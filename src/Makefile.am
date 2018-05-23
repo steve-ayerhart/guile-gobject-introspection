@@ -1,0 +1,32 @@
+lib_LTLIBRARIES = gobject-introspection.la
+
+AM_CFALGS = -I. $(WARN_CFLAGS) $(DEBUG_FLAGS)
+
+C_FILES = \
+	gi-types.c \
+	gi-repository.c \
+	gi-argument.c \
+	gi-function.c \
+	gi-object.c \
+	gi-registered-type.c \
+	gi-callable.c
+
+H_FILES = $(C_FILES:.c=.h)
+X_FILES = $(C_FILES:.c=.x)
+
+gobject_introspection_la_SOURCES = gir.c $(C_FILES) $(H_FILES)
+
+gobject_introspection_la_CFLAGS = $(GUILE_CFLAGS) $(GIR_CFLAGS) $(GOBJECT_CFLAGS) $(AM_CFLAGS)
+gobject_introspection_la_LIBADD = $(GUILE_LIBS) $(GIR_LIBS) $(GOBJECT_LIBS)
+gobject_introspection_la_LDFLAGS = -module -avoid-version
+
+MAINTERCLEANFILES = Makefile.in
+
+SUFFIXES = .x .c
+
+.c.x:
+	guile-snarf $(gobject_introspection_la_CFLAGS) $< > $@ || { rm $@; false; }
+
+BUILT_SOURCES = $(X_FILES)
+
+CLEANFILES = $(X_FILES		)
