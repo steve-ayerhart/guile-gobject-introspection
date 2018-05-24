@@ -9,7 +9,7 @@
 #define DIRECTION_OUT_SYMBOL "g-i-direction-out"
 #define DIRECTION_INOUT_SYMBOL "g-i-direction-inout"
 
-#define SCOPE_TYPE_INVLALID_SYMBOL "g-i-scope-type-invalid"
+#define SCOPE_TYPE_INVALID_SYMBOL "g-i-scope-type-invalid"
 #define SCOPE_TYPE_CALL_SYMBOL "g-i-scope-type-call"
 #define SCOPE_TYPE_ASYNC_SYMBOL "g-i-scope-type-async"
 #define SCOPE_TYPE_NOTIFIED_SYMBOL "g-i-scope-type-notified"
@@ -409,4 +409,141 @@ scm_to_gi_interface (SCM scm_arg,
   default:
     break;
   }
+}
+
+SCM_DEFINE (scm_g_arg_info_get_direction, "g-arg-info-get-direction", 1, 0, 0,
+            (SCM scm_arg_info),
+            ""
+            )
+{
+  GIArgInfo *arg_info;
+
+  arg_info = (GIArgInfo *) SCM_SMOB_DATA (scm_arg_info);
+
+  return scm_from_int (g_arg_info_get_direction (arg_info));
+}
+
+SCM_DEFINE (scm_g_arg_info_is_return_value, "g-arg-info-is-return-value?", 1, 0, 0,
+            (SCM scm_arg_info),
+            ""
+            )
+{
+  GIArgInfo *arg_info;
+
+  arg_info = (GIArgInfo *) SCM_SMOB_DATA (scm_arg_info);
+
+  return scm_from_bool (g_arg_info_is_return_value (arg_info));
+}
+
+SCM_DEFINE (scm_g_arg_info_is_optional, "g-arg-info-is-optional?", 1, 0, 0,
+            (SCM scm_arg_info),
+            ""
+            )
+{
+  GIArgInfo *arg_info;
+
+  arg_info = (GIArgInfo *) SCM_SMOB_DATA (scm_arg_info);
+
+  return scm_from_bool (g_arg_info_is_optional (arg_info));
+}
+
+SCM_DEFINE (scm_g_arg_info_may_be_null, "g-arg-info-may-be-null?", 1, 0, 0,
+            (SCM scm_arg_info),
+            ""
+            )
+{
+  GIArgInfo *arg_info;
+
+  arg_info = (GIArgInfo *) SCM_SMOB_DATA (scm_arg_info);
+
+  return scm_from_bool (g_arg_info_may_be_null (arg_info));
+}
+
+SCM_DEFINE (scm_g_arg_info_get_ownership_transfer, "g-arg-info-get-ownership-transfer", 1, 0, 0,
+            (SCM scm_arg_info),
+            ""
+            )
+{
+  GIArgInfo *arg_info;
+
+  arg_info = (GIArgInfo *) SCM_SMOB_DATA (scm_arg_info);
+
+  return scm_from_int (g_arg_info_get_ownership_transfer (arg_info));
+}
+
+SCM_DEFINE (scm_g_arg_info_get_scope, "g-arg-info-get-scope", 1, 0, 0,
+            (SCM scm_arg_info),
+            ""
+            )
+{
+  GIArgInfo *arg_info;
+
+  arg_info = (GIArgInfo *) SCM_SMOB_DATA (scm_arg_info);
+
+  return scm_from_int (g_arg_info_get_scope (arg_info));
+}
+
+SCM_DEFINE (scm_g_arg_info_get_closure, "g-arg-info-get-closure", 1, 0, 0,
+            (SCM scm_arg_info),
+            ""
+            )
+{
+  GIArgInfo *arg_info;
+
+  arg_info = (GIArgInfo *) SCM_SMOB_DATA (scm_arg_info);
+
+  return scm_from_int (g_arg_info_get_closure (arg_info));
+}
+
+SCM_DEFINE (scm_g_arg_info_get_destroy, "g-arg-info-get-destroy", 1, 0, 0,
+            (SCM scm_arg_info),
+            ""
+            )
+{
+  GIArgInfo *arg_info;
+
+  arg_info = (GIArgInfo *) SCM_SMOB_DATA (scm_arg_info);
+
+  return scm_from_int (g_arg_info_get_destroy (arg_info));
+}
+
+SCM_DEFINE (scm_g_arg_info_get_type, "g-arg-info-get-type", 1, 0, 0,
+            (SCM scm_arg_info),
+            ""
+            )
+{
+  GIArgInfo *arg_info;
+  GITypeInfo *type_info;
+  SCM scm_type;
+
+  arg_info = (GIArgInfo *) SCM_SMOB_DATA (scm_arg_info);
+  type_info = g_arg_info_get_type (arg_info);
+
+  if (type_info == NULL)
+    scm_type = SCM_BOOL_F;
+  else {
+    scm_type = scm_make_smob (type_info_t);
+    SCM_SET_SMOB_DATA (scm_type, type_info);
+  }
+
+  return scm_type;
+}
+
+void
+gi_argument_init (void)
+{
+  #ifndef SCM_MAGIC_SNARFER
+  #include "gi-argument.x"
+  #endif
+
+  arg_info_t = scm_make_smob_type ("g-i-arg-info", 0);
+
+  scm_c_define (DIRECTION_IN_SYMBOL, scm_from_int (GI_DIRECTION_IN));
+  scm_c_define (DIRECTION_OUT_SYMBOL, scm_from_int (GI_DIRECTION_OUT));
+  scm_c_define (DIRECTION_INOUT_SYMBOL, scm_from_int (GI_DIRECTION_INOUT));
+
+  scm_c_define (SCOPE_TYPE_INVALID_SYMBOL, scm_from_int (GI_SCOPE_TYPE_INVALID));
+  scm_c_define (SCOPE_TYPE_CALL_SYMBOL, scm_from_int (GI_SCOPE_TYPE_CALL));
+  scm_c_define (SCOPE_TYPE_ASYNC_SYMBOL, scm_from_int (GI_SCOPE_TYPE_ASYNC));
+  scm_c_define (SCOPE_TYPE_NOTIFIED_SYMBOL, scm_from_int (GI_SCOPE_TYPE_NOTIFIED));
 }
