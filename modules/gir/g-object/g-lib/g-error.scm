@@ -1,9 +1,10 @@
-(define-module (g-object g-lib g-error)
+(define-module (gir g-object g-lib g-error)
   #:use-module (system foreign)
   #:use-module (rnrs bytevectors)
+  #:use-module (ice-9 format)
 
-  #:use-module (g-object utils)
-  #:use-module (g-object g-lib g-quark)
+  #:use-module (gir g-object utils)
+  #:use-module (gir g-object g-lib g-quark)
 
   #:export-syntax (with-g-error)
 

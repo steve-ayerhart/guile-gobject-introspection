@@ -1,7 +1,8 @@
-(define-module (g-object g-lib g-quark)
+(define-module (gir g-object g-lib g-quark)
   #:use-module (system foreign)
+  #:use-module (ice-9 format)
 
-  #:use-module (g-object utils)
+  #:use-module (gir g-object utils)
 
   #:export (g-quark?
             unwrap-g-quark wrap-g-quark

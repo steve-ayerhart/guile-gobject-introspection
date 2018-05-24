@@ -19,6 +19,8 @@ godir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/ccache
 
 SOURCES = \
 	gir.scm \
+	gir/g-object/g-lib/g-quark.scm \
+	gir/g-object/g-lib/g-error.scm \
 	gir/g-object/utils.scm \
 	gir/g-object/g-type.scm \
 	gir/g-object/g-value.scm \
