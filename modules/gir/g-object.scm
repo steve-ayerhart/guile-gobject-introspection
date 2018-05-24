@@ -19,7 +19,7 @@
 
 (eval-when (expand load eval)
   (dynamic-call "scm_gobject_init"
-                (dynamic-link "/home/steve/Source/guile-g-object/src/.libs/g-object")))
+                (dynamic-link "/home/steve/Source/guile-gobject-introspection/src/.libs/gobject-introspection")))
 
 (define-class <g-object-class> (<g-type-class>))
 
