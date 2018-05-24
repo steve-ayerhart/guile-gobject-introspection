@@ -15,6 +15,7 @@
 *.lo
 autom4te.cache/
 build-aux/
+!build-aux/config.rpath
 Makefile
 Makefile.in
 /configure
@@ -28,7 +29,6 @@ Makefile.in
 /install-sh
 /libtool
 /ltmain.sh
-/AUTHORS
 /missing
 /config.rpath
 /m4
