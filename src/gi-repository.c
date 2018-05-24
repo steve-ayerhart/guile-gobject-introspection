@@ -82,6 +82,41 @@ SCM_DEFINE (scm_g_irepository_get_n_infos, "g-i-repository-get-n-infos", 1, 1, 0
                                                   scm_to_locale_string (scm_namespace)));
 }
 
+SCM_DEFINE (scm_g_irepository_get_info, "g-i-repository-get-info", 2, 1, 0,
+            (SCM scm_namespace, SCM scm_index, SCM scm_repository),
+            ""
+            )
+{
+  GIRepository *repo;
+  GIBaseInfo *info;
+  GError *error;
+  SCM scm_info;
+
+  repo = (GIRepository *) SCM_SMOB_DATA (scm_repository);
+
+  error = NULL;
+
+  if (SCM_UNBNDP (scm_repository))
+    repo = NULL;
+  else
+    repo = g_irepository_get_default ();
+
+  if (scm_is_symbol (scm_namespace))
+    scm_namespace = scm_symbol_to_string (scm_namespace);
+
+  info = g_irepository_get_info (repo,
+                                 scm_to_locale_string (scm_namespace),
+                                 scm_to_int (scm_index));
+
+  if (info == NULL)
+    return SCM_UNSPECIFIED;
+
+  scm_info = scm_make_smob (base_info_t);
+  SCM_SET_SMOB_DATA (scm_info, info);
+
+  return scm_info;
+}
+
 SCM_DEFINE (scm_g_irepository_find_by_name, "g-i-repository-find-by-name", 2, 1, 0,
            (SCM scm_namespace, SCM scm_name, SCM scm_repository),
            ""
@@ -119,7 +154,6 @@ SCM_DEFINE (scm_g_irepository_find_by_name, "g-i-repository-find-by-name", 2, 1,
 
   return scm_info;
 }
-
 
 
 void
