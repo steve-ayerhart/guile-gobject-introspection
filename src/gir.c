@@ -11,9 +11,9 @@ gir_init ()
 {
   gi_repository_init ();
   gi_types_init ();
-  //  gi_registered_type_init ();
-  //  gi_object_init ();
-  //  gi_function_init ();
-  //  gi_callable_init ();
-  //  gi_argument_init ();
+  gi_registered_type_init ();
+  gi_object_init ();
+  gi_function_init ();
+  gi_callable_init ();
+  gi_argument_init ();
 }

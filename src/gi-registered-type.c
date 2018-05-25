@@ -19,3 +19,13 @@ SCM_DEFINE (scm_g_registered_type_info_get_g_type, "g-registered-type-get-g-type
 
   return scm_c_gtype_to_class (gtype);
 }
+
+void
+gi_registered_type_init ()
+{
+  #ifndef SCM_MAGIC_SNARFER
+  #include "gi-registered-type.x"
+  #endif
+
+  registered_type_info_t = scm_make_smob_type ("g-i-registered-type-info", 0);
+}
