@@ -1,5 +1,13 @@
 (define-module (gir)
   #:use-module (gir g-object utils)
+  #:use-module (gir g-object)
+  #:use-module (gir g-object g-type)
+  #:use-module (gir g-object g-value)
+  #:use-module (gir g-object g-parameter)
+  #:use-module (gir g-object g-closure)
+  #:use-module (gir g-object g-signal)
+
+  #:use-module (oop goops)
   #:use-module (system foreign)
   #:use-module (ice-9 receive)
   #:use-module (ice-9 match))
