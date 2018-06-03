@@ -448,15 +448,20 @@ SCM_DEFINE (scm_gtype_instance_destroy_x, "g-type-instance-destroy!", 1, 0, 0,
 gpointer
 scm_c_scm_to_gtype_instance (SCM scm_instance)
 {
-  SCM scm_gtype;
+  SCM scm_ulong;
   gpointer c_ginstance;
 
   if (!SCM_IS_A_P (scm_instance, scm_class_gtype_instance))
     return NULL;
 
-  scm_gtype = scm_slot_ref (scm_instance, scm_sym_gtype_instance);
+  scm_ulong = scm_from_ulong (SCM_STRUCT_DATA (scm_instance)[0]);
 
-  if (scm_gtype == SCM_UNBOUND)
+  if (scm_ulong == SCM_UNBOUND)
+    scm_c_gruntime_error ("scm->gtype-instance",
+                          "Object ~A is uninitialized.",
+                          SCM_LIST1 (scm_instance));
+
+  if (!c_ginstance)
     scm_c_gruntime_error ("scm->g-type-instance",
                           "Object ~A has been destroyed.",
                           SCM_LIST1 (scm_instance));

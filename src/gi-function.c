@@ -58,8 +58,7 @@ construct_in_args (GICallableInfo *callable_info,
 
     in_args = g_malloc0 (sizeof (GArgument) * (n_args + 1));
 
-    container = g_base_info_get_container (
-                                           (GIBaseInfo *) callable_info);
+    container = g_base_info_get_container ((GIBaseInfo *) callable_info);
     type = g_base_info_get_type (container);
 
     arg = scm_list_ref (scm_in_args, scm_from_int (*n_in_args));
