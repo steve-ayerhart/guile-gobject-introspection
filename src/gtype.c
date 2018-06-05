@@ -461,6 +461,8 @@ scm_c_scm_to_gtype_instance (SCM scm_instance)
                           "Object ~A is uninitialized.",
                           SCM_LIST1 (scm_instance));
 
+  c_ginstance = (gpointer)scm_to_ulong (scm_ulong);
+
   if (!c_ginstance)
     scm_c_gruntime_error ("scm->g-type-instance",
                           "Object ~A has been destroyed.",
