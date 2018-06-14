@@ -47,6 +47,50 @@ SCM_DEFINE (scm_g_irepository_require, "%g-i-repository-require", 2, 1, 0,
   return scm_make_foreign_object_1 (typelib_t, (void *) typelib);
 }
 
+SCM_DEFINE (scm_g_irepository_get_infos, "%g-i-repository-get-infos", 2, 0, 0,
+  (SCM scm_repository, SCM scm_namespace),
+  ""
+  )
+{
+  GIRepository *repository;
+  GIBaseInfo *info;
+  const char *namespace;
+  gssize n_infos;
+  SCM scm_infos;
+  gint i;
+
+  repository = (GIRepository *) scm_foreign_object_signed_ref (scm_repository, 0);
+
+  if (scm_is_symbol (scm_namespace))
+    scm_namespace = scm_symbol_to_string (scm_namespace);
+
+  namespace = scm_to_locale_string (scm_namespace);
+
+  n_infos = g_irepository_get_n_infos (repository, namespace);
+
+  if (n_infos <0) {
+    g_critical ("Namespace '%s' not loaded", namespace);
+    return SCM_UNSPECIFIED;
+  }
+
+  scm_infos = SCM_EOL;
+
+  for(i = 0; i < n_infos; i++) {
+    GIBaseInfo *info;
+    SCM scm_info;
+
+    info = g_irepository_get_info (repository, namespace, i);
+    g_assert (info != NULL);
+
+    scm_info = make_gi_info (info);
+
+    // maybe? g_base_info_unref (info);
+    scm_append (scm_list_2 (scm_infos, scm_list_1 (scm_info)));
+  }
+
+  return scm_infos;
+}
+
 /*
 SCM_DEFINE (scm_g_irepository_get_n_infos, "g-i-repository-get-n-infos", 1, 1, 0,
             (SCM scm_namespace, SCM scm_repository),

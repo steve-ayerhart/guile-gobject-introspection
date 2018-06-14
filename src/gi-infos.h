@@ -5,7 +5,25 @@
 #include <libguile.h>
 #include <girepository.h>
 
-static SCM base_info_class_t;
+static SCM scm_base_info_class;
+
+static SCM scm_callable_info_class;
+static SCM scm_function_info_class;
+static SCM scm_signal_info_class;
+static SCM scm_v_func_info_class;
+
+static SCM scm_registered_type_info_class;
+static SCM scm_enum_info_class;
+static SCM scm_interface_info_class;
+static SCM scm_object_info_class;
+static SCM scm_struct_info_class;
+static SCM scm_union_info_class;
+
+static SCM scm_arg_info_class;
+static SCM scm_constant_info_class;
+static SCM scm_field_info_class;
+static SCM scm_property_info_class;
+static SCM scm_type_info_class;
 
 static void
 finalize_gi_object (SCM scm_info)
@@ -18,7 +36,10 @@ finalize_gi_object (SCM scm_info)
 }
 
 
-G_GNUC_INTERNAL void
+void
 gi_infos_init (void);
+
+SCM
+make_gi_info (GIBaseInfo *info);
 
 #endif
