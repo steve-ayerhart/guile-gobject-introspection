@@ -17,13 +17,16 @@
             <g-i-constant-info>
             <g-i-field-info>
             <g-i-property-info>
-            <g-i-type-info>))
+            <g-i-type-info>
+
+            get-name))
 
 (eval-when (expand load eval)
   (dynamic-call "gi_base_info_init"
                 (dynamic-link "/home/steve/Source/guile-gobject-introspection/src/.libs/gobject-introspection")))
 
 (define-class <g-i-callable-info> (<g-i-base-info>))
+(define-class <g-i-callback-info> (<g-i-callable-info>))
 (define-class <g-i-function-info> (<g-i-callable-info>))
 (define-class <g-i-signal-info> (<g-i-callable-info>))
 (define-class <g-i-v-func-info> (<g-i-callable-info>))
@@ -40,7 +43,12 @@
 (define-class <g-i-field-info> (<g-i-base-info>))
 (define-class <g-i-property-info> (<g-i-base-info>))
 (define-class <g-i-type-info> (<g-i-base-info>))
+(define-class <g-i-value-info> (<g-i-base-info>))
 
 (eval-when (expand load eval)
   (dynamic-call "gi_infos_init"
                 (dynamic-link "/home/steve/Source/guile-gobject-introspection/src/.libs/gobject-introspection")))
+
+
+(define-method (get-name (base-info <g-i-base-info>))
+  (%g-base-info-get-name base-info))

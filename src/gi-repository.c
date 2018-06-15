@@ -85,7 +85,7 @@ SCM_DEFINE (scm_g_irepository_get_infos, "%g-i-repository-get-infos", 2, 0, 0,
     scm_info = make_gi_info (info);
 
     // maybe? g_base_info_unref (info);
-    scm_append (scm_list_2 (scm_infos, scm_list_1 (scm_info)));
+    scm_infos = scm_append (scm_list_2 (scm_infos, scm_list_1 (scm_info)));
   }
 
   return scm_infos;

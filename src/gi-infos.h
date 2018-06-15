@@ -8,6 +8,7 @@
 static SCM scm_base_info_class;
 
 static SCM scm_callable_info_class;
+static SCM scm_callback_info_class;
 static SCM scm_function_info_class;
 static SCM scm_signal_info_class;
 static SCM scm_v_func_info_class;
@@ -23,6 +24,7 @@ static SCM scm_arg_info_class;
 static SCM scm_constant_info_class;
 static SCM scm_field_info_class;
 static SCM scm_property_info_class;
+static SCM scm_value_info_class;
 static SCM scm_type_info_class;
 
 static void
