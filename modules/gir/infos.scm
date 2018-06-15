@@ -19,7 +19,8 @@
             <g-i-property-info>
             <g-i-type-info>
 
-            get-name))
+            get-name
+            get-g-type))
 
 (eval-when (expand load eval)
   (dynamic-call "gi_base_info_init"
@@ -32,11 +33,11 @@
 (define-class <g-i-v-func-info> (<g-i-callable-info>))
 
 (define-class <g-i-registered-type-info> (<g-i-base-info>))
-(define-class <g-i-enum-info> (<g-i-callable-info>))
-(define-class <g-i-interface-info> (<g-i-callable-info>))
-(define-class <g-i-object-info> (<g-i-callable-info>))
-(define-class <g-i-struct-info> (<g-i-callable-info>))
-(define-class <g-i-union-info> (<g-i-callable-info>))
+(define-class <g-i-enum-info> (<g-i-registered-type-info>))
+(define-class <g-i-interface-info> (<g-i-registered-type-info>))
+(define-class <g-i-object-info> (<g-i-registered-type-info>))
+(define-class <g-i-struct-info> (<g-i-registered-type-info>))
+(define-class <g-i-union-info> (<g-i-registered-type-info>))
 
 (define-class <g-i-arg-info> (<g-i-base-info>))
 (define-class <g-i-constant-info> (<g-i-base-info>))
@@ -51,3 +52,6 @@
 
 (define-method (get-name (base-info <g-i-base-info>))
   (%g-base-info-get-name base-info))
+
+(define-method (get-g-type (registered-type-info <g-i-registered-type-info>))
+  (%g-registered-type-info-get-g-type registered-type-info))

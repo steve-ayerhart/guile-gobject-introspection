@@ -1,5 +1,7 @@
 #include "gi-infos.h"
+#include "gtype.h"
 
+// BASE INFO
 SCM_DEFINE (scm_g_base_info_get_name, "%g-base-info-get-name", 1, 0, 0,
             (SCM scm_base_info),
             "")
@@ -47,6 +49,26 @@ SCM_DEFINE (scm_g_base_info_get_container, "%g-base-info-get-container", 1, 0, 0
   base_info = (GIBaseInfo *) scm_foreign_object_signed_ref (scm_base_info, 0);
 
   return make_gi_info (g_base_info_get_container (base_info));
+}
+
+// REGISTERED TYPE
+
+SCM_DEFINE (scm_g_registered_type_info_get_g_type, "%g-registered-type-info-get-g-type", 1, 0, 0,
+            (SCM scm_registered_type_info),
+            ""
+            )
+{
+  GIRegisteredTypeInfo *registered_type_info;
+  GType gtype;
+
+
+  registered_type_info = (GIRegisteredTypeInfo *) scm_foreign_object_signed_ref (scm_registered_type_info, 0);
+  gtype = g_registered_type_info_get_g_type (registered_type_info);
+
+  if (gtype == G_TYPE_INVALID)
+    return SCM_BOOL_F;
+
+  return scm_c_gtype_to_class (gtype);
 }
 
 void
