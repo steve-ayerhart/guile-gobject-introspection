@@ -1,4 +1,5 @@
 (define-module (gir)
+  #:use-module (gir repository)
   #:use-module (gir infos)
   #:use-module (gir g-object utils)
   #:use-module (gir g-object)
@@ -13,9 +14,25 @@
   #:use-module (ice-9 receive)
   #:use-module (ice-9 match))
 
-(eval-when (expand load eval)
-  (dynamic-call "gir_init"
-                (dynamic-link "/home/steve/Source/guile-gobject-introspection/src/.libs/gobject-introspection")))
+;(eval-when (expand load eval)
+;  (dynamic-call "gir_init"
+;                (dynamic-link "/home/steve/Source/guile-gobject-introspection/src/.libs/gobject-introspection")))
+
+(define repository (g-i-repository-get-default))
+
+(define (make-gir-module namespace)
+  (let ((gir-module (resolve-module `(gir ,namespace)))
+        (typelib (require repository namespace)))
+    (set-module-public-interface! gir-module gir-module)
+
+    (let process-info ((infos (get-infos repository namespace)))
+      (if (null? infos)
+          gir-module
+          (let ((base-info (car infos)))
+            (module-define! gir-module
+                            (string->symbol (get-name base-info))
+                            base-info)
+            (process-info (cdr infos)))))))
 
 ;(define (build-gir-module namespace)
 ;  (let ((gir-module (resolve-module `(gir ,namespace)))

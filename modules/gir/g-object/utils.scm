@@ -3,7 +3,7 @@
   #:use-module (srfi srfi-42)
   #:use-module (ice-9 list)
 
-  #:export (camel-case->scheme-case
+  #:export (camel-case->snake-case
             g-type-name->scheme-name
             g-type-name->class-name
             g-type-class-name->method-name

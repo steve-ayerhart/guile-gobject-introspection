@@ -15,6 +15,40 @@ SCM_DEFINE (scm_g_base_info_get_name, "%g-base-info-get-name", 1, 0, 0,
   return scm_from_locale_string (name);
 }
 
+SCM_DEFINE (scm_g_base_info_get_namespace, "%g-base-info-get-namespace", 1, 0, 0,
+            (SCM scm_base_info),
+            "")
+{
+  GIBaseInfo *base_info;
+  const gchar *namespace;
+
+  base_info = (GIBaseInfo *) scm_foreign_object_signed_ref (scm_base_info, 0);
+  namespace = g_base_info_get_name (base_info);
+
+  return scm_from_locale_string (namespace);
+}
+
+SCM_DEFINE (scm_g_base_info_is_deprecated, "%g-base-info-is-deprecated", 1, 0, 0,
+            (SCM scm_base_info),
+            "")
+{
+  GIBaseInfo *base_info;
+
+  base_info = (GIBaseInfo *) scm_foreign_object_signed_ref (scm_base_info, 0);
+  return scm_from_bool (g_base_info_is_deprecated (base_info));
+}
+
+SCM_DEFINE (scm_g_base_info_get_container, "%g-base-info-get-container", 1, 0, 0,
+            (SCM scm_base_info),
+            "")
+{
+  GIBaseInfo *base_info;
+
+  base_info = (GIBaseInfo *) scm_foreign_object_signed_ref (scm_base_info, 0);
+
+  return make_gi_info (g_base_info_get_container (base_info));
+}
+
 void
 gi_base_info_init (void)
 {

@@ -5,10 +5,10 @@
 #include <libguile.h>
 #include <girepository.h>
 
-static SCM repository_t;
-static SCM typelib_t;
+static SCM scm_repository_class;
+static SCM scm_typelib_class;
 
-G_GNUC_INTERNAL void
+void
 gi_repository_init (void);
 
 #endif

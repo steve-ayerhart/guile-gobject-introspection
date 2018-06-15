@@ -5,7 +5,7 @@ SCM_DEFINE (scm_g_irepository_get_default, "g-i-repository-get-default", 0, 0, 0
             (),
             "")
 {
-  return scm_make_foreign_object_1 (repository_t, (void *) g_irepository_get_default());
+  return scm_make_foreign_object_1 (scm_repository_class, (void *) g_irepository_get_default());
 }
 
 // FIXME: scm_Flags is currently ignored
@@ -19,7 +19,6 @@ SCM_DEFINE (scm_g_irepository_require, "%g-i-repository-require", 2, 1, 0,
   GError *error;
   const char *version;
   const char *namespace;
-  SCM scm_typelib;
 
   repo = (GIRepository *) scm_foreign_object_signed_ref (scm_repository, 0);
 
@@ -44,7 +43,7 @@ SCM_DEFINE (scm_g_irepository_require, "%g-i-repository-require", 2, 1, 0,
     return SCM_UNSPECIFIED;
   }
 
-  return scm_make_foreign_object_1 (typelib_t, (void *) typelib);
+  return scm_make_foreign_object_1 (scm_typelib_class, (void *) typelib);
 }
 
 SCM_DEFINE (scm_g_irepository_get_infos, "%g-i-repository-get-infos", 2, 0, 0,
@@ -197,11 +196,13 @@ gi_repository_init (void)
 
   scm_t_struct_finalize finalizer = finalize_gi_object;
 
-  repository_t = scm_make_foreign_object_type (scm_from_utf8_symbol ("g-i-repository"),
-                                               scm_list_1 (scm_from_utf8_symbol ("ptr")),
-                                               finalizer);
+  scm_repository_class = scm_make_foreign_object_type (scm_from_utf8_symbol ("g-i-repository"),
+                                                       scm_list_1 (scm_from_utf8_symbol ("ptr")),
+                                                       finalizer);
+  scm_c_define ("<g-i-repository>", scm_repository_class);
 
-  typelib_t = scm_make_foreign_object_type (scm_from_utf8_symbol ("g-i-typelib"),
+  scm_typelib_class = scm_make_foreign_object_type (scm_from_utf8_symbol ("g-i-typelib"),
                                             scm_list_1 (scm_from_utf8_symbol ("ptr")),
                                             finalizer);
+  scm_c_define ("<g-i-typelib>", scm_typelib_class);
 }

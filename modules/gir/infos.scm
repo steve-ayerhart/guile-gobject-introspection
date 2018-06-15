@@ -49,6 +49,5 @@
   (dynamic-call "gi_infos_init"
                 (dynamic-link "/home/steve/Source/guile-gobject-introspection/src/.libs/gobject-introspection")))
 
-
 (define-method (get-name (base-info <g-i-base-info>))
   (%g-base-info-get-name base-info))

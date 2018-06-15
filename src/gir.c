@@ -10,5 +10,5 @@
 void
 gir_init ()
 {
-  gi_repository_init ();
+  //  gi_repository_init ();
 }
