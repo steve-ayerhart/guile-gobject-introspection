@@ -20,7 +20,8 @@
             <g-i-type-info>
 
             get-name
-            get-g-type))
+            get-g-type
+            get-value))
 
 (eval-when (expand load eval)
   (dynamic-call "gi_base_info_init"
@@ -50,8 +51,17 @@
   (dynamic-call "gi_infos_init"
                 (dynamic-link "/home/steve/Source/guile-gobject-introspection/src/.libs/gobject-introspection")))
 
+;;; BaseInfo
 (define-method (get-name (base-info <g-i-base-info>))
   (%g-base-info-get-name base-info))
 
 (define-method (get-g-type (registered-type-info <g-i-registered-type-info>))
   (%g-registered-type-info-get-g-type registered-type-info))
+
+;;; ObjectInfo
+
+
+;;; ConstantInfo
+
+(define-method (get-value (constant-info <g-i-constant-info>))
+  (%g-constant-info-get-value constant-info))

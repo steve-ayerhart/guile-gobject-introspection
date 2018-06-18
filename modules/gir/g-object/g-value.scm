@@ -13,7 +13,7 @@
             g-enum-register-static g-flags-register-static
             g-enum-class->value-table g-flags-class->value-table
             scm->g-value g-value->scm
-            g-enum->symbol g-enum->name g-enum->value
+            g-enum->symbol g-enum->name g-enum->value g-enum->enum
             g-flags->value
             g-flags->symbol-list g-flags->name-list g-flags->value-list))
 

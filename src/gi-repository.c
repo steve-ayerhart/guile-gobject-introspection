@@ -1,5 +1,6 @@
 #include "gi-repository.h"
 #include "gi-infos.h"
+#include "gtype.h"
 
 SCM_DEFINE (scm_g_irepository_get_default, "g-i-repository-get-default", 0, 0, 0,
             (),
@@ -90,81 +91,19 @@ SCM_DEFINE (scm_g_irepository_get_infos, "%g-i-repository-get-infos", 2, 0, 0,
   return scm_infos;
 }
 
-/*
-SCM_DEFINE (scm_g_irepository_get_n_infos, "g-i-repository-get-n-infos", 1, 1, 0,
-            (SCM scm_namespace, SCM scm_repository),
-            ""
-            )
-{
-  GIRepository *repo;
-
-  repo = (GIRepository *) SCM_SMOB_DATA (scm_repository);
-
-  if (SCM_UNBNDP (scm_repository))
-    repo = NULL;
-  else
-    repo = g_irepository_get_default ();
-
-  if (scm_is_symbol (scm_namespace))
-    scm_namespace = scm_symbol_to_string (scm_namespace);
-
-  return scm_from_int (g_irepository_get_n_infos (repo,
-                                                  scm_to_locale_string (scm_namespace)));
-}
-
-SCM_DEFINE (scm_g_irepository_get_info, "g-i-repository-get-info", 2, 1, 0,
-            (SCM scm_namespace, SCM scm_index, SCM scm_repository),
-            ""
-            )
-{
-  GIRepository *repo;
-  GIBaseInfo *info;
-  GError *error;
-  SCM scm_info;
-
-  repo = (GIRepository *) SCM_SMOB_DATA (scm_repository);
-
-  error = NULL;
-
-  if (SCM_UNBNDP (scm_repository))
-    repo = NULL;
-  else
-    repo = g_irepository_get_default ();
-
-  if (scm_is_symbol (scm_namespace))
-    scm_namespace = scm_symbol_to_string (scm_namespace);
-
-  info = g_irepository_get_info (repo,
-                                 scm_to_locale_string (scm_namespace),
-                                 scm_to_int (scm_index));
-
-  if (info == NULL)
-    return SCM_UNSPECIFIED;
-
-  scm_info = scm_make_smob (base_info_t);
-  SCM_SET_SMOB_DATA (scm_info, info);
-
-  return scm_info;
-}
-
-SCM_DEFINE (scm_g_irepository_find_by_name, "g-i-repository-find-by-name", 2, 1, 0,
-           (SCM scm_namespace, SCM scm_name, SCM scm_repository),
+SCM_DEFINE (scm_g_irepository_find_by_name, "%g-i-repository-find-by-name", 3, 0, 0,
+           (SCM scm_repository, SCM scm_namespace, SCM scm_name),
            ""
            )
 {
   GIRepository *repo;
   GIBaseInfo *info;
   GError *error;
-  SCM scm_info;
 
-  repo = (GIRepository *) SCM_SMOB_DATA (scm_repository);
+  repo = (GIRepository *) scm_foreign_object_signed_ref (scm_repository, 0);
 
   error = NULL;
 
-  if (SCM_UNBNDP (scm_repository))
-    repo = NULL;
-  else
-    repo = g_irepository_get_default ();
 
   if (scm_is_symbol (scm_namespace))
     scm_namespace = scm_symbol_to_string (scm_namespace);
@@ -179,13 +118,29 @@ SCM_DEFINE (scm_g_irepository_find_by_name, "g-i-repository-find-by-name", 2, 1,
   if (info == NULL)
     return SCM_UNSPECIFIED;
 
-  scm_info = scm_make_smob (base_info_t);
-  SCM_SET_SMOB_DATA (scm_info, info);
-
-  return scm_info;
+  return scm_make_foreign_object_1 (scm_base_info_class, (void *) info);
 }
-*/
 
+SCM_DEFINE (scm_g_irepository_find_by_gtype, "%g-i-repository-find-by-g-type", 2, 0, 0,
+            (SCM scm_repository, SCM scm_gtype),
+            ""
+            )
+{
+  GIRepository *repository;
+  GIBaseInfo *info;
+  GType gtype;
+  GError *error;
+
+  repository = (GIRepository *) scm_foreign_object_signed_ref (scm_repository, 0);
+  gtype = scm_to_ulong (scm_gtype);
+
+  error = NULL;
+
+  info = g_irepository_find_by_gtype (repository, gtype);
+
+  return scm_make_foreign_object_1 (scm_variable_ref (scm_c_lookup ("<g-i-base-info>")),
+                                    (void *) info);
+}
 
 void
 gi_repository_init (void)

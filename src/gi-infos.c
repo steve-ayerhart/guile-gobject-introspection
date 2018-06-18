@@ -1,5 +1,6 @@
 #include "gi-infos.h"
 #include "gtype.h"
+#include "gi-argument.h"
 
 // BASE INFO
 SCM_DEFINE (scm_g_base_info_get_name, "%g-base-info-get-name", 1, 0, 0,
@@ -69,6 +70,36 @@ SCM_DEFINE (scm_g_registered_type_info_get_g_type, "%g-registered-type-info-get-
     return SCM_BOOL_F;
 
   return scm_c_gtype_to_class (gtype);
+}
+
+// CONSTANT INFO
+
+SCM_DEFINE (scm_g_constant_info_get_value, "%g-constant-info-get-value", 1, 0, 0,
+            (SCM scm_constant_info),
+            "")
+{
+  GITypeInfo *type_info;
+  GIConstantInfo *constant_info;
+  GIArgument value = {0};
+  SCM scm_value;
+
+  constant_info = (GIConstantInfo *) ggir_object_get_gi_info (scm_constant_info);
+
+  GI_IS_CONSTANT_INFO (constant_info);
+
+  if (g_constant_info_get_value (constant_info, &value) < 0) {
+    return SCM_UNDEFINED;
+  }
+
+  type_info = g_constant_info_get_type (constant_info);
+
+  return gi_arg_to_scm (type_info, GI_TRANSFER_NOTHING, value);
+}
+
+GIBaseInfo *
+ggir_object_get_gi_info (SCM scm_object)
+{
+  return (GIBaseInfo *) scm_foreign_object_signed_ref (scm_object, 0);
 }
 
 void

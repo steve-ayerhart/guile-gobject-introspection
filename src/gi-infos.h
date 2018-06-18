@@ -38,6 +38,9 @@ finalize_gi_object (SCM scm_info)
 }
 
 
+GIBaseInfo *
+ggir_object_get_gi_info (SCM scm_object);
+
 void
 gi_infos_init (void);
 

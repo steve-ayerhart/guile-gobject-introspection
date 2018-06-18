@@ -29,9 +29,7 @@
       (if (null? infos)
           gir-module
           (let ((base-info (car infos)))
-            (receive (type-name type-value)
-                (build-gi-type base-info)
-              (module-define! gir-module type-name type-value))
+            (build-gi-type! gir-module base-info)
             (process-info (cdr infos)))))))
 
 ;(define (build-gir-module namespace)
@@ -51,12 +49,17 @@
 ;                (module-define! gir-module type-name type-value))
 ;              (read-info (+ index 1))))))))
 
-(define (build-gi-type base-info)
+(define (build-gi-type! gir-module info)
   (cond
-   ((is-a? base-info <g-i-registered-type-info>)
-    (values (string->symbol (get-name base-info))
-            (get-g-type base-info)))
-   (else
-    (values (string->symbol (get-name base-info))
-            "BUTTS"))))
-
+   ((is-a? info <g-i-registered-type-info>)
+    (module-define! gir-module
+                    (g-type-name->class-name (get-name info))
+                    (get-g-type info)))
+   ((is-a? info <g-i-constant-info>)
+    (module-define! gir-module
+                    ((compose string->symbol camel-case->snake-case) (get-name info))
+                    (get-value info)))
+     (else
+      (module-define! gir-module
+                      ((compose string->symbol camel-case->snake-case) (get-name info))
+                      "BUTTS"))))
