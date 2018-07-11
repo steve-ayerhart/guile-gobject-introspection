@@ -11,7 +11,7 @@ C_FILES = \
 	gparameter.c \
 	gclosure.c \
 	gsignal.c \
-  gi-infos.c \
+  ggi-info.c \
 	gi-types.c \
 	gi-repository.c \
 	gi-argument.c \

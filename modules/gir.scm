@@ -1,6 +1,6 @@
 (define-module (gir)
   #:use-module (gir repository)
-  #:use-module (gir infos)
+  #:use-module (gir info)
   #:use-module (gir g-object utils)
   #:use-module (gir g-object)
   #:use-module (gir g-object g-type)
@@ -18,14 +18,14 @@
 ;  (dynamic-call "gir_init"
 ;                (dynamic-link "/home/steve/Source/guile-gobject-introspection/src/.libs/gobject-introspection")))
 
-(define repository (g-i-repository-get-default))
+(define repository (repository-get-default))
 
 (define (make-gir-module namespace)
   (let ((gir-module (resolve-module `(gir ,namespace)))
-        (typelib (require repository namespace)))
+        (typelib (repository:require repository namespace)))
     (set-module-public-interface! gir-module gir-module)
 
-    (let process-info ((infos (get-infos repository namespace)))
+    (let process-info ((infos (repository:get-infos repository namespace)))
       (if (null? infos)
           gir-module
           (let ((base-info (car infos)))
@@ -49,17 +49,32 @@
 ;                (module-define! gir-module type-name type-value))
 ;              (read-info (+ index 1))))))))
 
+(define (function-info->scm-procedure function-info)
+  )
+
+(define (build-gi-registered-type gir-module info)
+  (define class-name (g-type-name->class-name (base-info:get-name info)))
+  (module-define! gir-module
+                  class-name
+                  (registered-type-info:get-g-type info))
+  (when (is-a? info <object-info>)
+    (for-each (lambda (method-info)
+                (module-define! gir-module
+                                (g-type-class-name->method-name class-name
+                                                                (string->symbol
+                                                                 (g-type-name->scheme-name (base-info:get-name method-info))))
+                                '()))
+              (object-info:get-methods info))))
+
 (define (build-gi-type! gir-module info)
   (cond
-   ((is-a? info <g-i-registered-type-info>)
+   ((is-a? info <registered-type-info>)
+    (build-gi-registered-type gir-module info))
+   ((is-a? info <constant-info>)
     (module-define! gir-module
-                    (g-type-name->class-name (get-name info))
-                    (get-g-type info)))
-   ((is-a? info <g-i-constant-info>)
-    (module-define! gir-module
-                    ((compose string->symbol camel-case->snake-case) (get-name info))
-                    (get-value info)))
+                    ((compose string->symbol camel-case->snake-case) (base-info:get-name info))
+                    (constant-info:get-value info)))
      (else
       (module-define! gir-module
-                      ((compose string->symbol camel-case->snake-case) (get-name info))
+                      ((compose string->symbol g-type-name->scheme-name) (base-info:get-name info))
                       "BUTTS"))))

@@ -1,4 +1,4 @@
-#include "gi-infos.h"
+#include "ggi-info.h"
 #include "gi-repository.h"
 #include "gi-types.h"
 #include "gi-registered-type.h"

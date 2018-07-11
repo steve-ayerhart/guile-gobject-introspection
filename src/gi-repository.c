@@ -1,8 +1,8 @@
 #include "gi-repository.h"
-#include "gi-infos.h"
+#include "ggi-info.h"
 #include "gtype.h"
 
-SCM_DEFINE (scm_g_irepository_get_default, "g-i-repository-get-default", 0, 0, 0,
+SCM_DEFINE (scm_g_irepository_get_default, "repository-get-default", 0, 0, 0,
             (),
             "")
 {
@@ -82,7 +82,7 @@ SCM_DEFINE (scm_g_irepository_get_infos, "%g-i-repository-get-infos", 2, 0, 0,
     info = g_irepository_get_info (repository, namespace, i);
     g_assert (info != NULL);
 
-    scm_info = make_gi_info (info);
+    scm_info = ggi_make_info (info);
 
     // maybe? g_base_info_unref (info);
     scm_infos = scm_append (scm_list_2 (scm_infos, scm_list_1 (scm_info)));
@@ -118,7 +118,7 @@ SCM_DEFINE (scm_g_irepository_find_by_name, "%g-i-repository-find-by-name", 3, 0
   if (info == NULL)
     return SCM_UNSPECIFIED;
 
-  return scm_make_foreign_object_1 (scm_base_info_class, (void *) info);
+  return scm_make_foreign_object_1 (scm_base_info_type, (void *) info);
 }
 
 SCM_DEFINE (scm_g_irepository_find_by_gtype, "%g-i-repository-find-by-g-type", 2, 0, 0,
@@ -138,26 +138,26 @@ SCM_DEFINE (scm_g_irepository_find_by_gtype, "%g-i-repository-find-by-g-type", 2
 
   info = g_irepository_find_by_gtype (repository, gtype);
 
-  return scm_make_foreign_object_1 (scm_variable_ref (scm_c_lookup ("<g-i-base-info>")),
+  return scm_make_foreign_object_1 (scm_variable_ref (scm_c_lookup ("<base-info>")),
                                     (void *) info);
 }
 
 void
-gi_repository_init (void)
+ggi_repository_init (void)
 {
   #ifndef SCM_MAGIC_SNARFER
   #include "gi-repository.x"
   #endif
 
-  scm_t_struct_finalize finalizer = finalize_gi_object;
+  scm_t_struct_finalize finalizer = ggi_finalize_object;
 
-  scm_repository_class = scm_make_foreign_object_type (scm_from_utf8_symbol ("g-i-repository"),
+  scm_repository_class = scm_make_foreign_object_type (scm_from_utf8_symbol ("<repository>"),
                                                        scm_list_1 (scm_from_utf8_symbol ("ptr")),
                                                        finalizer);
-  scm_c_define ("<g-i-repository>", scm_repository_class);
+  scm_c_define ("<repository>", scm_repository_class);
 
-  scm_typelib_class = scm_make_foreign_object_type (scm_from_utf8_symbol ("g-i-typelib"),
+  scm_typelib_class = scm_make_foreign_object_type (scm_from_utf8_symbol ("<typelib>"),
                                             scm_list_1 (scm_from_utf8_symbol ("ptr")),
                                             finalizer);
-  scm_c_define ("<g-i-typelib>", scm_typelib_class);
+  scm_c_define ("<typelib>", scm_typelib_class);
 }
