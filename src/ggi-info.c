@@ -27,7 +27,7 @@ ggi_make_infos_list (SCM scm_info_class,
                                     infos_index);
     g_assert (info != NULL);
 
-    scm_info = make_gi_info (info);
+    scm_info = ggi_make_info (info);
 
     scm_infos = scm_append (scm_list_2 (scm_infos, scm_list_1 (scm_info)));
   }
@@ -36,7 +36,9 @@ ggi_make_infos_list (SCM scm_info_class,
 }
 
 
-// BASE INFO
+/*
+ * GIBaseInfo
+ */
 
 SCM_DEFINE (scm_g_base_info_get_type, "%g-base-info-get-type", 1, 0, 0,
             (SCM scm_base_info),
@@ -116,7 +118,9 @@ SCM_DEFINE (scm_g_base_info_get_attribute, "%g-base-info-get-attribute", 2, 0, 0
   return scm_from_locale_symbol (value);
 }
 
-// REGISTERED TYPE
+/*
+ * GIRegisteredInfo
+ */
 
 SCM_DEFINE (scm_g_registered_type_info_get_g_type, "%g-registered-type-info-get-g-type", 1, 0, 0,
             (SCM scm_registered_type_info),
@@ -135,40 +139,16 @@ SCM_DEFINE (scm_g_registered_type_info_get_g_type, "%g-registered-type-info-get-
   return scm_c_gtype_to_class (gtype);
 }
 
+/*
+ * GIObjectInfo
+ */
+
 SCM_DEFINE (scm_g_object_info_get_methods, "%g-object-info-get-methods", 1, 0, 0,
             (SCM scm_object_info),
             ""
             )
 {
-  GIObjectInfo *object_info;
-  gssize n_infos;
-  gint info_index;
-  SCM scm_method_infos;
-
-  object_info = (GIObjectInfo *) scm_foreign_object_signed_ref (scm_object_info, 0);
-
-  n_infos = g_object_info_get_n_methods (object_info);
-
-  if (n_infos <0) {
-    g_critical ("get n methods failed");
-    return SCM_UNSPECIFIED;
-  }
-
-  scm_method_infos = SCM_EOL;
-
-  for (info_index = 0; info_index < n_infos; info_index++) {
-    GIFunctionInfo *function_info;
-    SCM scm_function_info;
-
-    function_info = g_object_info_get_method (object_info, info_index);
-    g_assert (function_info != NULL);
-
-    scm_function_info = ggi_make_info (function_info);
-
-    scm_method_infos = scm_append (scm_list_2 (scm_method_infos, scm_list_1 (scm_function_info)));
-  }
-
-  return scm_method_infos;
+  return ggi_make_infos_list (scm_object_info, g_object_info_get_n_methods, g_object_info_get_method);
 }
 
 // CONSTANT INFO

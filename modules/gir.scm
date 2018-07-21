@@ -50,7 +50,7 @@
 ;              (read-info (+ index 1))))))))
 
 (define (function-info->scm-procedure function-info)
-  )
+  '())
 
 (define (build-gi-registered-type gir-module info)
   (define class-name (g-type-name->class-name (base-info:get-name info)))
