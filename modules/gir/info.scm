@@ -55,19 +55,52 @@
   (dynamic-call "ggi_infos_init"
                 (dynamic-link ggi-lib)))
 
-;;; BaseInfo
-(define-method (base-info:get-name (base-info <base-info>))
-  (%g-base-info-get-name base-info))
+;; helper to generate the boilerplace for definine methods which take only the info
+;; example:
+;; (define-info-methods base-info
+;;  (get-name get-type))
+;; ->
+;; (begin
+;;   (define-method (get-name (base-info <base-info>)
+;;     (%g-base-info-get-name base-info)))
+;;   (define-method (get-type (base-info <base-info>)
+;;     (%g-base-info-get-type base-info))))
+(define-syntax define-info-methods
+  (λ (stx)
+    (syntax-case stx ()
+      ((_  info-name (method-name))
+       (with-syntax
+           ((class-name (datum->syntax stx (string->symbol
+                                             (string-append
+                                               (symbol->string (syntax->datum #'info-name))
+                                               (symbol->string (syntax->datum #'method-name))))))
+            (ffi-name (datum->syntax stx (string->symbol
+                                          (string-append
+                                            "%g-"
+                                            (symbol->string (syntax->datum #'info-name))
+                                            "-"
+                                            (symbol->string (syntax->datum #'method-name)))))))
+         #'(define-method (method-name (info-name class-name))
+             (ffi-name info-name))))
+      ((_ info-name (method-name0 method-name* ...))
+       #'(begin
+           (define-info-methods info-name (method-name0))
+           (define-info-methods info-name (method-name* ...)))))))
 
-(define-method (registered-type-info:get-g-type (registered-type-info <registered-type-info>))
-  (%g-registered-type-info-get-g-type registered-type-info))
+;;; BaseInfo
+(define-info-methods base-info
+  (get-name))
+
+;;; RegisteredTypeInfo
+(define-info-methods registered-type-info
+  (get-g-type))
 
 ;;; ObjectInfo
 
-(define-method (object-info:get-methods (object-info <object-info>))
-  (%g-object-info-get-methods object-info))
+(define-info-methods object-info
+  (get-methods))
 
 ;;; ConstantInfo
 
-(define-method (constant-info:get-value (constant-info <constant-info>))
-  (%g-constant-info-get-value constant-info))
+(define-info-methods constant-info
+  (get-value))
