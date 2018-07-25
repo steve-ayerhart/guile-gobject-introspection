@@ -20,7 +20,7 @@
 
 (define repository (repository-get-default))
 
-(define (make-gir-module namespace)
+(define (make-gir-module namespace
   (let ((gir-module (resolve-module `(gir ,namespace)))
         (typelib (repository:require repository namespace)))
     (set-module-public-interface! gir-module gir-module)
@@ -53,18 +53,18 @@
   '())
 
 (define (build-gi-registered-type gir-module info)
-  (define class-name (g-type-name->class-name (base-info:get-name info)))
+  (define class-name (g-type-name->class-name (get-name info)))
   (module-define! gir-module
                   class-name
-                  (registered-type-info:get-g-type info))
+                  (get-g-type info))
   (when (is-a? info <object-info>)
     (for-each (lambda (method-info)
                 (module-define! gir-module
                                 (g-type-class-name->method-name class-name
                                                                 (string->symbol
-                                                                 (g-type-name->scheme-name (base-info:get-name method-info))))
+                                                                 (g-type-name->scheme-name (get-name method-info))))
                                 '()))
-              (object-info:get-methods info))))
+              (get-methods info))))
 
 (define (build-gi-type! gir-module info)
   (cond
@@ -72,9 +72,9 @@
     (build-gi-registered-type gir-module info))
    ((is-a? info <constant-info>)
     (module-define! gir-module
-                    ((compose string->symbol camel-case->snake-case) (base-info:get-name info))
-                    (constant-info:get-value info)))
+                    ((compose string->symbol camel-case->snake-case) (get-name info))
+                    (get-value info)))
      (else
       (module-define! gir-module
-                      ((compose string->symbol g-type-name->scheme-name) (base-info:get-name info))
+                      ((compose string->symbol g-type-name->scheme-name) (get-name info))
                       "BUTTS"))))

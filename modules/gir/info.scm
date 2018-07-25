@@ -18,12 +18,7 @@
             <constant-info>
             <field-info>
             <property-info>
-            <type-info>
-
-            base-info:get-name
-            registered-type-info:get-g-type
-            constant-info:get-value
-            object-info:get-methods))
+            <type-info>))
 
 (define ggi-lib "/home/steve/Source/guile-gobject-introspection/src/.libs/gobject-introspection")
 
@@ -72,16 +67,19 @@
        (with-syntax
            ((class-name (datum->syntax stx (string->symbol
                                              (string-append
+                                              "<"
                                                (symbol->string (syntax->datum #'info-name))
-                                               (symbol->string (syntax->datum #'method-name))))))
+                                               ">"))))
             (ffi-name (datum->syntax stx (string->symbol
                                           (string-append
                                             "%g-"
                                             (symbol->string (syntax->datum #'info-name))
                                             "-"
                                             (symbol->string (syntax->datum #'method-name)))))))
-         #'(define-method (method-name (info-name class-name))
-             (ffi-name info-name))))
+         #'(begin
+             (define-method (method-name (info-name class-name))
+               (ffi-name info-name))
+             (export method-name))))
       ((_ info-name (method-name0 method-name* ...))
        #'(begin
            (define-info-methods info-name (method-name0))
