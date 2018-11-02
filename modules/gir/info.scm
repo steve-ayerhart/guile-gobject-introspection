@@ -31,7 +31,7 @@
 (eval-when (expand load eval)
   (dynamic-call "ggi_base_info_init"
                 (dynamic-link "/home/steve/Source/guile-gobject-introspection/src/.libs/gobject-introspection")))
-,
+
 (define-class <callable-info> (<base-info>))
 (define-class <callback-info> (<callable-info>))
 (define-class <function-info> (<callable-info>))
