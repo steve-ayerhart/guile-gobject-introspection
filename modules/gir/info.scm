@@ -1,21 +1,27 @@
 (define-module (gir info)
+  #:use-module (gir g-object g-type)
+
   #:use-module (oop goops)
   #:use-module (system foreign)
   #:use-module (system foreign-object)
 
   #:export (<base-info>
+            get-name
             <callable-info>
             <function-info>
             <signal-info>
             <v-func-info>
             <registered-type-info>
+            get-g-type
             <enum-info>
             <interface-info>
             <object-info>
+            get-methods
             <struct-info>
             <union-info>
             <arg-info>
             <constant-info>
+            get-value
             <field-info>
             <property-info>
             <type-info>))
@@ -24,8 +30,8 @@
 
 (eval-when (expand load eval)
   (dynamic-call "ggi_base_info_init"
-                (dynamic-link ggi-lib)))
-
+                (dynamic-link "/home/steve/Source/guile-gobject-introspection/src/.libs/gobject-introspection")))
+,
 (define-class <callable-info> (<base-info>))
 (define-class <callback-info> (<callable-info>))
 (define-class <function-info> (<callable-info>))

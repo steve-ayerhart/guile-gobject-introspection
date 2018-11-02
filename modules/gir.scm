@@ -20,12 +20,12 @@
 
 (define repository (repository-get-default))
 
-(define (make-gir-module namespace
+(define (make-gir-module namespace)
   (let ((gir-module (resolve-module `(gir ,namespace)))
-        (typelib (repository:require repository namespace)))
+        (typelib (require repository namespace)))
     (set-module-public-interface! gir-module gir-module)
 
-    (let process-info ((infos (repository:get-infos repository namespace)))
+    (let process-info ((infos (get-infos repository namespace)))
       (if (null? infos)
           gir-module
           (let ((base-info (car infos)))

@@ -46,7 +46,7 @@
   (let ((name (slot-definition-name slotdef)))
     (case (slot-definition-allocation slotdef)
       ((#:g-property) (list (lambda (o) (g-object-get-property o name))
-                           (lambda (o v) (g-object-set-property o name v))))
+                            (lambda (o v) (g-object-set-property o name v))))
       (else (next-method)))))
 
 (define-method (initialize (class <g-object-class>) initargs)
@@ -178,10 +178,10 @@ defined on the class, if such a slot is not already defined.
 @var{class} or one of its parent classes, or @code{#f} if not found."
   (let ((propname name))
     (with-accessors (name)
-      (let lp ((props (g-object-class-get-properties class)))
-        (cond ((null? props) #f)
-              ((eq? (name (car props)) propname) (car props))
-              (else (lp (cdr props))))))))
+                    (let lp ((props (g-object-class-get-properties class)))
+                      (cond ((null? props) #f)
+                            ((eq? (name (car props)) propname) (car props))
+                            (else (lp (cdr props))))))))
 
 (define-generic/docs g-object:set-property
   "Called to set a gobject property. Only properties directly belonging

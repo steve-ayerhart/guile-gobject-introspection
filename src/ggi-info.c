@@ -225,9 +225,9 @@ ggi_base_info_init (void)
 void
 ggi_infos_init (void)
 {
-  #ifndef SCM_MAGIC_SNARFER
-  #include "ggi-info.x"
-  #endif
+#ifndef SCM_MAGIC_SNARFER
+#include "ggi-info.x"
+#endif
 
   scm_callable_info_type = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<callable-info>")));
   scm_function_info_type = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<function-info>")));
