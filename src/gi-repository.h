@@ -5,8 +5,8 @@
 #include <libguile.h>
 #include <girepository.h>
 
-static SCM scm_repository_class;
-static SCM scm_typelib_class;
+static SCM scm_girepository_class;
+static SCM scm_gitypelib_class;
 
 void
 gi_repository_init (void);

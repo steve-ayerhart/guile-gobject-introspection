@@ -10,12 +10,15 @@ C_FILES = \
 	gobject.c \
 	gparameter.c \
 	gclosure.c \
-	gsignal.c
+	gsignal.c \
+  gi-argument.c \
+  gi-infos.c \
+  gi-repository.c
 
 H_FILES = $(C_FILES:.c=.h)
 X_FILES = $(C_FILES:.c=.x)
 
-gobject_introspection_la_SOURCES = gir.c $(C_FILES) $(H_FILES) support.c support.h private.h
+gobject_introspection_la_SOURCES = $(C_FILES) $(H_FILES) support.c support.h private.h
 
 gobject_introspection_la_CFLAGS = $(GUILE_CFLAGS) $(GIR_CFLAGS) $(GOBJECT_CFLAGS) $(AM_CFLAGS)
 gobject_introspection_la_LIBADD = $(GUILE_LIBS) $(GIR_LIBS) $(GOBJECT_LIBS)
