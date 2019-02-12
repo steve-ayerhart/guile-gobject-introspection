@@ -6,6 +6,12 @@
 
 G_BEGIN_DECLS
 
+#ifdef DEBUG_PRINT
+#define DEBUG_ALLOC(str, args...) g_print ("I: " str "\n", ##args)
+#else
+#define DEBUG_ALLOC(str, args...)
+#endif
+
 #define SCM_TO_GPOINTER(scm) ((gpointer) SCM_UNPACK (scm))
 #define GPOINTER_TO_SCM(ptr) (SCM_PACK ((scm_t_bits) (ptr)))
 

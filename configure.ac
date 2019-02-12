@@ -1,5 +1,5 @@
 AC_INIT([Guile Gobject Introspection], [0.1], [steve@ayerh.art], [guile-gobject-introspection])
-AC_CONFIG_SRCDIR([modules/pre-install-env.in])
+AC_CONFIG_SRCDIR([src/module/pre-install-env.in])
 AC_CONFIG_MACRO_DIRS([m4])
 AC_CONFIG_AUX_DIR([build-aux])
 
@@ -25,7 +25,7 @@ PKG_CHECK_MODULES(GIR, gobject-introspection-1.0 >= 0.6.5)
 AC_SUBST(GIR_LIBS)
 AC_SUBST(GIR_CFLAGS)
 
-AC_CONFIG_FILES([Makefile modules/Makefile src/Makefile])
-AC_CONFIG_FILES([modules/pre-install-env], [chmod +x modules/pre-install-env])
+AC_CONFIG_FILES([Makefile src/module/Makefile src/Makefile])
+AC_CONFIG_FILES([src/module/pre-install-env], [chmod +x src/module/pre-install-env])
 
 AC_OUTPUT

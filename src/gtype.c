@@ -4,8 +4,8 @@
 #include "gutil.h"
 #include "gtype.h"
 
-SCM_GLOBAL_SYMBOL (scm_sym_gtype, "g-type");
-SCM_GLOBAL_SYMBOL (scm_sym_gtype_instance, "g-type-instance");
+SCM_GLOBAL_SYMBOL (scm_sym_gtype, "gtype");
+SCM_GLOBAL_SYMBOL (scm_sym_gtype_instance, "gtype-instance");
 
 SCM scm_class_gtype_class;
 SCM scm_class_gtype_instance;
@@ -19,7 +19,7 @@ SCM_SYMBOL (sym_name, "name");
 SCM_KEYWORD (kw_name, "name");
 SCM_KEYWORD (kw_class, "class");
 SCM_KEYWORD (kw_metaclass, "metaclass");
-SCM_KEYWORD (kw_gtype_name, "g-type-name");
+SCM_KEYWORD (kw_gtype_name, "gtype-name");
 
 static SCM scm_make_class;
 static SCM scm_class_redefinition;
@@ -111,16 +111,16 @@ scm_c_gtype_to_class (GType gtype)
   return class;
 }
 
-SCM_DEFINE (scm_gtype_to_class, "g-type->class", 1, 0, 0,
+SCM_DEFINE (scm_gtype_to_class, "gtype->class", 1, 0, 0,
             (SCM gtype),
             "")
 {
   return scm_c_gtype_to_class (scm_to_ulong (gtype));
 }
 
-SCM_DEFINE (scm_gtype_name_to_class, "g-type-name->class", 1, 0, 0,
+SCM_DEFINE (scm_gtype_name_to_class, "gtype-name->class", 1, 0, 0,
             (SCM name),
-            "Return the @code{<g-type-class>} associated with the GType, @var{name}.")
+            "Return the @code{<gtype-class>} associated with the GType, @var{name}.")
 #define FUNC_NAME s_scm_gtype_name_to_class
 {
   GType type;
@@ -143,7 +143,7 @@ SCM_DEFINE (scm_gtype_name_to_class, "g-type-name->class", 1, 0, 0,
 }
 #undef FUNC_NAME
 
-SCM_DEFINE (scm_sys_gtype_class_bind, "g-type-class-bind", 2, 0, 0,
+SCM_DEFINE (scm_sys_gtype_class_bind, "gtype-class-bind", 2, 0, 0,
             (SCM class, SCM type_name),
             "")
 #define FUNC_NAME s_scm_sys_gtype_class_bind
@@ -169,7 +169,7 @@ SCM_DEFINE (scm_sys_gtype_class_bind, "g-type-class-bind", 2, 0, 0,
                           SCM_LIST1 (type_name));
   if (SCM_NFALSEP (scm_c_gtype_lookup_class (gtype)))
     scm_c_gruntime_error (FUNC_NAME,
-                          "~A already has aw GOOPS class, use g-type-name->class",
+                          "~A already has aw GOOPS class, use gtype-name->class",
                           SCM_LIST1 (type_name));
 
   g_type_set_qdata (gtype, quark_class, scm_permanent_object (class));
@@ -187,7 +187,7 @@ scm_gtype_instance_struct_free (SCM object)
   scm_gtype_instance_unbind (SCM_STRUCT_DATA (object));
 }
 
-SCM_DEFINE (scm_sys_gtype_class_inheritc_magic, "g-type-class-inherit-magic", 1, 0, 0,
+SCM_DEFINE (scm_sys_gtype_class_inheritc_magic, "gtype-class-inherit-magic", 1, 0, 0,
             (SCM class),
             "")
 #define FUNC_NAME s_scm_sys_gtype_class_inherit_magic
@@ -217,7 +217,7 @@ SCM_DEFINE (scm_sys_gtype_class_inheritc_magic, "g-type-class-inherit-magic", 1,
 
 GType
 scm_c_gtype_class_to_gtype (SCM klass)
-#define FUNC_NAME "g-type-class->g-type"
+#define FUNC_NAME "gtype-class->gtype"
 {
   SCM_VALIDATE_GTYPE_CLASS (1, klass);
 
@@ -313,7 +313,7 @@ scm_c_gtype_instance_construct (SCM object, SCM initargs)
   if (funcs && funcs->construct)
     return funcs->construct (object, initargs);
   else
-    scm_c_gruntime_error ("g-type-instance-construct",
+    scm_c_gruntime_error ("gtype-instance-construct",
                           "Don't know how to construct instances of class ~A",
                           SCM_LIST1 (scm_c_gtype_to_class (type)));
 
@@ -400,7 +400,7 @@ scm_c_gtype_instance_bind_to_object (gpointer ginstance, SCM object)
   //DEBUG_ALLOC ("bound SCM 0x%p to 0x%p", (void*)object, ginstance);
 }
 
-SCM_DEFINE (scm_sys_gtype_instance_construct, "g-type-instance-construct", 2, 0, 0,
+SCM_DEFINE (scm_sys_gtype_instance_construct, "gtype-instance-construct", 2, 0, 0,
             (SCM instance, SCM initargs),
             "")
 {
@@ -423,7 +423,7 @@ SCM_DEFINE (scm_sys_gtype_instance_construct, "g-type-instance-construct", 2, 0,
   return SCM_UNSPECIFIED;
 }
 
-SCM_DEFINE (scm_gtype_instance_destroy_x, "g-type-instance-destroy!", 1, 0, 0,
+SCM_DEFINE (scm_gtype_instance_destroy_x, "gtype-instance-destroy!", 1, 0, 0,
             (SCM instance),
             "Release all references that the Scheme wrapper @var{instance} "
             "has on the underlying C value, and release pointers associated "
@@ -464,7 +464,7 @@ scm_c_scm_to_gtype_instance (SCM scm_instance)
   c_ginstance = (gpointer)scm_to_ulong (scm_ulong);
 
   if (!c_ginstance)
-    scm_c_gruntime_error ("scm->g-type-instance",
+    scm_c_gruntime_error ("scm->gtype-instance",
                           "Object ~A has been destroyed.",
                           SCM_LIST1 (scm_instance));
 
@@ -538,19 +538,19 @@ scm_gobject_gtype_init (void)
   #include "gtype.x"
   #endif
 
-  quark_type = g_quark_from_static_string ("scm-g-type->type");
-  quark_class = g_quark_from_static_string ("scm-g-type->class");
-  quark_guile_gtype_class = g_quark_from_static_string ("scm-guile-g-type-class");
-  guile_gobject_quark_wrapper = g_quark_from_static_string ("guile-g-object-wrapper");
+  quark_type = g_quark_from_static_string ("scm-gtype->type");
+  quark_class = g_quark_from_static_string ("scm-gtype->class");
+  quark_guile_gtype_class = g_quark_from_static_string ("scm-guile-gtype-class");
+  guile_gobject_quark_wrapper = g_quark_from_static_string ("guile-gobject-wrapper");
 
   scm_sys_gtype_to_class =
-    scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("g-type->class")));
+    scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("gtype->class")));
 
   // (g-object utils)
   scm_gtype_name_to_scheme_name =
-    scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("g-type-name->scheme-name")));
+    scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("gtype-name->scheme-name")));
   scm_gtype_name_to_class_name =
-    scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("g-type-name->class-name")));
+    scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("gtype-name->class-name")));
 
   // (oop goops)
   scm_make_class = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("make-class")));
@@ -566,12 +566,12 @@ void
 scm_gobject_gtype_class_init (void)
 {
   scm_class_gtype_class =
-    scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<g-type-class>")));
+    scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gtype-class>")));
 }
 
 void
 scm_gobject_gtype_instance_init (void)
 {
   scm_class_gtype_instance =
-    scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<g-type-instance>")));
+    scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gtype-instance>")));
 }

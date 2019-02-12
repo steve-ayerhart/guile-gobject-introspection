@@ -10,15 +10,7 @@ C_FILES = \
 	gobject.c \
 	gparameter.c \
 	gclosure.c \
-	gsignal.c \
-  ggi-info.c \
-	gi-types.c \
-	gi-repository.c \
-	gi-argument.c \
-	gi-function.c \
-	gi-object.c \
-	gi-registered-type.c \
-	gi-callable.c
+	gsignal.c
 
 H_FILES = $(C_FILES:.c=.h)
 X_FILES = $(C_FILES:.c=.x)

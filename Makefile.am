@@ -1,2 +1,2 @@
 ACLOCAL_AMFLAGS=-I m4 --install
-SUBDIRS = src modules
+SUBDIRS = src src/module

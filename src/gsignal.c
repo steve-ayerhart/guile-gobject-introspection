@@ -40,7 +40,7 @@ scm_c_gsignal_query (guint id)
   return scm_apply_0 (scm_scm_make, args);
 }
 
-SCM_DEFINE (scm_gsignal_query, "g-signal-query", 2, 0, 0,
+SCM_DEFINE (scm_gsignal_query, "gsignal-query", 2, 0, 0,
             (SCM class, SCM name),
             "")
 #define FUNC_NAME s_scm_gsignal_query
@@ -63,7 +63,7 @@ SCM_DEFINE (scm_gsignal_query, "g-signal-query", 2, 0, 0,
 }
 #undef FUNC_NAME
 
-SCM_DEFINE (scm_gtype_class_get_signals, "g-type-class-get-signals", 1, 1, 0,
+SCM_DEFINE (scm_gtype_class_get_signals, "gtype-class-get-signals", 1, 1, 0,
             (SCM class, SCM tail),
             "Returns a list of signals belonging to @var{class} and all "
             "parent types.")
@@ -99,7 +99,7 @@ SCM_DEFINE (scm_gtype_class_get_signals, "g-type-class-get-signals", 1, 1, 0,
 }
 #undef FUNC_NAME
 
-SCM_DEFINE (scm_gsignal_create, "g-signal-create", 2, 0, 0,
+SCM_DEFINE (scm_gsignal_create, "gsignal-create", 2, 0, 0,
             (SCM signal, SCM closure),
             "")
 #define FUNC_NAME s_scm_gsignal_create
@@ -141,7 +141,7 @@ SCM_DEFINE (scm_gsignal_create, "g-signal-create", 2, 0, 0,
 }
 #undef FUNC_NAME
 
-SCM_DEFINE (scm_gtype_instance_signal_emit, "g-type-instance-signal-emit", 2, 0, 1,
+SCM_DEFINE (scm_gtype_instance_signal_emit, "gtype-instance-signal-emit", 2, 0, 1,
             (SCM object, SCM name, SCM args),
             "")
 #define FUNC_NAME s_scm_gtype_instance_signal_emit
@@ -200,7 +200,7 @@ SCM_DEFINE (scm_gtype_instance_signal_emit, "g-type-instance-signal-emit", 2, 0,
 #undef FUNC_NAME
 
 SCM_DEFINE (scm_gtype_instance_signal_connect_closure,
-            "g-type-instance-signal-connect-closure", 4, 1, 0,
+            "gtype-instance-signal-connect-closure", 4, 1, 0,
             (SCM object, SCM id, SCM closure, SCM after, SCM detail),
             "")
 #define FUNC_NAME s_scm_gtype_instance_signal_connect_closure
@@ -244,7 +244,7 @@ SCM_DEFINE (scm_gtype_instance_signal_connect_closure,
 }
 #undef FUNC_NAME
 
-SCM_DEFINE (scm_gsignal_handler_block, "g-signal-handler-block", 2, 0, 0,
+SCM_DEFINE (scm_gsignal_handler_block, "gsignal-handler-block", 2, 0, 0,
             (SCM instance, SCM handler_id),
             "")
 #define FUNC_NAME s_scm_gsignal_handler_block
@@ -261,7 +261,7 @@ SCM_DEFINE (scm_gsignal_handler_block, "g-signal-handler-block", 2, 0, 0,
 }
 #undef FUNC_NAME
 
-SCM_DEFINE (scm_gsignal_handler_unblock, "g-signal-handler-unblock", 2, 0, 0,
+SCM_DEFINE (scm_gsignal_handler_unblock, "gsignal-handler-unblock", 2, 0, 0,
             (SCM instance, SCM handler_id),
             "")
 #define FUNC_NAME s_scm_gsignal_handler_unblock
@@ -278,7 +278,7 @@ SCM_DEFINE (scm_gsignal_handler_unblock, "g-signal-handler-unblock", 2, 0, 0,
 }
 #undef FUNC_NAME
 
-SCM_DEFINE (scm_gsignal_handler_disconnect, "g-signal-handler-disconnect", 2, 0, 0,
+SCM_DEFINE (scm_gsignal_handler_disconnect, "gsignal-handler-disconnect", 2, 0, 0,
             (SCM instance, SCM handler_id),
             "")
 #define FUNC_NAME s_scm_gsignal_handler_disconnect
@@ -295,7 +295,7 @@ SCM_DEFINE (scm_gsignal_handler_disconnect, "g-signal-handler-disconnect", 2, 0,
 }
 #undef FUNC_NAME
 
-SCM_DEFINE (scm_gsignal_handler_connected_p, "g-signal-handler-connected?", 2, 0, 0,
+SCM_DEFINE (scm_gsignal_handler_connected_p, "gsignal-handler-connected?", 2, 0, 0,
             (SCM instance, SCM handler_id),
             "")
 #define FUNC_NAME s_scm_gsignal_handler_connected_p
@@ -317,6 +317,6 @@ scm_gobject_gsignal_init (void)
 #ifndef SCM_MAGIC_SNARFER
 #include "gsignal.x"
 #endif
-  scm_class_gsignal = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<g-signal>")));
+  scm_class_gsignal = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gsignal>")));
   scm_scm_make = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("make")));
 }

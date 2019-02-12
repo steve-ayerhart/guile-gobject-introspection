@@ -27,7 +27,7 @@ typedef struct {
 
 static void*
 scm_gclosure_marshal_with_guile (const closure_data *d)
-#define FUNC_NAME "scm-g-closure-marshal"
+#define FUNC_NAME "scm-gclosure-marshal"
 {
   GuileGClosure *gclosure = (GuileGClosure *) d->closure;
   SCM params = SCM_EOL, retval;
@@ -79,7 +79,7 @@ free_closure (gpointer data, GClosure *closure)
   ((GuileGClosure *) closure)->func = SCM_UNDEFINED;
 }
 
-SCM_DEFINE (scm_sys_gclosure_construct, "g-closure-construct", 4, 0, 0,
+SCM_DEFINE (scm_sys_gclosure_construct, "gclosure-construct", 4, 0, 0,
             (SCM closure, SCM return_type, SCM param_types, SCM func),
             "")
 #define FUNC_NAME s_scm_sys_gclosure_construct
@@ -131,7 +131,7 @@ scm_closure_primitive_invoke_without_guile (closure_data *args)
   return NULL;
 }
 
-SCM_DEFINE (scm_gclosure_invoke, "g-closure-invoke", 2, 0, 1,
+SCM_DEFINE (scm_gclosure_invoke, "gclosure-invoke", 2, 0, 1,
             (SCM closure, SCM return_type, SCM args),
             "Invoke a closure.\n\n"
             "A @code{<gclosure>} in GLib's abstraction for a callable object. "

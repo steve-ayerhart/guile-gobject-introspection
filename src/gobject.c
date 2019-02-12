@@ -16,7 +16,7 @@ static SCM _slot_definition_options;
 
 static GQuark quark_guile_gtype_class = 0;
 
-SCM_SYMBOL  (sym_gruntime_error,"g-runtime-error");
+SCM_SYMBOL  (sym_gruntime_error,"gruntime-error");
 SCM_KEYWORD (kw_init_keyword, "init-keyword");
 
 /* #define DEBUG_PRINT */
@@ -115,7 +115,7 @@ in_construction_from_scheme (void)
 
 static gpointer
 scm_c_gobject_construct (SCM instance, SCM initargs)
-#define FUNC_NAME "g-object-construct"
+#define FUNC_NAME "gobject-construct"
 {
   GObject *gobject;
   GObjectClass *propclass;
@@ -290,7 +290,7 @@ scm_c_gtype_instance_class_init (gpointer g_class, gpointer class_data)
                             g_class, class_data);
 }
 
-SCM_DEFINE (scm_scheme_gclass_p, "scheme-g-class?", 1, 0, 0,
+SCM_DEFINE (scm_scheme_gclass_p, "scheme-gclass?", 1, 0, 0,
             (SCM class),
             "")
 #define FUNC_NAME s_scm_scheme_gclass_p
@@ -306,11 +306,11 @@ SCM_DEFINE (scm_scheme_gclass_p, "scheme-g-class?", 1, 0, 0,
 #undef FUNC_NAME
 
 // FIXME: remove?
-SCM_DEFINE (scm_gtype_register_static, "g-type-register-static", 2, 0, 0,
+SCM_DEFINE (scm_gtype_register_static, "gtype-register-static", 2, 0, 0,
             (SCM name, SCM parent_class),
             "Derive a new type named @var{name} from @var{parent_class}. "
-            "Returns the new @code{<g-type-class>}. This function is called "
-            "when deriving from @code{<g-object>}; users do not normally "
+            "Returns the new @code{<gtype-class>}. This function is called "
+            "when deriving from @code{<gobject>}; users do not normally "
             "call this function directly.")
 #define FUNC_NAME s_scm_gtype_register_static
 {
@@ -364,7 +364,7 @@ SCM_DEFINE (scm_gtype_register_static, "g-type-register-static", 2, 0, 0,
 }
 #undef FUNC_NAME
 
-SCM_DEFINE (scm_gobject_class_get_properties, "g-object-class-get-properties", 1, 0, 0,
+SCM_DEFINE (scm_gobject_class_get_properties, "gobject-class-get-properties", 1, 0, 0,
             (SCM class),
             "")
 #define FUNC_NAME s_scm_gobject_class_get_properties
@@ -408,7 +408,7 @@ SCM_DEFINE (scm_gobject_class_get_properties, "g-object-class-get-properties", 1
 }
 #undef FUNC_NAME
 
-SCM_DEFINE (scm_gobject_class_get_property_names, "g-object-class-get-property-names", 1, 0, 0,
+SCM_DEFINE (scm_gobject_class_get_property_names, "gobject-class-get-property-names", 1, 0, 0,
             (SCM class),
             "")
 #define FUNC_NAME s_scm_gobject_class_get_property_names
@@ -451,7 +451,7 @@ SCM_DEFINE (scm_gobject_class_get_property_names, "g-object-class-get-property-n
 }
 #undef FUNC_NAME
 
-SCM_DEFINE (scm_gobject_class_install_property, "g-object-class-install-property", 2, 0, 0,
+SCM_DEFINE (scm_gobject_class_install_property, "gobject-class-install-property", 2, 0, 0,
             (SCM class, SCM param),
             "")
 #define FUNC_NAME s_scm_gobject_class_install_property
@@ -495,7 +495,7 @@ SCM_DEFINE (scm_gobject_class_install_property, "g-object-class-install-property
 }
 #undef FUNC_NAME
 
-SCM_DEFINE (scm_gobject_get_property, "g-object-get-property", 2, 0, 0,
+SCM_DEFINE (scm_gobject_get_property, "gobject-get-property", 2, 0, 0,
             (SCM object, SCM name),
             "Gets a the property named @var{name} (a symbol) from @var{object}.")
 #define FUNC_NAME s_scm_gobject_get_property
@@ -531,7 +531,7 @@ SCM_DEFINE (scm_gobject_get_property, "g-object-get-property", 2, 0, 0,
 
 
 
-SCM_DEFINE (scm_gobject_set_property, "g-object-set-property", 3, 0, 0,
+SCM_DEFINE (scm_gobject_set_property, "gobject-set-property", 3, 0, 0,
             (SCM object, SCM name, SCM value),
             "Sets the property named @var{name} (a symbol) on @var{object} to "
             "@var{init-value}.")
@@ -615,7 +615,7 @@ scm_register_gobject_postmakefunc (GType type, gpointer (*postmakefunc) (gpointe
 }
 
 #ifdef DEBUG_REFCOUNTING
-SCM_DEFINE (scm_sys_gobject_get_refcount, "g-object-get-refcount", 1, 0, 0,
+SCM_DEFINE (scm_sys_gobject_get_refcount, "gobject-get-refcount", 1, 0, 0,
             (SCM object),
             "Get the refcount of an object (for debugging purposes)")
 #define FUNC_NAME s_scm_sys_gobject_get_refcount
@@ -630,15 +630,15 @@ SCM_DEFINE (scm_sys_gobject_get_refcount, "g-object-get-refcount", 1, 0, 0,
 #endif
 
 SCM_DEFINE (scm_sys_gnome_gobject_object_post_init,
-            "g-object-object-post-init", 0, 0, 0,
+            "gobject-object-post-init", 0, 0, 0,
             (),
             "")
 #define FUNC_NAME s_scm_sys_gnome_gobject_object_post_init
 {
   _initialize = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("initialize")));
-  _gobject_get_property = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("g-object:get-property")));
-  _gobject_set_property = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("g-object:set-property")));
-  scm_class_gobject = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<g-object>")));
+  _gobject_get_property = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("gobject:get-property")));
+  _gobject_set_property = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("gobject:set-property")));
+  scm_class_gobject = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gobject>")));
   return SCM_UNSPECIFIED;
 }
 #undef FUNC_NAME

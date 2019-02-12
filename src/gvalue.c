@@ -38,11 +38,11 @@ scm_gvalue_struct_free (SCM object)
   if (value) {
     //    DEBUG_ALLOC ("freeing GValue %p", value);
     g_value_unset (value);
-    scm_gc_free (value, sizeof (GValue), "g-value");
+    scm_gc_free (value, sizeof (GValue), "gvalue");
   }
 }
 
-SCM_DEFINE (scm_sys_bless_gvalue_class, "bless-g-value-class", 1, 0, 0,
+SCM_DEFINE (scm_sys_bless_gvalue_class, "bless-gvalue-class", 1, 0, 0,
             (SCM class),
             "")
 {
@@ -52,13 +52,13 @@ SCM_DEFINE (scm_sys_bless_gvalue_class, "bless-g-value-class", 1, 0, 0,
   return SCM_UNSPECIFIED;
 }
 
-SCM_DEFINE (scm_sys_allocate_gvalue, "allocate-g-value", 2, 0, 0,
+SCM_DEFINE (scm_sys_allocate_gvalue, "allocate-gvalue", 2, 0, 0,
             (SCM class, SCM instance),
             "")
 {
   GValue *value;
 
-  value = scm_gc_malloc (sizeof (GValue), "g-value");
+  value = scm_gc_malloc (sizeof (GValue), "gvalue");
   value->g_type = 0;
   SCM_STRUCT_DATA (instance)[0] = (scm_t_bits)value;
   if (class != scm_class_gvalue) {
@@ -78,7 +78,7 @@ scm_c_make_gvalue (GType c_gtype)
   SCM scm_gvalue, scm_class;
 
   scm_class = scm_c_gtype_to_class (c_gtype);
-  /* it's not a <g-value> class; use the generic code */
+  /* it's not a <gvalue> class; use the generic code */
   if (scm_is_false (scm_memq (scm_class_gvalue,
                               scm_class_precedence_list (scm_class))))
     scm_class = scm_class_gvalue;
@@ -96,7 +96,7 @@ scm_c_make_gvalue (GType c_gtype)
 /* assume that something on the stack will reference scm */
 GValue*
 scm_c_gvalue_peek_value (SCM scm)
-#define FUNC_NAME "g-value-peek-value"
+#define FUNC_NAME "gvalue-peek-value"
 {
   SCM_VALIDATE_GVALUE (1, scm);
   return (GValue*)SCM_STRUCT_DATA (scm)[0];
@@ -140,7 +140,7 @@ scm_c_register_gtype_instance_gvalue_wrappers (GType type,
 
 SCM
 scm_c_gvalue_ref (const GValue *gvalue)
-#define FUNC_NAME "g-value-ref"
+#define FUNC_NAME "gvalue-ref"
 {
   GType type, fundamental;
 
@@ -213,7 +213,7 @@ scm_c_gvalue_ref (const GValue *gvalue)
 
 void
 scm_c_gvalue_set (GValue *gvalue, SCM value)
-#define FUNC_NAME "g-value-set!"
+#define FUNC_NAME "gvalue-set!"
 {
   GType gtype, fundamental;
 
@@ -391,9 +391,9 @@ scm_c_scm_to_enum_value (GEnumClass *enum_class, SCM value)
 }
 #undef FUNC_NAME
 
-SCM_DEFINE (scm_genum_to_value, "g-enum->value", 1, 0, 0,
+SCM_DEFINE (scm_genum_to_value, "genum->value", 1, 0, 0,
             (SCM value),
-            "Convert the enumerated value @var{obj} from a @code{<g-value>} to "
+            "Convert the enumerated value @var{obj} from a @code{<gvalue>} to "
             "its representation as an integer.")
 #define FUNC_NAME s_scm_genum_to_value
 {
@@ -473,7 +473,7 @@ scm_c_scm_to_flags_value (GFlagsClass *flags_class, SCM value)
 }
 #undef FUNC_NAME
 
-SCM_DEFINE (scm_gflags_to_value, "g-flags->value", 1, 0, 0,
+SCM_DEFINE (scm_gflags_to_value, "gflags->value", 1, 0, 0,
             (SCM value),
             "Convert the flags value @var{obj} from a @code{<gvalue>} to "
             "its representation as an integer.")
@@ -485,7 +485,7 @@ SCM_DEFINE (scm_gflags_to_value, "g-flags->value", 1, 0, 0,
 }
 #undef FUNC_NAME
 
-SCM_DEFINE (scm_sys_gvalue_set_x, "g-value-set!", 2, 0, 0,
+SCM_DEFINE (scm_sys_gvalue_set_x, "gvalue-set!", 2, 0, 0,
             (SCM instance, SCM value), "")
 {
   scm_c_gvalue_set (scm_c_gvalue_peek_value (instance), value);
@@ -510,9 +510,9 @@ scm_c_scm_to_gvalue (GType gtype, SCM scm)
   return new;
 }
 
-SCM_DEFINE (scm_gvalue_to_scm, "g-value->scm", 1, 0, 0,
+SCM_DEFINE (scm_gvalue_to_scm, "gvalue->scm", 1, 0, 0,
             (SCM value),
-            "Convert a @code{<g-value>} into it normal scheme representation, "
+            "Convert a @code{<gvalue>} into it normal scheme representation, "
             "for example unboxing characters into Scheme characters. Note "
             "that the Scheme form for some values is the @code{<gvalue>} "
             "form, for example with boxed or enumerated values.")
@@ -522,11 +522,11 @@ SCM_DEFINE (scm_gvalue_to_scm, "g-value->scm", 1, 0, 0,
   return scm_c_gvalue_ref (v);
 }
 
-SCM_DEFINE (scm_scm_to_gvalue, "scm->g-value", 2, 0, 0,
+SCM_DEFINE (scm_scm_to_gvalue, "scm->gvalue", 2, 0, 0,
             (SCM class, SCM scm),
-            "Convert a Scheme value into a @code{<g-value>} of type "
+            "Convert a Scheme value into a @code{<gvalue>} of type "
             "@var{class}. If the conversion is not possible, raise a "
-            "@code{g-runtime-error}.")
+            "@code{gruntime-error}.")
 {
   SCM ret;
   GValue *gvalue;
@@ -607,7 +607,7 @@ wrap_gvalue_array (const GValue *value)
 
 void
 unwrap_gvalue_array (SCM scm, GValue *value)
-#define FUNC_NAME "unwrap-g-value-array"
+#define FUNC_NAME "unwrap-gvalue-array"
 {
   GArray *arr;
   gint len;
@@ -661,16 +661,16 @@ unwrap_gvalue_array (SCM scm, GValue *value)
 
 // enum and flags
 
-SCM_DEFINE (scm_genum_register_static, "g-enum-register-static", 2, 0, 0,
+SCM_DEFINE (scm_genum_register_static, "genum-register-static", 2, 0, 0,
             (SCM name, SCM vtable),
             "Creates and registers a new enumerated type with name @var{name} with the C runtime. "
             "There must be no type with name @var{name} when this function is called.\n\n"
-            "The new type can be accessed by using @code{g-type-name->class}.\n\n"
+            "The new type can be accessed by using @code{gtype-name->class}.\n\n"
             "@var{vtable} is a vector describing the new enum type. Each vector element describes "
             "one enum element and must be a list of 3 elements: the element's nick name as a symbol, "
             "its name as a string, and its integer value.\n\n"
             "@lisp\n"
-            "(g-enum-register-static \"Test\"\n"
+            "(genum-register-static \"Test\"\n"
             "  #((foo \"Foo\" 1) (bar \"Bar\" 2) (baz \"Long name of baz\" 4)))\n"
             "@end lisp\n")
 #define FUNC_NAME s_scm_genum_register_static
@@ -722,12 +722,12 @@ SCM_DEFINE (scm_genum_register_static, "g-enum-register-static", 2, 0, 0,
 }
 #undef FUNC_NAME
 
-SCM_DEFINE (scm_gflags_register_static, "g-flags-register-static", 2, 0, 0,
+SCM_DEFINE (scm_gflags_register_static, "gflags-register-static", 2, 0, 0,
             (SCM name, SCM vtable),
-            "Creates and registers a new flags @code{<g-type-class>} with name "
+            "Creates and registers a new flags @code{<gtype-class>} with name "
             "@var{name} with the C runtime.\n\n"
             "The @var{vtable} should be in the format described in the "
-            "documentation for @code{g-enum-register-static}.")
+            "documentation for @code{genum-register-static}.")
 #define FUNC_NAME s_scm_gflags_register_static
 {
   size_t length, i;
@@ -775,11 +775,11 @@ SCM_DEFINE (scm_gflags_register_static, "g-flags-register-static", 2, 0, 0,
   return SCM_UNSPECIFIED;
 }
 #undef FUNC_NAME
-SCM_DEFINE (scm_genum_class_to_value_table, "g-enum-class->value-table", 1, 0, 0,
+SCM_DEFINE (scm_genum_class_to_value_table, "genum-class->value-table", 1, 0, 0,
             (SCM class),
             "Return a table of the values supported by the enumerated "
-            "@code{<g-type-class>} @var{class}. The return value will be in the "
-            "format described in @code{g-enum-register-static}.")
+            "@code{<gtype-class>} @var{class}. The return value will be in the "
+            "format described in @code{genum-register-static}.")
 #define FUNC_NAME s_scm_genum_class_to_value_table
 {
   GType gtype;
@@ -810,11 +810,11 @@ SCM_DEFINE (scm_genum_class_to_value_table, "g-enum-class->value-table", 1, 0, 0
 }
 #undef FUNC_NAME
 
-SCM_DEFINE (scm_gflags_class_to_value_table, "g-flags-class->value-table", 1, 0, 0,
+SCM_DEFINE (scm_gflags_class_to_value_table, "gflags-class->value-table", 1, 0, 0,
             (SCM class),
             "Return a table of the values supported by the flag "
-            "@code{<g-type-class>} @var{class}. The return value will be in the "
-            "format described in @code{g-flags-register-static}.")
+            "@code{<gtype-class>} @var{class}. The return value will be in the "
+            "format described in @code{gflags-register-static}.")
 #define FUNC_NAME s_scm_gflags_class_to_value_table
 {
   GType gtype;

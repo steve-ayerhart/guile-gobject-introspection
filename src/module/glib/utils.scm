@@ -1,17 +1,17 @@
-(define-module (gir g-object utils)
+(define-module (glib utils)
   #:use-module (system foreign)
   #:use-module (srfi srfi-42)
   #:use-module (ice-9 list)
 
   #:export (camel-case->snake-case
-            g-type-name->scheme-name
-            g-type-name->class-name
-            g-type-class-name->method-name
-            class-name->g-type-name
+            gtype-name->scheme-name
+            gtype-name->class-name
+            gtype-class-name->method-name
+            class-name->gtype-name
             char**->list)
 
   #:export-syntax (define/docs define-generic/docs define-class/docs with-accessors
-                    define-g-lib define-g-object define-g-ir
+                    define-glib define-gobject define-gir
                     define-enumeration))
 
 (define-syntax define-enumeration
@@ -45,9 +45,9 @@
                           (dynamic-func function-name lib)
                           arg-types))))
 
-(define g-ir-func (foreign-func "libgirepository-1.0"))
-(define g-object-func (foreign-func "libgobject-2.0"))
-(define g-lib-func (foreign-func "libglib-2.0"))
+(define gir-func (foreign-func "libgirepository-1.0"))
+(define gobject-func (foreign-func "libgobject-2.0"))
+(define glib-func (foreign-func "libglib-2.0"))
 
 (eval-when (expand load eval)
   (define-syntax define-macro/docs
@@ -76,9 +76,9 @@
                    ((_ return-type name arg-types)
                     #'(define-public name (func-name return-type (symbol->string 'name) arg-types))))))))))))
 
-(define-gnome-definer g-ir)
-(define-gnome-definer g-object)
-(define-gnome-definer g-lib)
+(define-gnome-definer gir)
+(define-gnome-definer gobject)
+(define-gnome-definer glib)
 
 (define-macro/docs (define/docs name docs val)
   "Define @var{name} as @var{val}, documenting the value with
@@ -101,10 +101,10 @@ documentation @var{docs}."
      (set-object-property! ,name 'documentation ,docs)))
 
 
-(define (class-name->g-type-name class-name)
+(define (class-name->gtype-name class-name)
   "Convert the name of a class into a suitable name for a GType. For example:
 @lisp
-(class-name->g-type-name '<foo-bar>) @result{} \"FooBar\"
+(class-name->gtype-name '<foo-bar>) @result{} \"FooBar\"
 @end lisp"
 (list->string
  (reverse!
@@ -127,7 +127,7 @@ documentation @var{docs}."
   "Expand the StudlyCaps @var{nstr} to a more schemey-form, according to
 the conventions of GLib libraries. For example:
 @lisp
- (GStudlyCapsExpand \"GSource\") @result{} g-source
+ (GStudlyCapsExpand \"GSource\") @result{} gsource
  (GStudlyCapsExpand \"GtkIMContext\") @result{} gtk-im-context
  (GStudlyCapsExpand \"GtkHBox\") @result{} gtk-hbox
 @end lisp"
@@ -160,7 +160,7 @@ the conventions of GLib libraries. For example:
                             (substring nstr idx
                                        (string-length nstr))))))))
 
-(define (g-type-name->scheme-name type-name)
+(define (gtype-name->scheme-name type-name)
   "Transform a name of a @code{<gtype>}, such as \"GtkWindow\", to a
 scheme form, such as @code{gtk-window}, taking into account the
 exceptions in @code{gtype-name->scheme-name-alist}, and trimming
@@ -172,14 +172,14 @@ trailing dashes if any."
 
 ;; "GtkAccelGroup" => <gtk-accel-group>
 ;; "GSource*" => <g-source*>
-(define (g-type-name->class-name type-name)
+(define (gtype-name->class-name type-name)
   "Transform a name of a @code{<gtype>}, such as \"GtkWindow\", to a
 suitable name of a Scheme class, such as @code{<gtk-window>}. Uses
 @code{gtype-name->scheme-name}."
   (string->symbol
-   (string-append "<" (g-type-name->scheme-name type-name) ">")))
+   (string-append "<" (gtype-name->scheme-name type-name) ">")))
 
-(define (g-type-class-name->method-name class-name name)
+(define (gtype-class-name->method-name class-name name)
   "Generate the name of a method given the name of a @code{<gtype>} and
 the name of the operation. For example:
 @lisp

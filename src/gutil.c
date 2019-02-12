@@ -23,5 +23,5 @@ scm_c_raise_gerror (GError *error)
 {
   SCM scm_gerror = scm_c_gerror_to_scm (error);
   g_error_free (error);
-  scm_throw (scm_from_locale_symbol ("g-error"), scm_gerror);
+  scm_throw (scm_from_locale_symbol ("gerror"), scm_gerror);
 }

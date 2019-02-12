@@ -38,7 +38,7 @@ SCM_SYMBOL (sym_is_a_type, "is-a-type");
 SCM_SYMBOL (sym_gruntime_error, "gruntime-error");
 
 static void scm_c_gparam_initialize_scm (SCM param, gpointer ppspec)
-#define FUNC_NAME "g-param-initialize-scm"
+#define FUNC_NAME "gparam-initialize-scm"
 {
   GParamSpec *pspec = ppspec;
   char *blurb;
@@ -357,7 +357,7 @@ scm_c_gparam_construct (SCM instance, SCM initargs)
     pspec = g_param_spec_gtype (name, nick, blurb, param_gtype, flags);
   }
   else {
-    scm_c_gruntime_error ("g-param-construct",
+    scm_c_gruntime_error ("gparam-construct",
                           "Can't create instance of ~A from initargs: ~A",
                           SCM_LIST2 (scm_class_of (instance), initargs));
   }
@@ -442,19 +442,19 @@ scm_gobject_gparameter_init (void)
                                                  (SCMGValueSetTypeInstanceFunc)g_value_set_param);
 
   /* fixme: these names suck */
-  scm_c_define ("g-parameter:uint-max", scm_from_uint (G_MAXUINT));
-  scm_c_define ("g-parameter:int-min", scm_from_int (G_MININT));
-  scm_c_define ("g-parameter:int-max", scm_from_int (G_MAXINT));
-  scm_c_define ("g-parameter:ulong-max", scm_from_ulong (G_MAXULONG));
-  scm_c_define ("g-parameter:long-min", scm_from_long (G_MINLONG));
-  scm_c_define ("g-parameter:long-max", scm_from_long (G_MAXLONG));
-  scm_c_define ("g-parameter:uint64-max", scm_from_ulong_long (G_MAXUINT64));
-  scm_c_define ("g-parameter:int64-min", scm_from_long_long (G_MININT64));
-  scm_c_define ("g-parameter:int64-max", scm_from_long_long (G_MAXINT64));
-  scm_c_define ("g-parameter:float-max", scm_from_double (G_MAXFLOAT));
-  scm_c_define ("g-parameter:float-min", scm_from_double (G_MINFLOAT));
-  scm_c_define ("g-parameter:double-max", scm_from_double (G_MAXDOUBLE));
-  scm_c_define ("g-parameter:double-min", scm_from_double (G_MINDOUBLE));
-  scm_c_define ("g-parameter:byte-order", scm_from_uint (G_BYTE_ORDER));
+  scm_c_define ("gparameter:uint-max", scm_from_uint (G_MAXUINT));
+  scm_c_define ("gparameter:int-min", scm_from_int (G_MININT));
+  scm_c_define ("gparameter:int-max", scm_from_int (G_MAXINT));
+  scm_c_define ("gparameter:ulong-max", scm_from_ulong (G_MAXULONG));
+  scm_c_define ("gparameter:long-min", scm_from_long (G_MINLONG));
+  scm_c_define ("gparameter:long-max", scm_from_long (G_MAXLONG));
+  scm_c_define ("gparameter:uint64-max", scm_from_ulong_long (G_MAXUINT64));
+  scm_c_define ("gparameter:int64-min", scm_from_long_long (G_MININT64));
+  scm_c_define ("gparameter:int64-max", scm_from_long_long (G_MAXINT64));
+  scm_c_define ("gparameter:float-max", scm_from_double (G_MAXFLOAT));
+  scm_c_define ("gparameter:float-min", scm_from_double (G_MINFLOAT));
+  scm_c_define ("gparameter:double-max", scm_from_double (G_MAXDOUBLE));
+  scm_c_define ("gparameter:double-min", scm_from_double (G_MINDOUBLE));
+  scm_c_define ("gparameter:byte-order", scm_from_uint (G_BYTE_ORDER));
 
 }

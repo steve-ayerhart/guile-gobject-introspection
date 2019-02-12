@@ -12,19 +12,19 @@ GUILE_WARNINGS = -Wunbound-variable -Warity-mismatch -Wformat
 SUFFIXES = .scm .go
 
 .scm.go:
-	$(AM_V_GEN)$(top_builddir)/modules/pre-install-env $(GUILE_TOOLS) compile $(GUILE_WARNINGS) -o "$@" "$<"
+	$(AM_V_GEN)$(top_builddir)/src/module/pre-install-env $(GUILE_TOOLS) compile $(GUILE_WARNINGS) -o "$@" "$<"
 
 moddir=$(prefix)/share/guile/site/$(GUILE_EFFECTIVE_VERSION)
 godir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/ccache
 
 SOURCES = \
 	gir.scm \
-	gir/g-object/g-lib/g-quark.scm \
-	gir/g-object/g-lib/g-error.scm \
-	gir/g-object/utils.scm \
-	gir/g-object/g-type.scm \
-	gir/g-object/g-value.scm \
-	gir/g-object/g-parameter.scm \
-	gir/g-object/g-closure.scm \
-	gir/g-object/g-signal.scm \
-	gir/g-object.scm
+	glib/gquark.scm \
+	glib/gerror.scm \
+	glib/utils.scm \
+	gobject/gtype.scm \
+	gobject/gvalue.scm \
+	gobject/gparameter.scm \
+	gobject/gclosure.scm \
+	gobject/gsignal.scm \
+	gobject.scm
