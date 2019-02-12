@@ -12,10 +12,9 @@
             <ginterface>
             <gparam-object>
             gtype-register-static
-            get-property set-property
+            get-property set-property!
             gobject-class-get-properties gobject-class-find-property
-            gobject-class-get-property-names
-            gobject-get-property gobject-set-property))
+            gobject-class-get-property-names))
 
 (eval-when (expand load eval)
   (dynamic-call "scm_gobject_init"
@@ -29,7 +28,7 @@
          (or (eq? name (slot-definition-name (car slots)))
              (has-slot? name (cdr slots)))))
   (define (compute-extra-slots props slots)
-    (filter-map (lambda (prop)
+    (filter-map (λ (prop)
                   (and (not (has-slot? prop slots))
                        (if (defined? '<slot>)
                            (make <slot> #:name prop #:allocation #:gproperty)
@@ -45,8 +44,8 @@
 (define-method (compute-get-n-set (class <gobject-class>) slotdef)
   (let ((name (slot-definition-name slotdef)))
     (case (slot-definition-allocation slotdef)
-      ((#:gproperty) (list (lambda (o) (gobject-get-property o name))
-                            (lambda (o v) (gobject-set-property o name v))))
+      ((#:gproperty) (list (λ (o) (get-property o name))
+                            (λ (o v) (set-property! o name v))))
       (else (next-method)))))
 
 (define-method (initialize (class <gobject-class>) initargs)
@@ -54,7 +53,7 @@
     ;; To expose slots as gobject properties, <gobject> will process a
     ;; #:gparam slot option to create a new gobject property.
     (for-each
-     (lambda (slot)
+     (λ (slot)
        (let ((pspec (get-keyword #:gparam (slot-definition-options slot) #f)))
          (if pspec
              (gobject-class-install-property
@@ -113,7 +112,7 @@
 @code{#:gparam}, which will export a slot as a @code{<gobject>}
 property. The default implementation will set and access the value from
 the slot, but you can customize this by writing your own methods for
-@code{gobject:set-property} and @code{gobject:get-property}.
+@code{set-property!} and @code{get-property}.
 
 In addition, the metaclass also understands @code{#:gsignal} arguments,
 which define signals on the class, and define the generics for the
@@ -164,7 +163,7 @@ defined on the class, if such a slot is not already defined.
   "Parameter for @code{<gobject>} values."
   (object-type
    #:init-keyword #:object-type #:allocation #:checked
-   #:pred (lambda (x) (is-a? x <gobject-class>)))
+   #:pred (λ (x) (is-a? x <gobject-class>)))
   #:value-type <gobject>
   #:gtype-name "GParamObject")
 
@@ -183,7 +182,7 @@ defined on the class, if such a slot is not already defined.
                             ((eq? (name (car props)) propname) (car props))
                             (else (lp (cdr props))))))))
 
-(define-generic/docs gobject:set-property
+(define-generic/docs set-property!
   "Called to set a gobject property. Only properties directly belonging
 to the object's class will come through this function; superclasses
 handle their own properties.
@@ -192,14 +191,14 @@ Takes three arguments: the object, the property name, and the value.
 
 Call @code{(next-method)} in your methods to invoke the default handler.")
 
-(define-method (gobject:set-property (object <gobject>) (name <symbol>) value)
-  "The default implementation of @code{gobject:set-property}, which sets
+(define-method (set-property! (object <gobject>) (name <symbol>) value)
+  "The default implementation of @code{set-property!}, which sets
 slots on the object."
   (if (class-slot-definition (class-of object) name)
       (slot-set! object name value)
       (gruntime-error "Properties added after object definition must be accessed via custom property methods: ~A" name)))
 
-(define-generic/docs gobject:get-property
+(define-generic/docs get-property
   "Called to get a gobject property. Only properties directly belonging
 to the object's class will come through this function; superclasses
 handle their own properties.
@@ -208,8 +207,8 @@ Takes two arguments: the object and the property name.
 
 Call @code{(next-method)} in your methods to invoke the default handler")
 
-(define-method (gobject:get-property (object <gobject>) (name <symbol>))
-  "The default implementation of @code{gobject:get-property}, which
+(define-method (get-property (object <gobject>) (name <symbol>))
+  "The default implementation of @code{get-property}, which
 calls @code{(slot-ref obj name)}."
   (if (class-slot-definition (class-of object) name)
       (slot-ref object name)

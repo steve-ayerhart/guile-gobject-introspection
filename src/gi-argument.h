@@ -6,8 +6,6 @@
 #include <libguile.h>
 #include <girepository.h>
 
-extern scm_t_bits arg_info_t;
-
 G_GNUC_INTERNAL SCM
 gi_return_value_to_scm (GICallableInfo *info,
                         GArgument return_value);

@@ -495,7 +495,7 @@ SCM_DEFINE (scm_gobject_class_install_property, "gobject-class-install-property"
 }
 #undef FUNC_NAME
 
-SCM_DEFINE (scm_gobject_get_property, "gobject-get-property", 2, 0, 0,
+SCM_DEFINE (scm_gobject_get_property, "get-property", 2, 0, 0,
             (SCM object, SCM name),
             "Gets a the property named @var{name} (a symbol) from @var{object}.")
 #define FUNC_NAME s_scm_gobject_get_property
@@ -531,7 +531,7 @@ SCM_DEFINE (scm_gobject_get_property, "gobject-get-property", 2, 0, 0,
 
 
 
-SCM_DEFINE (scm_gobject_set_property, "gobject-set-property", 3, 0, 0,
+SCM_DEFINE (scm_gobject_set_property, "set-property!", 3, 0, 0,
             (SCM object, SCM name, SCM value),
             "Sets the property named @var{name} (a symbol) on @var{object} to "
             "@var{init-value}.")
@@ -636,8 +636,8 @@ SCM_DEFINE (scm_sys_gnome_gobject_object_post_init,
 #define FUNC_NAME s_scm_sys_gnome_gobject_object_post_init
 {
   _initialize = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("initialize")));
-  _gobject_get_property = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("gobject:get-property")));
-  _gobject_set_property = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("gobject:set-property")));
+  _gobject_get_property = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("get-property")));
+  _gobject_set_property = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("set-property!")));
   scm_class_gobject = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gobject>")));
   return SCM_UNSPECIFIED;
 }
