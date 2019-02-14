@@ -13,14 +13,15 @@
 *.la
 *.o
 *.lo
+*.a
 autom4te.cache/
 build-aux/
-!build-aux/config.rpath
 Makefile
 Makefile.in
 /configure
 /config.status
 /config.log
+/config.h*
 /aclocal.m4
 /compile
 /config.guess
@@ -34,5 +35,4 @@ Makefile.in
 /m4
 .deps
 .libs
-/src/.dir-locals.el
 /modules/pre-install-env
