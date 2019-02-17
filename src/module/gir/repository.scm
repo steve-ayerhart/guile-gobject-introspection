@@ -57,9 +57,8 @@
 (define-class <gi-type-info> (<gi-base-info>))
 (define-class <gi-value-info> (<gi-base-info>))
 
-(eval-when (expand load eval)
-  (dynamic-call "gi_infos_init"
-                (dynamic-link "/home/steve/Source/guile-gobject-introspection/src/.libs/gobject-introspection")))
+(dynamic-call "gi_infos_init"
+              (dynamic-link "/home/steve/Source/guile-gobject-introspection/src/.libs/gobject-introspection"))
 
 (define-syntax define-info-methods
   (λ (stx)
@@ -67,16 +66,16 @@
       ((_  info-name (method-name))
        (with-syntax
            ((class-name (datum->syntax stx (string->symbol
-                                             (string-append
-                                              "<"
-                                               (symbol->string (syntax->datum #'info-name))
-                                               ">"))))
+                                            (string-append
+                                             "<"
+                                             (symbol->string (syntax->datum #'info-name))
+                                             ">"))))
             (ffi-name (datum->syntax stx (string->symbol
                                           (string-append
-                                            "%g-"
-                                            (symbol->string (syntax->datum #'info-name))
-                                            "-"
-                                            (symbol->string (syntax->datum #'method-name)))))))
+                                           "%"
+                                           (symbol->string (syntax->datum #'info-name))
+                                           "-"
+                                           (symbol->string (syntax->datum #'method-name)))))))
          #'(begin
              (define-method (method-name (info-name class-name))
                (ffi-name info-name))
@@ -86,33 +85,35 @@
            (define-info-methods info-name (method-name0))
            (define-info-methods info-name (method-name* ...)))))))
 
-;;; BaseInfo
-(define-info-methods base-info
-  (get-name))
-
-;;; RegisteredTypeInfo
-(define-info-methods registered-type-info
-  (get-g-type))
-
-;;; ObjectInfo
-
-(define-info-methods object-info
-  (get-methods))
-
-;;; ConstantInfo
-
-(define-info-methods constant-info
-  (get-value))
-
-;;; GIRepository
-
+;;;; BaseInfo
+                                        ;(define-info-methods gi-base-info
+                                        ;  (get-name))
+                                        ;
+;;;; RegisteredTypeInfo
+                                        ;(define-info-methods gi-registered-type-info
+                                        ;  (get-g-type))
+                                        ;
+;;;; ObjectInfo
+                                        ;
+                                        ;(define-info-methods gi-object-info
+                                        ;  (get-methods))
+                                        ;
+;;;; ConstantInfo
+                                        ;
+                                        ;(define-info-methods gi-constant-info
+                                        ;  (get-value))
+                                        ;
+;;;; GIRepository
+                                        ;
 (eval-when (expand load eval)
   (dynamic-call "gi_repository_init"
-                (dynamic-link "/home/steve/Source/guile-gobject-introspection/src/.libs/gobject-introspection"))) (define-method (require (repository <repository>) (namespace <symbol>))
-  (%g-irepository-require repository namespace))
+                (dynamic-link "/home/steve/Source/guile-gobject-introspection/src/.libs/gobject-introspection")))
 
-(define-method (get-infos (repository <repository>) (namespace <symbol>))
-  (%g-irepository-get-infos repository namespace))
-
-(define-method (find-by-g-type (repository <repository>) (g-type <real>))
-  (%g-irepository-find-by-g-type repository g-type))
+(define-method (require (repository <gi-repository>) (namespace <symbol>))
+  (%gi-repository-require repository namespace))
+                                        ;
+(define-method (get-infos (repository <gi-repository>) (namespace <symbol>))
+  (%gi-repository-get-infos repository namespace))
+                                        ;
+                                        ;(define-method (find-by-g-type (repository <gi-repository>) (g-type <real>))
+                                        ;  (%g-irepository-find-by-g-type repository g-type))

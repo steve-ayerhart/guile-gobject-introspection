@@ -38,16 +38,16 @@
                       (car (rassq lookup enums)))
                      (#t #f)))))))))
 
-(define (foreign-func name)
-  (let ((lib (dynamic-link name)))
-    (λ (return-type function-name arg-types)
-      (pointer->procedure return-type
-                          (dynamic-func function-name lib)
-                          arg-types))))
+;(define (foreign-func name)
+;  (let ((lib (dynamic-link name)))
+;    (λ (return-type function-name arg-types)
+;      (pointer->procedure return-type
+;                          (dynamic-func function-name lib)
+;                          arg-types))))
 
-(define gir-func (foreign-func "libgirepository-1.0"))
-(define gobject-func (foreign-func "libgobject-2.0"))
-(define glib-func (foreign-func "libglib-2.0"))
+;(define gir-func (foreign-func "girepository-1.0"))
+;(define gobject-func (foreign-func "gobject-2.0"))
+;(define glib-func (foreign-func "glib-2.0"))
 
 (eval-when (expand load eval)
   (define-syntax define-macro/docs

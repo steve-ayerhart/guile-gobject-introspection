@@ -2,7 +2,7 @@
 #include "gi-infos.h"
 #include "gtype.h"
 
-SCM_DEFINE (scm_g_irepository_get_default, "%g-irepository-get-default", 0, 0, 0,
+SCM_DEFINE (scm_g_irepository_get_default, "gi-repository-get-default", 0, 0, 0,
             (),
             "")
 {
@@ -10,7 +10,7 @@ SCM_DEFINE (scm_g_irepository_get_default, "%g-irepository-get-default", 0, 0, 0
 }
 
 // FIXME: scm_Flags is currently ignored
-SCM_DEFINE (scm_g_irepository_require, "%g-irepository-require", 2, 1, 0,
+SCM_DEFINE (scm_g_irepository_require, "%gi-repository-require", 2, 1, 0,
             (SCM scm_repository, SCM scm_namespace, SCM scm_version),
             ""
             )
@@ -47,10 +47,10 @@ SCM_DEFINE (scm_g_irepository_require, "%g-irepository-require", 2, 1, 0,
   return scm_make_foreign_object_1 (scm_gitypelib_class, (void *) typelib);
 }
 
-SCM_DEFINE (scm_g_irepository_get_infos, "%g-irepository-get-infos", 2, 0, 0,
-  (SCM scm_repository, SCM scm_namespace),
-  ""
-  )
+SCM_DEFINE (scm_g_irepository_get_infos, "%gi-repository-get-infos", 2, 0, 0,
+            (SCM scm_repository, SCM scm_namespace),
+            ""
+            )
 {
   GIRepository *repository;
   GIBaseInfo *info;
@@ -90,10 +90,10 @@ SCM_DEFINE (scm_g_irepository_get_infos, "%g-irepository-get-infos", 2, 0, 0,
   return scm_infos;
 }
 
-SCM_DEFINE (scm_g_irepository_find_by_name, "%g-irepository-find-by-name", 3, 0, 0,
-           (SCM scm_repository, SCM scm_namespace, SCM scm_name),
-           ""
-           )
+SCM_DEFINE (scm_g_irepository_find_by_name, "%gi-repository-find-by-name", 3, 0, 0,
+            (SCM scm_repository, SCM scm_namespace, SCM scm_name),
+            ""
+            )
 {
   GIRepository *repo;
   GIBaseInfo *info;
@@ -120,7 +120,7 @@ SCM_DEFINE (scm_g_irepository_find_by_name, "%g-irepository-find-by-name", 3, 0,
   return scm_make_foreign_object_1 (scm_gibase_info_type, (void *) info);
 }
 
-SCM_DEFINE (scm_g_irepository_find_by_gtype, "%g-irepository-find-by-g-type", 2, 0, 0,
+SCM_DEFINE (scm_g_irepository_find_by_gtype, "%gi-repository-find-by-g-type", 2, 0, 0,
             (SCM scm_repository, SCM scm_gtype),
             ""
             )
@@ -144,19 +144,19 @@ SCM_DEFINE (scm_g_irepository_find_by_gtype, "%g-irepository-find-by-g-type", 2,
 void
 gi_repository_init (void)
 {
-  #ifndef SCM_MAGIC_SNARFER
-  #include "gi-repository.x"
-  #endif
+#ifndef SCM_MAGIC_SNARFER
+#include "gi-repository.x"
+#endif
 
   scm_t_struct_finalize finalizer = gi_finalize_object;
 
   scm_girepository_class = scm_make_foreign_object_type (scm_from_utf8_symbol ("<gi-repository>"),
-                                                       scm_list_1 (scm_from_utf8_symbol ("ptr")),
-                                                       finalizer);
+                                                         scm_list_1 (scm_from_utf8_symbol ("ptr")),
+                                                         finalizer);
   scm_c_define ("<gi-repository>", scm_girepository_class);
 
   scm_gitypelib_class = scm_make_foreign_object_type (scm_from_utf8_symbol ("<gi-typelib>"),
-                                            scm_list_1 (scm_from_utf8_symbol ("ptr")),
-                                            finalizer);
+                                                      scm_list_1 (scm_from_utf8_symbol ("ptr")),
+                                                      finalizer);
   scm_c_define ("<gi-typelib>", scm_gitypelib_class);
 }

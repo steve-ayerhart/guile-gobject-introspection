@@ -145,14 +145,14 @@ make_infos_list (SCM scm_info,
  * GIBaseInfo
  */
 
-SCM_DEFINE (scm_gi_base_info_get_type, "%gibase-info-get-type", 1, 0, 0,
+SCM_DEFINE (scm_gi_base_info_get_type, "%gi-base-info-get-type", 1, 0, 0,
             (SCM scm_base_info),
             "")
 {
   return scm_from_uint (g_base_info_get_type (gi_object_get_gi_info (scm_base_info)));
 }
 
-SCM_DEFINE (scm_gi_base_info_get_name, "%gibase-info-get-name", 1, 0, 0,
+SCM_DEFINE (scm_gi_base_info_get_name, "%gi-base-info-get-name", 1, 0, 0,
             (SCM scm_base_info),
             "")
 {
@@ -167,7 +167,7 @@ SCM_DEFINE (scm_gi_base_info_get_name, "%gibase-info-get-name", 1, 0, 0,
   return scm_from_locale_string (name);
 }
 
-SCM_DEFINE (scm_gi_base_info_get_namespace, "%gibase-info-get-namespace", 1, 0, 0,
+SCM_DEFINE (scm_gi_base_info_get_namespace, "%gi-base-info-get-namespace", 1, 0, 0,
             (SCM scm_base_info),
             "")
 {
@@ -180,7 +180,7 @@ SCM_DEFINE (scm_gi_base_info_get_namespace, "%gibase-info-get-namespace", 1, 0, 
   return scm_from_locale_string (namespace);
 }
 
-SCM_DEFINE (scm_gi_base_info_is_deprecated, "%gibase-info-is-deprecated", 1, 0, 0,
+SCM_DEFINE (scm_gi_base_info_is_deprecated, "%gi-base-info-is-deprecated", 1, 0, 0,
             (SCM scm_base_info),
             "")
 {
@@ -190,7 +190,7 @@ SCM_DEFINE (scm_gi_base_info_is_deprecated, "%gibase-info-is-deprecated", 1, 0, 
   return scm_from_bool (g_base_info_is_deprecated (base_info));
 }
 
-SCM_DEFINE (scm_gi_base_info_get_container, "%gibase-info-get-container", 1, 0, 0,
+SCM_DEFINE (scm_gi_base_info_get_container, "%gi-base-info-get-container", 1, 0, 0,
             (SCM scm_base_info),
             "")
 {
@@ -201,7 +201,7 @@ SCM_DEFINE (scm_gi_base_info_get_container, "%gibase-info-get-container", 1, 0, 
   return gi_make_info (g_base_info_get_container (base_info));
 }
 
-SCM_DEFINE (scm_gi_base_info_get_attribute, "%gibase-info-get-attribute", 2, 0, 0,
+SCM_DEFINE (scm_gi_base_info_get_attribute, "%gi-base-info-get-attribute", 2, 0, 0,
             (SCM scm_base_info, SCM scm_name),
             "")
 {
@@ -227,7 +227,7 @@ SCM_DEFINE (scm_gi_base_info_get_attribute, "%gibase-info-get-attribute", 2, 0, 
  * GIRegisteredInfo
  */
 
-SCM_DEFINE (scm_gi_registered_type_info_get_g_type, "%giregistered-type-info-get-g-type", 1, 0, 0,
+SCM_DEFINE (scm_gi_registered_type_info_get_g_type, "%gi-registered-type-info-get-g-type", 1, 0, 0,
             (SCM scm_registered_type_info),
             ""
             )
@@ -248,7 +248,7 @@ SCM_DEFINE (scm_gi_registered_type_info_get_g_type, "%giregistered-type-info-get
  * GIObjectInfo
  */
 
-SCM_DEFINE (scm_gi_object_info_get_methods, "%giobject-info-get-methods", 1, 0, 0,
+SCM_DEFINE (scm_gi_object_info_get_methods, "%gi-object-info-get-methods", 1, 0, 0,
             (SCM scm_object_info),
             ""
             )
@@ -274,7 +274,7 @@ SCM_DEFINE (scm_gi_object_info_get_methods, "%giobject-info-get-methods", 1, 0, 
 #define SCOPE_TYPE_NOTIFIED_SYMBOL "gi-scope-type-notified"
 
 
-SCM_DEFINE (scm_g_arg_info_get_direction, "%giarg-info-get-direction", 1, 0, 0,
+SCM_DEFINE (scm_g_arg_info_get_direction, "%gi-arg-info-get-direction", 1, 0, 0,
             (SCM scm_arg_info),
             ""
             )
@@ -286,7 +286,7 @@ SCM_DEFINE (scm_g_arg_info_get_direction, "%giarg-info-get-direction", 1, 0, 0,
   return scm_from_int (g_arg_info_get_direction (arg_info));
 }
 
-SCM_DEFINE (scm_g_arg_info_is_return_value, "%giarg-info-is-return-value?", 1, 0, 0,
+SCM_DEFINE (scm_g_arg_info_is_return_value, "%gi-arg-info-is-return-value?", 1, 0, 0,
             (SCM scm_arg_info),
             ""
             )
@@ -298,7 +298,7 @@ SCM_DEFINE (scm_g_arg_info_is_return_value, "%giarg-info-is-return-value?", 1, 0
   return scm_from_bool (g_arg_info_is_return_value (arg_info));
 }
 
-SCM_DEFINE (scm_g_arg_info_is_optional, "%giarg-info-is-optional?", 1, 0, 0,
+SCM_DEFINE (scm_g_arg_info_is_optional, "%gi-arg-info-is-optional?", 1, 0, 0,
             (SCM scm_arg_info),
             ""
             )
@@ -310,7 +310,7 @@ SCM_DEFINE (scm_g_arg_info_is_optional, "%giarg-info-is-optional?", 1, 0, 0,
   return scm_from_bool (g_arg_info_is_optional (arg_info));
 }
 
-SCM_DEFINE (scm_g_arg_info_may_be_null, "%giarg-info-may-be-null?", 1, 0, 0,
+SCM_DEFINE (scm_g_arg_info_may_be_null, "%gi-arg-info-may-be-null?", 1, 0, 0,
             (SCM scm_arg_info),
             ""
             )
@@ -322,7 +322,7 @@ SCM_DEFINE (scm_g_arg_info_may_be_null, "%giarg-info-may-be-null?", 1, 0, 0,
   return scm_from_bool (g_arg_info_may_be_null (arg_info));
 }
 
-SCM_DEFINE (scm_g_arg_info_get_ownership_transfer, "%giarg-info-get-ownership-transfer", 1, 0, 0,
+SCM_DEFINE (scm_g_arg_info_get_ownership_transfer, "%gi-arg-info-get-ownership-transfer", 1, 0, 0,
             (SCM scm_arg_info),
             ""
             )
@@ -370,7 +370,7 @@ SCM_DEFINE (scm_g_arg_info_get_destroy, "%gi-arg-info-get-destroy", 1, 0, 0,
   return scm_from_int (g_arg_info_get_destroy (arg_info));
 }
 
-SCM_DEFINE (scm_g_arg_info_get_type, "%giarg-info-get-type", 1, 0, 0,
+SCM_DEFINE (scm_g_arg_info_get_type, "%gi-arg-info-get-type", 1, 0, 0,
             (SCM scm_arg_info),
             ""
             )
@@ -395,7 +395,7 @@ SCM_DEFINE (scm_g_arg_info_get_type, "%giarg-info-get-type", 1, 0, 0,
  * GIConstantInfo
  */
 
-SCM_DEFINE (scm_gi_constant_info_get_value, "%giconstant-info-get-value", 1, 0, 0,
+SCM_DEFINE (scm_gi_constant_info_get_value, "%gi-constant-info-get-value", 1, 0, 0,
             (SCM scm_constant_info),
             "")
 {
@@ -414,7 +414,10 @@ SCM_DEFINE (scm_gi_constant_info_get_value, "%giconstant-info-get-value", 1, 0, 
 
   type_info = g_constant_info_get_type (constant_info);
 
-  return gi_arg_to_scm (type_info, GI_TRANSFER_NOTHING, value);
+  scm_value = gi_arg_to_scm (type_info, GI_TRANSFER_NOTHING, value);
+  g_constant_info_free_value (type_info, &value);
+
+  return scm_value;
 }
 
 /*
