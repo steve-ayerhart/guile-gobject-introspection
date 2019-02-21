@@ -117,7 +117,7 @@ SCM_DEFINE (scm_g_irepository_find_by_name, "%gi-repository-find-by-name", 3, 0,
   if (info == NULL)
     return SCM_UNSPECIFIED;
 
-  return scm_make_foreign_object_1 (scm_gibase_info_type, (void *) info);
+  return scm_make_foreign_object_1 (scm_variable_ref (scm_c_lookup ("<gi-base-info>")), (void *) info);
 }
 
 SCM_DEFINE (scm_g_irepository_find_by_gtype, "%gi-repository-find-by-gtype", 2, 0, 0,
