@@ -19,7 +19,7 @@
 ;  (dynamic-call "gir_init"
 ;                (dynamic-link "/home/steve/Source/guile-gobject-introspection/src/.libs/gobject-introspection")))
 
-(define repository (repository-get-default))
+(define repository (gi-repository-get-default))
 ;
 ;(define (make-gir-module namespace)
 ;  (let ((gir-module (resolve-module `(gir ,namespace)))

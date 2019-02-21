@@ -26,7 +26,8 @@
             get-value
             <gi-field-info>
             <gi-property-info>
-            <gi-type-info>))
+            <gi-type-info>
+            <gi-value-info>))
 
 (eval-when (expand load eval)
   (dynamic-call "gi_infos_init"

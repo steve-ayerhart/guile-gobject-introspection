@@ -444,6 +444,7 @@ gi_infos_init (void)
   scm_c_define (SCOPE_TYPE_ASYNC_SYMBOL, scm_from_int (GI_SCOPE_TYPE_ASYNC));
   scm_c_define (SCOPE_TYPE_NOTIFIED_SYMBOL, scm_from_int (GI_SCOPE_TYPE_NOTIFIED));
 
+  // TODO: ugh
   scm_c_use_module ("oop goops");
 
   scm_c_eval_string("(define-class <gi-callable-info> (<gi-base-info>))");
@@ -465,5 +466,26 @@ gi_infos_init (void)
   scm_c_eval_string("(define-class <gi-property-info> (<gi-base-info>))");
   scm_c_eval_string("(define-class <gi-type-info> (<gi-base-info>))");
   scm_c_eval_string("(define-class <gi-value-info> (<gi-base-info>))");
+
+  scm_gicallable_info_type = scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-callable-info>")));
+  scm_gicallback_info_type = scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-callback-info>")));
+  scm_gifunction_info_type = scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-function-info>")));
+  scm_gisignal_info_type = scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-signal-info>")));
+  scm_giv_func_info_type = scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-v-func-info>")));
+
+  scm_giregistered_type_info_type =
+    scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-registered-type-info>")));
+  scm_gienum_info_type = scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-enum-info>")));
+  scm_giinterface_info_type = scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-interface-info>")));
+  scm_giobject_info_type = scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-object-info>")));
+  scm_gistruct_info_type = scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-struct-info>")));
+  scm_giunion_info_type = scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-union-info>")));
+
+  scm_giarg_info_type = scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-arg-info>")));
+  scm_giconstant_info_type = scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-constant-info>")));
+  scm_gifield_info_type = scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-field-info>")));
+  scm_giproperty_info_type = scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-property-info>")));
+  scm_gitype_info_type = scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-type-info>")));
+  scm_givalue_info_type = scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-value-info>")));
 }
 
