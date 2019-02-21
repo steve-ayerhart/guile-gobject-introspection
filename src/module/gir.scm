@@ -1,6 +1,7 @@
 (define-module (gir)
-;  #:use-module (gir repository)
-;  #:use-module (gir info)
+  #:use-module (gir repository)
+  #:use-module (gir info)
+
   #:use-module (glib utils)
   #:use-module (gobject)
   #:use-module (gobject gtype)

@@ -227,7 +227,7 @@ SCM_DEFINE (scm_gi_base_info_get_attribute, "%gi-base-info-get-attribute", 2, 0,
  * GIRegisteredInfo
  */
 
-SCM_DEFINE (scm_gi_registered_type_info_get_g_type, "%gi-registered-type-info-get-g-type", 1, 0, 0,
+SCM_DEFINE (scm_gi_registered_type_info_get_g_type, "%gi-registered-type-info-get-gtype", 1, 0, 0,
             (SCM scm_registered_type_info),
             ""
             )
@@ -421,19 +421,8 @@ SCM_DEFINE (scm_gi_constant_info_get_value, "%gi-constant-info-get-value", 1, 0,
 }
 
 /*
- * INITS
+ * init
  */
-
-void
-gi_base_info_init (void)
-{
-  scm_t_struct_finalize finalizer = gi_finalize_object;
-  scm_gibase_info_type = scm_make_foreign_object_type (scm_from_utf8_symbol ("<gi-base-info>"),
-                                                     scm_list_1 (scm_from_utf8_symbol ("info")),
-                                                     finalizer);
-  scm_c_define ("<gi-base-info>", scm_gibase_info_type);
-}
-
 
 void
 gi_infos_init (void)
@@ -441,21 +430,12 @@ gi_infos_init (void)
 #ifndef SCM_MAGIC_SNARFER
 #include "gi-infos.x"
 #endif
+  scm_t_struct_finalize finalizer = gi_finalize_object;
+  scm_gibase_info_type = scm_make_foreign_object_type (scm_from_utf8_symbol ("<gi-base-info>"),
+                                                       scm_list_1 (scm_from_utf8_symbol ("info")),
+                                                       finalizer);
+  scm_c_define ("<gi-base-info>", scm_gibase_info_type);
 
-  scm_gicallable_info_type = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gi-callable-info>")));
-  scm_gifunction_info_type = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gi-function-info>")));
-  scm_gisignal_info_type = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gi-signal-info>")));
-  scm_giv_func_info_type = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gi-v-func-info>")));
-  scm_gicallback_info_type = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gi-callback-info>")));
-  scm_giregistered_type_info_type =
-    scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gi-registered-type-info>")));
-  scm_gienum_info_type = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gi-enum-info>")));
-  scm_giinterface_info_type = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gi-interface-info>")));
-  scm_giobject_info_type = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gi-object-info>")));
-  scm_gistruct_info_type = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gi-struct-info>")));
-  scm_giunion_info_type = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gi-union-info>")));
-
-  scm_giarg_info_type = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gi-arg-info>")));
   scm_c_define (DIRECTION_IN_SYMBOL, scm_from_int (GI_DIRECTION_IN));
   scm_c_define (DIRECTION_OUT_SYMBOL, scm_from_int (GI_DIRECTION_OUT));
   scm_c_define (DIRECTION_INOUT_SYMBOL, scm_from_int (GI_DIRECTION_INOUT));
@@ -464,10 +444,26 @@ gi_infos_init (void)
   scm_c_define (SCOPE_TYPE_ASYNC_SYMBOL, scm_from_int (GI_SCOPE_TYPE_ASYNC));
   scm_c_define (SCOPE_TYPE_NOTIFIED_SYMBOL, scm_from_int (GI_SCOPE_TYPE_NOTIFIED));
 
-  scm_giconstant_info_type = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gi-constant-info>")));
-  scm_gifield_info_type = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gi-field-info>")));
-  scm_giproperty_info_type = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gi-property-info>")));
-  scm_givalue_info_type = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gi-value-info>")));
-  scm_gitype_info_type = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gi-type-info>")));
+  scm_c_use_module ("oop goops");
+
+  scm_c_eval_string("(define-class <gi-callable-info> (<gi-base-info>))");
+  scm_c_eval_string("(define-class <gi-callback-info> (<gi-callable-info>))");
+  scm_c_eval_string("(define-class <gi-function-info> (<gi-callable-info>))");
+  scm_c_eval_string("(define-class <gi-signal-info> (<gi-callable-info>))");
+  scm_c_eval_string("(define-class <gi-v-func-info> (<gi-callable-info>))");
+
+  scm_c_eval_string("(define-class <gi-registered-type-info> (<gi-base-info>))");
+  scm_c_eval_string("(define-class <gi-enum-info> (<gi-registered-type-info>))");
+  scm_c_eval_string("(define-class <gi-interface-info> (<gi-registered-type-info>))");
+  scm_c_eval_string("(define-class <gi-object-info> (<gi-registered-type-info>))");
+  scm_c_eval_string("(define-class <gi-struct-info> (<gi-registered-type-info>))");
+  scm_c_eval_string("(define-class <gi-union-info> (<gi-registered-type-info>))");
+
+  scm_c_eval_string("(define-class <gi-arg-info> (<gi-base-info>))");
+  scm_c_eval_string("(define-class <gi-constant-info> (<gi-base-info>))");
+  scm_c_eval_string("(define-class <gi-field-info> (<gi-base-info>))");
+  scm_c_eval_string("(define-class <gi-property-info> (<gi-base-info>))");
+  scm_c_eval_string("(define-class <gi-type-info> (<gi-base-info>))");
+  scm_c_eval_string("(define-class <gi-value-info> (<gi-base-info>))");
 }
 
