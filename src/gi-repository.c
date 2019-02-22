@@ -18,33 +18,45 @@ SCM_DEFINE (scm_g_irepository_require, "%gi-repository-require", 2, 1, 0,
   GIRepository *repo;
   GTypelib *typelib;
   GError *error;
-  const char *version;
-  const char *namespace;
+  char *version;
+  char *namespace;
 
   repo = (GIRepository *) scm_foreign_object_signed_ref (scm_repository, 0);
 
+
+  scm_dynwind_begin (0);
   if (SCM_UNBNDP (scm_version))
     version = NULL;
   else
     version = scm_to_locale_string (scm_version);
 
+  scm_dynwind_free (version);
+
   error = NULL;
 
-  if (scm_is_symbol (scm_namespace))
-    scm_namespace = scm_symbol_to_string (scm_namespace);
+  scm_namespace = scm_symbol_to_string (scm_namespace);
+  namespace = scm_to_locale_string (scm_namespace);
+  scm_dynwind_free (namespace);
 
   typelib = g_irepository_require (repo,
-                                   scm_to_locale_string (scm_namespace),
+                                   namespace,
                                    version,
                                    0,
                                    &error);
+
+
+  scm_dynwind_end ();
 
   if (error) {
     g_critical ("Failed to load typelib: %s", error->message);
     return SCM_UNSPECIFIED;
   }
 
-  return scm_make_foreign_object_1 (scm_gitypelib_class, (void *) typelib);
+  if (typelib) {
+    return scm_make_foreign_object_1 (scm_gitypelib_class, (void *) typelib);
+  }
+
+  return SCM_BOOL_F;
 }
 
 SCM_DEFINE (scm_g_irepository_get_infos, "%gi-repository-get-infos", 2, 0, 0,
