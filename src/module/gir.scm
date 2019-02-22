@@ -15,11 +15,13 @@
   #:use-module (ice-9 receive)
   #:use-module (ice-9 match))
 
-;(eval-when (expand load eval)
-;  (dynamic-call "gir_init"
-;                (dynamic-link "/home/steve/Source/guile-gobject-introspection/src/.libs/gobject-introspection")))
-
 (define repository (gi-repository-get-default))
+
+(define (build-gir-module namespace)
+  (when (require repository namespace)
+    (let ((gir-module (resolve-module `(gir ,namespace) #:autoload #f)))
+
+      (set-module-public-interface! gir-module gir-module))))
 ;
 ;(define (make-gir-module namespace)
 ;  (let ((gir-module (resolve-module `(gir ,namespace)))
