@@ -19,65 +19,50 @@
 
 (define (build-gir-module namespace)
   (when (require repository namespace)
-    (let ((gir-module (resolve-module `(gir ,namespace) #:autoload #f)))
+    (let ((namespace-module (resolve-module `(gir ,namespace) #f)))
+      (set-module-public-interface! namespace-module namespace-module)
 
-      (set-module-public-interface! gir-module gir-module))))
-;
-;(define (make-gir-module namespace)
-;  (let ((gir-module (resolve-module `(gir ,namespace)))
-;        (typelib (require repository namespace)))
-;    (set-module-public-interface! gir-module gir-module)
-;
-;    (let process-info ((infos (get-infos repository namespace)))
-;      (if (null? infos)
-;          gir-module
-;          (let ((base-info (car infos)))
-;            (build-gi-type! gir-module base-info)
-;            (process-info (cdr infos)))))))
+      (module-use! namespace-module (resolve-module '(oop goops)))
 
-;(define (build-gir-module namespace)
-;  (let ((gir-module (resolve-module `(gir ,namespace)))
-;        (c-namespace (camel-case->scheme-case namespace)))
-;
-;    (g-i-repository-require c-namespace)
-;    (set-module-public-interface! gir-module gir-module)
-;
-;    (let ((n-infos (g-i-repository-get-n-infos c-namespace)))
-;      (let read-info ((index 0))
-;        (if (= n-infos index)
-;            gir-module
-;            (let ((base-info (g-i-repository-get-info c-namespace index)))
-;              (receive (type-name type-value)
-;                  (build-gi-type base-info)
-;                (module-define! gir-module type-name type-value))
-;              (read-info (+ index 1))))))))
+      (save-module-excursion
+       (λ ()
+         (let ((gir-module (set-current-module namespace-module)))
+           (let process-info ((infos (get-infos repository namespace)))
+             (if (null? infos)
+                 namespace-module
+                 (let ((base-info (car infos)))
+                   (build-gi-type! base-info)
+                   (process-info (cdr infos)))))))))))
 
-;(define (function-info->scm-procedure function-info)
-;  '())
-;
-;(define (build-gi-registered-type gir-module info)
-;  (define class-name (g-type-name->class-name (get-name info)))
-;  (module-define! gir-module
-;                  class-name
-;                  (get-g-type info))
-;  (when (is-a? info <object-info>)
-;    (for-each (lambda (method-info)
-;                (module-define! gir-module
-;                                (g-type-class-name->method-name class-name
-;                                                                (string->symbol
-;                                                                 (g-type-name->scheme-name (get-name method-info))))
-;                                '()))
-;              (get-methods info))))
-;
-;(define (build-gi-type! gir-module info)
-;  (cond
-;   ((is-a? info <registered-type-info>)
-;    (build-gi-registered-type gir-module info))
-;   ((is-a? info <constant-info>)
-;    (module-define! gir-module
-;                    ((compose string->symbol camel-case->snake-case) (get-name info))
-;                    (get-value info)))
-;     (else
-;      (module-define! gir-module
-;                      ((compose string->symbol g-type-name->scheme-name) (get-name info))
-;                      "BUTTS"))))
+
+(define (build-gi-registered-type! info)
+  (let ((class-name (gtype-name->class-name (get-name info))))
+    (module-define! (current-module)
+                    class-name
+                    (get-gtype info))
+    (when (is-a? info <gi-object-info>)
+      (for-each
+       (λ (method-info)
+         (module-define! (current-module)
+                         (gtype-class-name->method-name
+                          class-name
+                          (string->symbol
+                           (gtype-name->scheme-name (get-name method-info)))) '()))
+       (get-methods info)))))
+
+
+(define (build-constant-type info)
+  (let ((constant-name ((compose string->symbol camel-case->snake-case) (get-name info))))
+    (module-define! (current-module) constant-name (get-value info))
+    (export constant-name)))
+
+(define (build-gi-type! info)
+  (cond
+   ((is-a? info <gi-registered-type-info>)
+    (build-gi-registered-type! info))
+   ((is-a? info <gi-constant-info>)
+    (build-constant-type info))
+   (else
+    (module-define! (current-module)
+                    ((compose string->symbol gtype-name->scheme-name) (get-name info))
+                    "BUTTS"))))

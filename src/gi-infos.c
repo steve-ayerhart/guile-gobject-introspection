@@ -415,7 +415,7 @@ SCM_DEFINE (scm_gi_constant_info_get_value, "%gi-constant-info-get-value", 1, 0,
   type_info = g_constant_info_get_type (constant_info);
 
   scm_value = gi_arg_to_scm (type_info, GI_TRANSFER_NOTHING, value);
-  g_constant_info_free_value (type_info, &value);
+  g_constant_info_free_value (constant_info, &value);
 
   return scm_value;
 }
