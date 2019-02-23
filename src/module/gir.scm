@@ -43,11 +43,13 @@
     (when (is-a? info <gi-object-info>)
       (for-each
        (λ (method-info)
-         (module-define! (current-module)
-                         (gtype-class-name->method-name
-                          class-name
-                          (string->symbol
-                           (gtype-name->scheme-name (get-name method-info)))) '()))
+         (let ((method-name ((compose string->symbol gtype-name->scheme-name) (get-name method-info))))
+           (module-define! (current-module)
+                           method-name
+                           (make <method>
+                             #:dsupers `(,<gobject> <object>)
+                             #:specializers `(,class-name)
+                             #:procedure (λ (self) "BOO")))))
        (get-methods info)))))
 
 
