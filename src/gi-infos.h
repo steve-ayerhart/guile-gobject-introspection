@@ -36,6 +36,7 @@ static SCM scm_gitype_info_type;
 static void
 gi_finalize_object (SCM scm_info)
 {
+  g_print ("FINALIZING\n");
   GIBaseInfo *info;
 
   info = (GIBaseInfo *)scm_foreign_object_signed_ref (scm_info, 0);

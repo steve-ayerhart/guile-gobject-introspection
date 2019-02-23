@@ -15,13 +15,13 @@ gi_make_infos_list (SCM scm_info_class,
   gint n_infos;
   SCM scm_infos;
   gint infos_index;
+  GIBaseInfo *info;
 
   n_infos = get_n_infos ((GIBaseInfo *) scm_foreign_object_signed_ref (scm_info_class, 0));
 
   scm_infos = SCM_EOL;
 
   for (infos_index = 0; infos_index < n_infos; infos_index++) {
-    GIBaseInfo *info;
     SCM scm_info;
 
     info = (GIBaseInfo *) get_info ((GIBaseInfo *) scm_foreign_object_signed_ref (scm_info_class, 0),
@@ -32,6 +32,8 @@ gi_make_infos_list (SCM scm_info_class,
 
     scm_infos = scm_append (scm_list_2 (scm_infos, scm_list_1 (scm_info)));
   }
+
+  scm_remember_upto_here_1 (info);
 
   return scm_infos;
 }
@@ -100,6 +102,8 @@ gi_make_info (GIBaseInfo *info)
     return SCM_UNSPECIFIED;
   }
 
+  scm_remember_upto_here_1 (info);
+
   return scm_info_type;
 }
 
@@ -118,6 +122,7 @@ make_infos_list (SCM scm_info,
   gint n_infos;
   SCM scm_infos;
   gint i;
+  GIBaseInfo *info;
 
   base_info = gi_object_get_gi_info (scm_info);
 
@@ -125,7 +130,6 @@ make_infos_list (SCM scm_info,
 
   scm_infos = SCM_EOL;
   for (i = 0; i < n_infos; i++) {
-    GIBaseInfo *info;
     SCM scm_info;
 
     info = (GIBaseInfo *) get_info (base_info, i);
@@ -136,6 +140,8 @@ make_infos_list (SCM scm_info,
     // maybe? g_base_info_unref (info);
     scm_infos = scm_append (scm_list_2 (scm_infos, scm_list_1 (scm_info)));
   }
+
+  scm_remember_upto_here_1 (info);
 
   return scm_infos;
 }
@@ -161,6 +167,8 @@ SCM_DEFINE (scm_gi_base_info_get_name, "%gi-base-info-get-name", 1, 0, 0,
 
   base_info = gi_object_get_gi_info (scm_base_info);
   name = g_base_info_get_name (base_info);
+
+  scm_remember_upto_here_1 (base_info);
 
   // TODO: need to escape any names?
 
@@ -240,6 +248,8 @@ SCM_DEFINE (scm_gi_registered_type_info_get_g_type, "%gi-registered-type-info-ge
 
   if (gtype == G_TYPE_INVALID)
     return SCM_BOOL_F;
+
+  scm_remember_upto_here_1 (registered_type_info);
 
   return scm_c_gtype_to_class (gtype);
 }
@@ -388,6 +398,8 @@ SCM_DEFINE (scm_g_arg_info_get_type, "%gi-arg-info-get-type", 1, 0, 0,
     scm_type = gi_make_info (type_info);
   }
 
+  scm_remember_upto_here_1 (type_info);
+
   return scm_type;
 }
 
@@ -416,6 +428,8 @@ SCM_DEFINE (scm_gi_constant_info_get_value, "%gi-constant-info-get-value", 1, 0,
 
   scm_value = gi_arg_to_scm (type_info, GI_TRANSFER_NOTHING, value);
   g_constant_info_free_value (constant_info, &value);
+
+  scm_remember_upto_here_1 (constant_info);
 
   return scm_value;
 }

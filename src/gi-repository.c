@@ -23,14 +23,15 @@ SCM_DEFINE (scm_g_irepository_require, "%gi-repository-require", 2, 1, 0,
 
   repo = (GIRepository *) scm_foreign_object_signed_ref (scm_repository, 0);
 
-
   scm_dynwind_begin (0);
+
+  scm_dynwind_free (version);
+
   if (SCM_UNBNDP (scm_version))
     version = NULL;
   else
     version = scm_to_locale_string (scm_version);
 
-  scm_dynwind_free (version);
 
   error = NULL;
 
@@ -56,6 +57,8 @@ SCM_DEFINE (scm_g_irepository_require, "%gi-repository-require", 2, 1, 0,
     return scm_make_foreign_object_1 (scm_gitypelib_class, (void *) typelib);
   }
 
+  scm_remember_upto_here_1 (typelib);
+
   return SCM_BOOL_F;
 }
 
@@ -66,15 +69,17 @@ SCM_DEFINE (scm_g_irepository_get_infos, "%gi-repository-get-infos", 2, 0, 0,
 {
   GIRepository *repository;
   GIBaseInfo *info;
-  const char *namespace;
+  char *namespace;
   gssize n_infos;
   SCM scm_infos;
   gint i;
 
   repository = (GIRepository *) scm_foreign_object_signed_ref (scm_repository, 0);
 
-  if (scm_is_symbol (scm_namespace))
-    scm_namespace = scm_symbol_to_string (scm_namespace);
+  scm_namespace = scm_symbol_to_string (scm_namespace);
+
+  scm_dynwind_begin (0);
+  scm_dynwind_free (namespace);
 
   namespace = scm_to_locale_string (scm_namespace);
 
@@ -88,7 +93,6 @@ SCM_DEFINE (scm_g_irepository_get_infos, "%gi-repository-get-infos", 2, 0, 0,
   scm_infos = SCM_EOL;
 
   for(i = 0; i < n_infos; i++) {
-    GIBaseInfo *info;
     SCM scm_info;
 
     info = g_irepository_get_info (repository, namespace, i);
@@ -96,8 +100,15 @@ SCM_DEFINE (scm_g_irepository_get_infos, "%gi-repository-get-infos", 2, 0, 0,
 
     scm_info = gi_make_info (info);
 
+    scm_remember_upto_here_1 (info);
+
     scm_infos = scm_append (scm_list_2 (scm_infos, scm_list_1 (scm_info)));
+
   }
+
+  scm_dynwind_end ();
+  scm_remember_upto_here_1 (repository);
+  scm_remember_upto_here_1 (info);
 
   return scm_infos;
 }
@@ -160,15 +171,13 @@ gi_repository_init (void)
 #include "gi-repository.x"
 #endif
 
-  scm_t_struct_finalize finalizer = gi_finalize_object;
-
   scm_girepository_class = scm_make_foreign_object_type (scm_from_utf8_symbol ("<gi-repository>"),
                                                          scm_list_1 (scm_from_utf8_symbol ("ptr")),
-                                                         finalizer);
+                                                         NULL);
   scm_c_define ("<gi-repository>", scm_girepository_class);
 
   scm_gitypelib_class = scm_make_foreign_object_type (scm_from_utf8_symbol ("<gi-typelib>"),
                                                       scm_list_1 (scm_from_utf8_symbol ("ptr")),
-                                                      finalizer);
+                                                      NULL);
   scm_c_define ("<gi-typelib>", scm_gitypelib_class);
 }
