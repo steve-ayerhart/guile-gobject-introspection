@@ -72,7 +72,7 @@ SCM_DEFINE (scm_g_irepository_get_infos, "%gi-repository-get-infos", 2, 0, 0,
   SCM scm_infos;
   gint i;
 
-  repository = (GIRepository *) scm_foreign_object_signed_ref (scm_repository, 0);
+  repository = (GIRepository *) scm_to_pointer (scm_foreign_object_ref (scm_repository, 0));
 
   scm_namespace = scm_symbol_to_string (scm_namespace);
 
@@ -98,15 +98,11 @@ SCM_DEFINE (scm_g_irepository_get_infos, "%gi-repository-get-infos", 2, 0, 0,
 
     scm_info = gi_make_info (info);
 
-    scm_remember_upto_here_1 (info);
-
     scm_infos = scm_append (scm_list_2 (scm_infos, scm_list_1 (scm_info)));
 
   }
 
   scm_dynwind_end ();
-  scm_remember_upto_here_1 (repository);
-  scm_remember_upto_here_1 (info);
 
   return scm_infos;
 }
@@ -116,29 +112,35 @@ SCM_DEFINE (scm_g_irepository_find_by_name, "%gi-repository-find-by-name", 3, 0,
             ""
             )
 {
+  scm_t_pointer_finalizer finalizer = gi_finalize_pointer;
   GIRepository *repo;
   GIBaseInfo *info;
   GError *error;
+  gchar *namespace;
+  gchar *name;
 
-  repo = (GIRepository *) scm_foreign_object_signed_ref (scm_repository, 0);
+  repo = (GIRepository *) scm_to_pointer (scm_foreign_object_ref (scm_repository, 0));
 
   error = NULL;
 
+  scm_dynwind_begin (0);
+  scm_namespace = scm_symbol_to_string (scm_namespace);
+  scm_name = scm_symbol_to_string (scm_name);
 
-  if (scm_is_symbol (scm_namespace))
-    scm_namespace = scm_symbol_to_string (scm_namespace);
+  namespace = scm_to_locale_string (scm_namespace);
+  scm_dynwind_free (namespace);
+  name = scm_to_locale_string (scm_name);
+  scm_dynwind_free (name);
 
-  if (scm_is_symbol (scm_name))
-    scm_name = scm_symbol_to_string (scm_name);
+  info = g_irepository_find_by_name (repo, namespace, name);
 
-  info = g_irepository_find_by_name (repo,
-                                     scm_to_locale_string (scm_namespace),
-                                     scm_to_locale_string (scm_name));
+  scm_dynwind_end ();
 
   if (info == NULL)
-    return SCM_UNSPECIFIED;
+    return SCM_BOOL_F;
 
-  return scm_make_foreign_object_1 (scm_variable_ref (scm_c_lookup ("<gi-base-info>")), (void *) info);
+  return scm_make_foreign_object_1 (scm_variable_ref (scm_c_lookup ("<gi-base-info>")),
+                                    scm_from_pointer (g_base_info_ref (info), finalizer));
 }
 
 SCM_DEFINE (scm_g_irepository_find_by_gtype, "%gi-repository-find-by-gtype", 2, 0, 0,
