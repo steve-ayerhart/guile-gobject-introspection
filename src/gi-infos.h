@@ -36,10 +36,18 @@ static SCM scm_gitype_info_type;
 static void
 gi_finalize_object (SCM scm_info)
 {
-  g_print ("FINALIZING\n");
+  g_print ("FINALIZING OBJ\n");
   GIBaseInfo *info;
 
-  info = (GIBaseInfo *)scm_foreign_object_signed_ref (scm_info, 0);
+  info = (GIBaseInfo *) scm_to_pointer (scm_foreign_object_ref (scm_info, 0));
+
+  g_base_info_unref (info);
+}
+
+static void
+gi_finalize_pointer (void *info)
+{
+  g_print ("FINALIZING PROP\n");
 
   g_base_info_unref (info);
 }

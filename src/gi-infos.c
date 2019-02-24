@@ -15,16 +15,16 @@ gi_make_infos_list (SCM scm_info_class,
   gint n_infos;
   SCM scm_infos;
   gint infos_index;
-  GIBaseInfo *info;
 
-  n_infos = get_n_infos ((GIBaseInfo *) scm_foreign_object_signed_ref (scm_info_class, 0));
+  n_infos = get_n_infos ((GIBaseInfo *) scm_to_pointer (scm_foreign_object_ref (scm_info_class, 0)));
 
   scm_infos = SCM_EOL;
 
   for (infos_index = 0; infos_index < n_infos; infos_index++) {
+    GIBaseInfo *info;
     SCM scm_info;
 
-    info = (GIBaseInfo *) get_info ((GIBaseInfo *) scm_foreign_object_signed_ref (scm_info_class, 0),
+    info = (GIBaseInfo *) get_info ((GIBaseInfo *) scm_to_pointer (scm_foreign_object_ref (scm_info_class, 0)),
                                     infos_index);
     g_assert (info != NULL);
 
@@ -33,8 +33,6 @@ gi_make_infos_list (SCM scm_info_class,
     scm_infos = scm_append (scm_list_2 (scm_infos, scm_list_1 (scm_info)));
   }
 
-  scm_remember_upto_here_1 (info);
-
   return scm_infos;
 }
 
@@ -42,6 +40,8 @@ SCM
 gi_make_info (GIBaseInfo *info)
 {
   GIInfoType info_type;
+  scm_t_pointer_finalizer finalizer = gi_finalize_pointer;
+
   SCM scm_info_type;
 
   info_type = g_base_info_get_type (info);
@@ -51,66 +51,65 @@ gi_make_info (GIBaseInfo *info)
     g_critical ("Invalid info type");
     return SCM_UNSPECIFIED;
   case GI_INFO_TYPE_FUNCTION:
-    scm_info_type = scm_make_foreign_object_1 (scm_gifunction_info_type, (void *) info);
+    scm_info_type = scm_gifunction_info_type;
     break;
   case GI_INFO_TYPE_CALLBACK:
-    scm_info_type = scm_make_foreign_object_1 (scm_gicallback_info_type, (void *) info);
+    scm_info_type = scm_gicallback_info_type;
     break;
   case GI_INFO_TYPE_STRUCT:
   case GI_INFO_TYPE_BOXED:
-    scm_info_type = scm_make_foreign_object_1 (scm_gistruct_info_type, (void *) info);
+    scm_info_type = scm_gistruct_info_type;
     break;
   case GI_INFO_TYPE_ENUM:
   case GI_INFO_TYPE_FLAGS:
-    scm_info_type = scm_make_foreign_object_1 (scm_gienum_info_type, (void *) info);
+    scm_info_type = scm_gienum_info_type;
     break;
   case GI_INFO_TYPE_OBJECT:
-    scm_info_type = scm_make_foreign_object_1 (scm_giobject_info_type, (void *) info);
+    scm_info_type = scm_giobject_info_type;
     break;
   case GI_INFO_TYPE_INTERFACE:
-    scm_info_type = scm_make_foreign_object_1 (scm_giinterface_info_type, (void *) info);
+    scm_info_type = scm_giinterface_info_type;
     break;
   case GI_INFO_TYPE_CONSTANT:
-    scm_info_type = scm_make_foreign_object_1 (scm_giconstant_info_type, (void *) info);
+    scm_info_type = scm_giconstant_info_type;
     break;
   case GI_INFO_TYPE_UNION:
-    scm_info_type = scm_make_foreign_object_1 (scm_giunion_info_type, (void *) info);
+    scm_info_type = scm_giunion_info_type;
     break;
   case GI_INFO_TYPE_VALUE:
-    scm_info_type = scm_make_foreign_object_1 (scm_givalue_info_type, (void *) info);
+    scm_info_type = scm_givalue_info_type;
     break;
   case GI_INFO_TYPE_SIGNAL:
-    scm_info_type = scm_make_foreign_object_1 (scm_gisignal_info_type, (void *) info);
+    scm_info_type = scm_gisignal_info_type;
     break;
   case GI_INFO_TYPE_VFUNC:
-    scm_info_type = scm_make_foreign_object_1 (scm_giv_func_info_type, (void *) info);
+    scm_info_type = scm_giv_func_info_type;
     break;
   case GI_INFO_TYPE_PROPERTY:
-    scm_info_type = scm_make_foreign_object_1 (scm_giproperty_info_type, (void *) info);
+    scm_info_type = scm_giproperty_info_type;
     break;
   case GI_INFO_TYPE_FIELD:
-    scm_info_type = scm_make_foreign_object_1 (scm_gifield_info_type, (void *) info);
+    scm_info_type = scm_gifield_info_type;
     break;
   case GI_INFO_TYPE_ARG:
-    scm_info_type = scm_make_foreign_object_1 (scm_giarg_info_type, (void *) info);
+    scm_info_type = scm_giarg_info_type;
     break;
   case GI_INFO_TYPE_TYPE:
-    scm_info_type = scm_make_foreign_object_1 (scm_gitype_info_type, (void *) info);
+    scm_info_type = scm_gitype_info_type;
     break;
   default:
     g_assert_not_reached ();
     return SCM_UNSPECIFIED;
   }
 
-  scm_remember_upto_here_1 (info);
-
-  return scm_info_type;
+  return scm_make_foreign_object_1 (scm_info_type,
+                                    scm_from_pointer (g_base_info_ref (info), finalizer));
 }
 
 GIBaseInfo *
 gi_object_get_gi_info (SCM scm_object)
 {
-  return (GIBaseInfo *) scm_foreign_object_signed_ref (scm_object, 0);
+  return (GIBaseInfo *) scm_to_pointer (scm_foreign_object_ref (scm_object, 0));
 }
 
 static SCM
@@ -122,7 +121,6 @@ make_infos_list (SCM scm_info,
   gint n_infos;
   SCM scm_infos;
   gint i;
-  GIBaseInfo *info;
 
   base_info = gi_object_get_gi_info (scm_info);
 
@@ -130,6 +128,7 @@ make_infos_list (SCM scm_info,
 
   scm_infos = SCM_EOL;
   for (i = 0; i < n_infos; i++) {
+    GIBaseInfo *info;
     SCM scm_info;
 
     info = (GIBaseInfo *) get_info (base_info, i);
@@ -137,11 +136,8 @@ make_infos_list (SCM scm_info,
 
     scm_info = gi_make_info (info);
 
-    // maybe? g_base_info_unref (info);
     scm_infos = scm_append (scm_list_2 (scm_infos, scm_list_1 (scm_info)));
   }
-
-  scm_remember_upto_here_1 (info);
 
   return scm_infos;
 }
@@ -166,9 +162,15 @@ SCM_DEFINE (scm_gi_base_info_get_name, "%gi-base-info-get-name", 1, 0, 0,
   const gchar *name;
 
   base_info = gi_object_get_gi_info (scm_base_info);
-  name = g_base_info_get_name (base_info);
 
-  scm_remember_upto_here_1 (base_info);
+  if (g_base_info_get_type (base_info) == GI_INFO_TYPE_TYPE)
+    {
+      name = "type_type_instance";
+    }
+  else
+    {
+      name = g_base_info_get_name (base_info);
+    }
 
   // TODO: need to escape any names?
 
@@ -243,13 +245,12 @@ SCM_DEFINE (scm_gi_registered_type_info_get_g_type, "%gi-registered-type-info-ge
   GIRegisteredTypeInfo *registered_type_info;
   GType gtype;
 
-  registered_type_info = (GIRegisteredTypeInfo *) scm_foreign_object_signed_ref (scm_registered_type_info, 0);
+  registered_type_info = (GIRegisteredTypeInfo *) gi_object_get_gi_info (scm_registered_type_info);
   gtype = g_registered_type_info_get_g_type (registered_type_info);
 
   if (gtype == G_TYPE_INVALID)
     return SCM_BOOL_F;
 
-  scm_remember_upto_here_1 (registered_type_info);
 
   return scm_c_gtype_to_class (gtype);
 }

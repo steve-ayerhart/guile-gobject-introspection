@@ -6,25 +6,33 @@ SCM_DEFINE (scm_g_irepository_get_default, "gi-repository-get-default", 0, 0, 0,
             (),
             "")
 {
-  return scm_make_foreign_object_1 (scm_girepository_class, (void *) g_irepository_get_default());
+  GIRepository *repository;
+  SCM scm_repository;
+
+  repository = g_irepository_get_default ();
+  scm_repository = scm_from_pointer (repository, NULL);
+
+  return scm_make_foreign_object_1 (scm_girepository_class, scm_repository);
 }
 
-// FIXME: scm_Flags is currently ignored
-SCM_DEFINE (scm_g_irepository_require, "%gi-repository-require", 2, 1, 0,
-            (SCM scm_repository, SCM scm_namespace, SCM scm_version),
+SCM_DEFINE (scm_g_irepository_require, "%gi-repository-require", 2, 2, 0,
+            (SCM scm_repository, SCM scm_namespace, SCM scm_version, SCM scm_lazy),
             ""
             )
 {
   GIRepository *repo;
-  GTypelib *typelib;
+  GIRepositoryLoadFlags flags = 0;
   GError *error;
   char *version;
   char *namespace;
 
-  repo = (GIRepository *) scm_foreign_object_signed_ref (scm_repository, 0);
+  if (!SCM_UNBNDP (scm_lazy) && scm_is_true (scm_lazy)) {
+    flags |= G_IREPOSITORY_LOAD_FLAG_LAZY;
+  }
+
+  repo = (GIRepository *) scm_to_pointer (scm_foreign_object_ref (scm_repository, 0));
 
   scm_dynwind_begin (0);
-
   scm_dynwind_free (version);
 
   if (SCM_UNBNDP (scm_version))
@@ -32,34 +40,24 @@ SCM_DEFINE (scm_g_irepository_require, "%gi-repository-require", 2, 1, 0,
   else
     version = scm_to_locale_string (scm_version);
 
-
   error = NULL;
 
   scm_namespace = scm_symbol_to_string (scm_namespace);
   namespace = scm_to_locale_string (scm_namespace);
   scm_dynwind_free (namespace);
 
-  typelib = g_irepository_require (repo,
-                                   namespace,
-                                   version,
-                                   0,
-                                   &error);
-
+  g_irepository_require (repo, namespace, version, flags, &error);
 
   scm_dynwind_end ();
 
-  if (error) {
+  if (error != NULL) {
     g_critical ("Failed to load typelib: %s", error->message);
-    return SCM_UNSPECIFIED;
+    g_error_free (error);
+
+    return SCM_BOOL_F;
   }
 
-  if (typelib) {
-    return scm_make_foreign_object_1 (scm_gitypelib_class, (void *) typelib);
-  }
-
-  scm_remember_upto_here_1 (typelib);
-
-  return SCM_BOOL_F;
+  return SCM_BOOL_T;
 }
 
 SCM_DEFINE (scm_g_irepository_get_infos, "%gi-repository-get-infos", 2, 0, 0,
@@ -172,7 +170,7 @@ gi_repository_init (void)
 #endif
 
   scm_girepository_class = scm_make_foreign_object_type (scm_from_utf8_symbol ("<gi-repository>"),
-                                                         scm_list_1 (scm_from_utf8_symbol ("ptr")),
+                                                         scm_list_1 (scm_from_utf8_symbol ("repository")),
                                                          NULL);
   scm_c_define ("<gi-repository>", scm_girepository_class);
 
