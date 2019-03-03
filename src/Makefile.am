@@ -11,9 +11,9 @@ C_FILES = \
 	gparameter.c \
 	gclosure.c \
 	gsignal.c \
-  gi-argument.c \
-  gi-infos.c \
-  gi-repository.c
+  ggi-argument.c \
+  ggi-infos.c \
+  ggi-repository.c
 
 H_FILES = $(C_FILES:.c=.h)
 X_FILES = $(C_FILES:.c=.x)

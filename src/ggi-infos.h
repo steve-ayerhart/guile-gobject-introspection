@@ -2,8 +2,8 @@
  * vim: tabstop=4 shiftwidth=4 expandtab
 */
 
-#ifndef __GI_INFOS_H__
-#define __GI_INFOS_H__
+#ifndef __GGI_INFOS_H__
+#define __GGI_INFOS_H__
 
 #include <glib.h>
 #include <libguile.h>
@@ -34,7 +34,7 @@ static SCM scm_givalue_info_type;
 static SCM scm_gitype_info_type;
 
 static void
-gi_finalize_object (SCM scm_info)
+ggi_finalize_object (SCM scm_info)
 {
   g_print ("FINALIZING OBJ\n");
   GIBaseInfo *info;
@@ -45,7 +45,7 @@ gi_finalize_object (SCM scm_info)
 }
 
 static void
-gi_finalize_pointer (void *info)
+ggi_finalize_pointer (void *info)
 {
   g_print ("FINALIZING PROP\n");
 
@@ -53,10 +53,10 @@ gi_finalize_pointer (void *info)
 }
 
 GIBaseInfo *
-gi_object_get_gi_info (SCM scm_object);
+ggi_object_get_gi_info (SCM scm_object);
 
 SCM
-gi_make_info (GIBaseInfo *info);
+ggi_make_info (GIBaseInfo *info);
 
 G_END_DECLS
 

@@ -2,8 +2,8 @@
 
 #include "gtype.h"
 #include "gvalue.h"
-#include "gi-argument.h"
-#include "gi-infos.h"
+#include "ggi-argument.h"
+#include "ggi-infos.h"
 
 typedef struct
 {
@@ -404,6 +404,6 @@ void
 gi_argument_init (void)
 {
   #ifndef SCM_MAGIC_SNARFER
-  #include "gi-argument.x"
+  #include "ggi-argument.x"
   #endif
 }

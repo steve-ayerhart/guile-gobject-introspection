@@ -1,5 +1,5 @@
-#include "gi-repository.h"
-#include "gi-infos.h"
+#include "ggi-repository.h"
+#include "ggi-infos.h"
 #include "gtype.h"
 
 SCM_DEFINE (scm_g_irepository_get_default, "gi-repository-get-default", 0, 0, 0,
@@ -96,7 +96,7 @@ SCM_DEFINE (scm_g_irepository_get_infos, "%gi-repository-get-infos", 2, 0, 0,
     info = g_irepository_get_info (repository, namespace, i);
     g_assert (info != NULL);
 
-    scm_info = gi_make_info (info);
+    scm_info = ggi_make_info (info);
 
     scm_infos = scm_append (scm_list_2 (scm_infos, scm_list_1 (scm_info)));
 
@@ -112,7 +112,7 @@ SCM_DEFINE (scm_g_irepository_find_by_name, "%gi-repository-find-by-name", 3, 0,
             ""
             )
 {
-  scm_t_pointer_finalizer finalizer = gi_finalize_pointer;
+  scm_t_pointer_finalizer finalizer = ggi_finalize_pointer;
   GIRepository *repo;
   GIBaseInfo *info;
   GError *error;
@@ -165,10 +165,10 @@ SCM_DEFINE (scm_g_irepository_find_by_gtype, "%gi-repository-find-by-gtype", 2, 
 }
 
 void
-gi_repository_init (void)
+ggi_repository_init (void)
 {
 #ifndef SCM_MAGIC_SNARFER
-#include "gi-repository.x"
+#include "ggi-repository.x"
 #endif
 
   scm_girepository_class = scm_make_foreign_object_type (scm_from_utf8_symbol ("<gi-repository>"),

@@ -86,3 +86,8 @@
 
 (define-info-methods gi-constant-info
   (get-value))
+
+;;;;; EnumInfo
+
+(define-info-methods gi-enum-info
+  (get-methods))

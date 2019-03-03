@@ -35,6 +35,10 @@
                    (process-info (cdr infos)))))))))))
 
 
+;(define (build-gi-enum-type! info)
+;  (let ((enum-name (gtype-name->class-name (get-name info))))
+;    (module-define! (current-module) enum-name ())))
+
 (define (build-gi-registered-type! info)
   (let ((class-name (gtype-name->class-name (get-name info))))
     (module-define! (current-module)
@@ -46,10 +50,11 @@
          (let ((method-name ((compose string->symbol gtype-name->scheme-name) (get-name method-info))))
            (module-define! (current-module)
                            method-name
-                           (make <method>
-                             #:dsupers `(,<gobject> <object>)
-                             #:specializers `(,class-name)
-                             #:procedure (λ (self) "BOO")))))
+                           "H")))
+;                           (make <method>
+;                             #:dsupers `(,<gobject> <object>)
+;                             #:specializers `(,class-name)
+;                             #:procedure (λ (self) "BOO")))))
        (get-methods info)))))
 
 
@@ -58,10 +63,17 @@
     (module-define! (current-module) constant-name (get-value info))
     (export constant-name)))
 
+(define (build-function-info info)
+  (let ((function-name ((compose string->symbol camel-case->snake-case) (get-name info))))
+    (module-define! (current-module) function-name (λ () #t))
+    (export function-name)))
+
 (define (build-gi-type! info)
   (cond
    ((is-a? info <gi-registered-type-info>)
     (build-gi-registered-type! info))
+   ((is-a? info <gi-function-info>)
+    (build-function-info info))
    ((is-a? info <gi-constant-info>)
     (build-constant-type info))
    (else

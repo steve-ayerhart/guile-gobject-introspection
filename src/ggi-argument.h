@@ -1,5 +1,5 @@
-#ifndef __GI_ARGUMENT_H__
-#define __GI_ARGUMENT_H__
+#ifndef __GGI_ARGUMENT_H__
+#define __GGI_ARGUMENT_H__
 
 #include <girffi.h>
 #include <glib.h>
