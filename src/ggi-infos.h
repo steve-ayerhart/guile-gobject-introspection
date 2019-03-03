@@ -9,6 +9,8 @@
 #include <libguile.h>
 #include <girepository.h>
 
+#include "ggi-cache.h"
+
 G_BEGIN_DECLS
 
 static SCM scm_gibase_info_type;

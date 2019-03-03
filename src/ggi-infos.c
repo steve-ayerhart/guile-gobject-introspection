@@ -294,6 +294,14 @@ SCM_DEFINE (scm_gi_enum_info_get_methods, "%gi-enum-info-get-methods", 1, 0, 0,
  * GICallableInfo
  */
 
+SCM_DEFINE (scm_gi_callable_info_call, "%gi-callable-info-call", 2, 0, 0,
+            (SCM scm_callable_info, SCM scm_args, SCM scm_kwargs),
+            ""
+            )
+{
+  return _wrap_g_callable_info_invoke (scm_callable_info, scm_args, scm_kwargs);
+}
+
 /*
  * GIArgInfo
  */
@@ -486,7 +494,7 @@ ggi_infos_init (void)
   // TODO: ugh
   scm_c_use_module ("oop goops");
 
-  scm_c_eval_string("(define-class <gi-callable-info> (<gi-base-info>))");
+  scm_c_eval_string("(define-class <gi-callable-info> (<gi-base-info>) scm-unbound-info scm-bound-arg)");
   scm_c_eval_string("(define-class <gi-callback-info> (<gi-callable-info>))");
   scm_c_eval_string("(define-class <gi-function-info> (<gi-callable-info>))");
   scm_c_eval_string("(define-class <gi-signal-info> (<gi-callable-info>))");
