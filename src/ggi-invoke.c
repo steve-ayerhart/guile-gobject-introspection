@@ -27,6 +27,8 @@ SCM_DEFINE (scm_wrap_g_callable_info_invoke, "%wrap-callable-info-invoke", 3, 0,
             "")
 {
   if (SCM_UNBNDP (scm_foreign_object_ref (scm_callable_info, 1))) {
-    
+    return SCM_UNDEFINED;
   }
+  return SCM_UNDEFINED;
 }
+
