@@ -2,6 +2,7 @@
  */
 
 #include "ggi-invoke.h"
+#include "ggi-infos.h"
 
 extern SCM _GGIDefaultArgPlaceholder;
 
@@ -22,13 +23,21 @@ _ggi_invoke_arg_state_init (GGIInvokeState *state)
   gpointer mem;
 }
 
-SCM_DEFINE (scm_wrap_g_callable_info_invoke, "%wrap-callable-info-invoke", 3, 0, 0,
-            (SCM scm_callable_info, SCM scm_args, SCM scm_kwargs),
-            "")
+SCM
+_wrap_g_callable_info_invoke (SCM callable_info,
+                              SCM scm_args,
+                              SCM scm_kwargs)
 {
+
+  /*
+    TODO: cache
   if (SCM_UNBNDP (scm_foreign_object_ref (scm_callable_info, 1))) {
     return SCM_UNDEFINED;
   }
-  return SCM_UNDEFINED;
+  */
+
+  GIBaseInfo *base_info = ggi_object_get_gi_info (callable_info);
+  GIInfoType type = g_base_info_get_type ()
+
 }
 
