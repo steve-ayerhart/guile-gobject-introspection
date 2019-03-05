@@ -1,3 +1,5 @@
+/* -*- Mode: C; c-basic-offset: 4 -*-
+ */
 #ifndef __GGI_CACHE_H__
 #define __GGI_CACHE_H__
 
