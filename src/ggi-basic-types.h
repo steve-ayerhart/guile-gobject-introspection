@@ -26,8 +26,6 @@ ggi_arg_basic_type_new_from_info (GITypeInfo  *type_info,
                                   GITransfer   transfer,
                                   GGIDirection direction);
 
-SCM ggi_gint64_to_scm (gint64 value);
-SCM ggi_guint64_to_scm (guint64 value);
 SCM ggi_gfloat_to_scm (gfloat value);
 SCM ggi_gdouble_to_scm (gdouble value);
 SCM ggi_gboolean_to_scm (gboolean value);
@@ -39,8 +37,6 @@ SCM ggi_glong_to_scm (glong value);
 SCM ggi_guint_to_scm (guint value);
 SCM ggi_gulong_to_scm (gulong value);
 SCM ggi_gfilename_to_scm (gfilename value);
-SCM ggi_gsize_to_scm (gsize value);
-SCM ggi_gssize_to_scm (g value);
 SCM ggi_guint32_to_scm (guint32 value);
 
 gboolean ggi_gint64_from_scm (SCM scm_value, gint64 *result);
@@ -56,8 +52,6 @@ gboolean ggi_glong_from_scm (SCM scm_value, glong *result);
 gboolean ggi_guint_from_scm (SCM scm_value, guint *result);
 gboolean ggi_gulong_from_scm (SCM scm_value, gulong *result);
 gboolean ggi_gfilename_from_scm (SCM scm_value, gfilename *result);
-gboolean ggi_gsize_from_scm (SCM scm_value, gsize *result);
-gboolean ggi_gssize_from_scm (SCM scm_value, gssize *result);
 gboolean ggi_guint32_from_scm (SCM scm_value, guint32 *result);
 
 G_END_DECLS
