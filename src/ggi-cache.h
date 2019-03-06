@@ -3,8 +3,10 @@
 #ifndef __GGI_CACHE_H__
 #define __GGI_CACHE_H__
 
+#include <libguile.h>
 #include <girepository.h>
 #include <girffi.h>
+
 
 #include "ggi-invoke-state-struct.h"
 

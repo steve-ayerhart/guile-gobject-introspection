@@ -37,7 +37,8 @@ _wrap_g_callable_info_invoke (SCM callable_info,
   */
 
   GIBaseInfo *base_info = ggi_object_get_gi_info (callable_info);
-  GIInfoType type = g_base_info_get_type ()
+  GIInfoType type = g_base_info_get_type (base_info);
 
+  return SCM_EOL;
 }
 

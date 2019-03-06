@@ -3,7 +3,7 @@
  */
 
 #include <libguile.h>
-#include <girepository.h>
+#include <girffi.h>
 
 #include "ggi-cache.h"
 #include "ggi-infos.h"
@@ -42,12 +42,13 @@ _arg_info_default_value (GIArgInfo *info, GIArgument *arg)
  *
  * Returns: TRUE on success and FALSE on failure
  */
+
 gboolean
-ggi_arg_base_setup (GGIArgCache  *arg_cache,
-                    GITypeInfo   *type_info,
-                    GIArgInfo    *arg_info,  /* may be NULL for return arguments */
-                    GITransfer    transfer,
-                    GGIDirection  direction)
+ggi_arg_base_setup (GGIArgCache *arg_cache,
+                    GITypeInfo  *type_info,
+                    GIArgInfo   *arg_info,
+                    GITransfer   transfer,
+                    GIDirection  direction)
 {
     arg_cache->direction = direction;
     arg_cache->transfer = transfer;
@@ -114,7 +115,7 @@ ggi_arg_interface_setup (GGIInterfaceCache *iface_cache,
                          GGIDirection       direction,
                          GIInterfaceInfo   *iface_info)
 {
-    if (!ggi_arg_base_setup ((GGIArgCache *)iface_cache,
+    if (!ggi_arg_base_setup ((GGIArgCache *) iface_cache,
                              type_info,
                              arg_info,
                              transfer,
@@ -127,7 +128,7 @@ ggi_arg_interface_setup (GGIInterfaceCache *iface_cache,
     g_base_info_ref ((GIBaseInfo *)iface_info);
     iface_cache->interface_info = iface_info;
     iface_cache->arg_cache.type_tag = GI_TYPE_TAG_INTERFACE;
-    iface_cache->type_name = scm_from_utf8_string ("TYPE!!!!");
+    iface_cache->type_name = (gchar*)scm_from_utf8_string ("TYPE!!!!");
     //    iface_cache->type_name = _ggi_g_base_info_get_fullname (iface_info);
     iface_cache->g_type = g_registered_type_info_get_g_type ((GIRegisteredTypeInfo *) iface_info);
     iface_cache->scm_type = scm_from_int (1);
