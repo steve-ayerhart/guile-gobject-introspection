@@ -6,7 +6,7 @@
 #include "ggi-basic-types.h"
 #include "ggi-argument.h"
 
-#if define(G_OS_WIN32)
+#if defined(G_OS_WIN32)
 #include <float.h>
 static boolean
 ggi_is_finite (gdouble value)
@@ -15,14 +15,14 @@ ggi_is_finite (gdouble value)
 }
 #else
 #include <math.h>
-static boolean
+static gboolean
 ggi_is_finite (double value)
 {
     return isfinite (value);
 }
 #endif
 
-static boolean
+static gboolean
 marshal_from_scm_void (GGIInvokeState   *state,
                        GGICallableCache *callable_cache,
                        GGIArgCache      *arg_cache,
@@ -54,7 +54,7 @@ ggi_scm_to_gpointer (SCM scm_arg)
         }
     else if (scm_is_bytevector (scm_arg) && SCM_BYTEVECTOR_LENGTH (scm_arg) >= 8)
         {
-            return SCM_BYTEVECTOR_CONTENT (scm_arg);
+            return SCM_BYTEVECTOR_CONTENTS (scm_arg);
         }
     else
         {
