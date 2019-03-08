@@ -1,6 +1,6 @@
-/* -*- Mode: C; c-base-ioffset: 4 -*-
+/* -*- Mode: C; c-base-offset: 4 -*-
  * vim: tabstop=4 shiftwidth=4 expandtab
-*/
+ */
 
 #ifndef __GGI_INFOS_H__
 #define __GGI_INFOS_H__

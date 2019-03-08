@@ -1,6 +1,6 @@
-(define-module (gir)
-  #:use-module (gir repository)
-  #:use-module (gir info)
+(define-module (gi)
+  #:use-module (gi repository)
+  #:use-module (gi info)
 
   #:use-module (glib utils)
   #:use-module (gobject)
@@ -15,18 +15,22 @@
   #:use-module (ice-9 receive)
   #:use-module (ice-9 match))
 
+(eval-when (expand load eval)
+  (dynamic-call "gi_module_init"
+                (dynamic-link "/home/steve/Source/guile-gobject-introspection/src/.libs/gobject-introspection")))
+
 (define repository (gi-repository-get-default))
 
-(define (build-gir-module namespace)
+(define (build-gi-module namespace)
   (when (require repository namespace)
-    (let ((namespace-module (resolve-module `(gir ,namespace) #f)))
+    (let ((namespace-module (resolve-module `(gi ,namespace) #f)))
       (set-module-public-interface! namespace-module namespace-module)
 
       (module-use! namespace-module (resolve-module '(oop goops)))
 
       (save-module-excursion
        (λ ()
-         (let ((gir-module (set-current-module namespace-module)))
+         (let ((gi-module (set-current-module namespace-module)))
            (let process-info ((infos (get-infos repository namespace)))
              (if (null? infos)
                  namespace-module
@@ -35,9 +39,10 @@
                    (process-info (cdr infos)))))))))))
 
 
-;(define (build-gi-enum-type! info)
-;  (let ((enum-name (gtype-name->class-name (get-name info))))
-;    (module-define! (current-module) enum-name ())))
+(define (build-gi-enum-type! info)
+  (let ((enum-name (gtype-name->class-name (get-name info))))
+    (module-define! (current-module) enum-name '())
+    (export enum-name)))
 
 (define (build-gi-registered-type! info)
   (let ((class-name (gtype-name->class-name (get-name info))))
@@ -70,6 +75,8 @@
 
 (define (build-gi-type! info)
   (cond
+   ((is-a? info <gi-enum-info>)
+    (build-gi-enum-type! info))
    ((is-a? info <gi-registered-type-info>)
     (build-gi-registered-type! info))
    ((is-a? info <gi-function-info>)

@@ -1,5 +1,5 @@
-(define-module (gir repository)
-  #:use-module (gir info)
+(define-module (gi repository)
+  #:use-module (gi info)
   #:use-module (glib utils)
   #:use-module (gobject gtype)
 
@@ -18,7 +18,7 @@
 (define gi-lib "/home/steve/Source/guile-gobject-introspection/src/.libs/gobject-introspection")
 
 (eval-when (expand load eval)
-  (dynamic-call "gi_repository_init"
+  (dynamic-call "ggi_repository_init"
               (dynamic-link "/home/steve/Source/guile-gobject-introspection/src/.libs/gobject-introspection")))
 
 (define-method (require (repository <gi-repository>) (namespace <symbol>))

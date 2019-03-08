@@ -1,3 +1,7 @@
+/* -*- Mode: C; c-base-offset: 4 -*-
+ * vim: tabstop=4 shiftwidth=4 expandtab
+ */
+
 #include "ggi-repository.h"
 #include "ggi-infos.h"
 #include "gtype.h"
@@ -50,12 +54,13 @@ SCM_DEFINE (scm_g_irepository_require, "%gi-repository-require", 2, 2, 0,
 
   scm_dynwind_end ();
 
-  if (error != NULL) {
-    g_critical ("Failed to load typelib: %s", error->message);
-    g_error_free (error);
+  if (error != NULL)
+    {
+      g_critical ("Failed to load typelib: %s", error->message);
+      g_error_free (error);
 
-    return SCM_BOOL_F;
-  }
+      return SCM_BOOL_F;
+    }
 
   return SCM_BOOL_T;
 }
@@ -83,10 +88,11 @@ SCM_DEFINE (scm_g_irepository_get_infos, "%gi-repository-get-infos", 2, 0, 0,
 
   n_infos = g_irepository_get_n_infos (repository, namespace);
 
-  if (n_infos <0) {
-    g_critical ("Namespace '%s' not loaded", namespace);
-    return SCM_UNSPECIFIED;
-  }
+  if (n_infos <0)
+    {
+      g_critical ("Namespace '%s' not loaded", namespace);
+      return SCM_UNSPECIFIED;
+    }
 
   scm_infos = SCM_EOL;
 

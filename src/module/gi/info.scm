@@ -1,4 +1,4 @@
-(define-module (gir info)
+(define-module (gi info)
   #:use-module (glib utils)
   #:use-module (gobject gtype)
 
@@ -30,7 +30,7 @@
             <gi-value-info>))
 
 (eval-when (expand load eval)
-  (dynamic-call "gi_infos_init"
+  (dynamic-call "ggi_infos_init"
                 (dynamic-link "/home/steve/Source/guile-gobject-introspection/src/.libs/gobject-introspection")))
 
 ;; helper to generate the boilerplace for define-methods which take only the info

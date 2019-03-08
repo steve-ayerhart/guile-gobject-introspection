@@ -25,5 +25,6 @@ SOURCES = \
 	gobject/gclosure.scm \
 	gobject/gsignal.scm \
 	gobject.scm \
-  gir/repository.scm \
-  gir.scm
+  gi/info.scm \
+  gi/repository.scm \
+  gi.scm
