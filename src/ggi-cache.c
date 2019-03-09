@@ -8,6 +8,7 @@
 #include "ggi-cache.h"
 #include "ggi-infos.h"
 #include "ggi-invoke.h"
+#include "ggi-basic-types.h"
 
 /* _arg_info_default_value
  * info:
@@ -69,7 +70,7 @@ ggi_arg_base_setup (GGIArgCache *arg_cache,
                                                               &arg_cache->default_value);
         }
         arg_cache->arg_name = g_base_info_get_name ((GIBaseInfo *) arg_info);
-        arg_cache->is_allow_none = g_arg_info_may_be_null (arg_info);
+        arg_cache->allow_none = g_arg_info_may_be_null (arg_info);
 
         if (arg_cache->type_tag == GI_TYPE_TAG_INTERFACE || arg_cache->type_tag == GI_TYPE_TAG_ARRAY)
             arg_cache->is_caller_allocates = g_arg_info_is_caller_allocates (arg_info);
@@ -142,6 +143,97 @@ ggi_arg_interface_setup (GGIInterfaceCache *iface_cache,
 }
 
 GGIArgCache *
+ggi_arg_cache_new (GITypeInfo *type_info,
+                   GIArgInfo *arg_info,
+                   GITransfer transfer,
+                   GIDirection direction,
+                   GGICallableCache *callable_cache,
+                   gssize c_arg_index,
+                   gssize scm_arg_index)
+{
+    GGIArgCache *arg_cache = NULL;
+    GITypeTag type_tag;
+
+    type_tag = g_type_info_get_tag (type_info);
+
+    switch (type_tag)
+        {
+        case GI_TYPE_TAG_VOID:
+        case GI_TYPE_TAG_BOOLEAN:
+        case GI_TYPE_TAG_INT8:
+        case GI_TYPE_TAG_UINT8:
+        case GI_TYPE_TAG_INT16:
+        case GI_TYPE_TAG_UINT16:
+        case GI_TYPE_TAG_INT32:
+        case GI_TYPE_TAG_UINT32:
+        case GI_TYPE_TAG_INT64:
+        case GI_TYPE_TAG_UINT64:
+        case GI_TYPE_TAG_FLOAT:
+        case GI_TYPE_TAG_DOUBLE:
+        case GI_TYPE_TAG_UNICHAR:
+        case GI_TYPE_TAG_GTYPE:
+        case GI_TYPE_TAG_UTF8:
+        case GI_TYPE_TAG_FILENAME:
+            arg_cache = ggi_arg_basic_type_new_from_info (type_info,
+                                                          arg_info,
+                                                          transfer,
+                                                          direction);
+            break;
+
+        case GI_TYPE_TAG_ARRAY:
+            // TODO
+            break;
+        case GI_TYPE_TAG_GLIST:
+            // TODO
+            break;
+        case GI_TYPE_TAG_GSLIST:
+            // TODO
+            break;
+        case GI_TYPE_TAG_GHASH:
+            // TODO
+            break;
+        case GI_TYPE_TAG_INTERFACE:
+            // TODO
+            break;
+        case GI_TYPE_TAG_ERROR:
+            // TODO
+            break;
+        default:
+            break;
+        }
+
+    if (arg_cache!= NULL)
+        {
+            arg_cache->scm_arg_index = scm_arg_index;
+            arg_cache->c_arg_index = c_arg_index;
+        }
+
+    return arg_cache;
+}
+
+static GGIDirection
+_ggi_get_direction (GGICallableCache *callable_cache, GIDirection gi_direction)
+{
+    if (gi_direction == GI_DIRECTION_INOUT)
+        return GGI_DIRECTION_BIDIRECTIONAL;
+    else if (gi_direction == GI_DIRECTION_IN)
+        {
+           if (callable_cache->calling_context != GGI_CALLING_CONTEXT_IS_FROM_SCM)
+                return GGI_DIRECTION_TO_SCM;
+           return GGI_DIRECTION_FROM_SCM;
+        }
+    else
+        {
+            if (callable_cache->calling_context !=GGI_CALLING_CONTEXT_IS_FROM_SCM)
+                return GGI_DIRECTION_FROM_SCM;
+            return GGI_DIRECTION_TO_SCM;
+        }
+}
+
+
+
+
+GGIArgCache *
 ggi_arg_interface_new_from_info (GITypeInfo       *type_info,
                                  GIArgInfo       *arg_info,    /* may be NULL for return arguments */
                                  GITransfer       transfer,
@@ -163,4 +255,14 @@ ggi_arg_interface_new_from_info (GITypeInfo       *type_info,
 
     return (GGIArgCache *) ic;
 
+}
+
+SCM
+ggi_function_cache_invoke (GGIFunctionCache *function_cache,
+                           SCM scm_args,
+                           SCM scm_kwargs)
+{
+    GGIInvokeState state = { 0, };
+
+    return function_cache->invoke (function_cache, &state, scm_args, scm_kwargs);
 }

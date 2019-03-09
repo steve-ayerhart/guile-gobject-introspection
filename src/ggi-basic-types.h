@@ -14,10 +14,24 @@ ggi_marshal_from_scm_basic_type (SCM         object,         /* in  */
                                  GITypeTag   type_tag,
                                  GITransfer  transfer,
                                  gpointer   *cleanup_data);
+gboolean
+ggi_marshal_from_scm_basic_type_cache_adapter (GGIInvokeState   *state,
+                                               GGICallableCache *callable_cache,
+                                               GGIArgCache      *arg_cache,
+                                               SCM               scm_arg,
+                                               GIArgument       *arg,
+                                               gpointer         *cleanup_data);
 
 SCM
 ggi_marshal_to_scm_basic_type (GIArgument *arg,
                                GITypeTag   type_tag);
+
+gboolean
+ggi_marshal_to_scm_basic_type_cache_adapter (GGIInvokeState   *state,
+                                             GGICallableCache *callable_cache,
+                                             GGIArgCache      *arg_cache,
+                                             GIArgument       *arg,
+                                             gpointer         *cleanup_data);
 
 GGIArgCache *
 ggi_arg_basic_type_new_from_info (GITypeInfo  *type_info,

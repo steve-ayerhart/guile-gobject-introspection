@@ -23,14 +23,14 @@ typedef GGIFunctionCache GGIFunctionWithInstanceCache;
 typedef GGIFunctionCache GGIMethodCache;
 typedef GGICallableCache GGIClosureCache;
 
-typedef gboolean (*GGIMarshalFromScmProc) (GGIInvokeState   *state,
+typedef gboolean (*GGIMarshalFromScmFunc) (GGIInvokeState   *state,
                                            GGICallableCache *callable_cache,
                                            GGIArgCache      *arg_cache,
                                            SCM              scm_arg,
                                            GIArgument       *arg,
                                            gpointer         *cleanup_data);
 
-typedef SCM (*GGIMarshalToScmProc) (GGIInvokeState   *state,
+typedef SCM (*GGIMarshalToScmFunc) (GGIInvokeState   *state,
                                     GGICallableCache *callable_cache,
                                     GGIArgCache      *arg_cache,
                                     GIArgument       *arg,
@@ -65,13 +65,18 @@ struct _GGIArgCache
     gboolean is_pointer;
     gboolean is_caller_allocates;
     gboolean is_skipped;
-    gboolean is_allow_none;
+    gboolean allow_none;
     gboolean has_default;
 
     GGIDirection direction;
     GITransfer transfer;
     GITypeTag type_tag;
     GITypeInfo *type_info;
+
+    GGIMarshalFromScmFunc from_scm_marshaller;
+    GGIMarshalToScmFunc to_scm_marshaller;
+
+    // TODO cleanup
 
     GDestroyNotify destroy_notify;
 
@@ -119,7 +124,7 @@ struct _GGICallableCache
 
     GGIArgCache *return_cache;
     GPtrArray *args_cache;
-    GSList *to_py_args;
+    GSList *to_scm_args;
     GSList *arg_name_list; /* for keyword arg matching */
     GHashTable *arg_name_hash;
     gboolean throws;
@@ -215,14 +220,13 @@ GGIArgCache *
 ggi_arg_cache_alloc (void);
 
 GGIArgCache *
-ggi_arg_cache_new (GITypeInfo       *type_info,
-                   GIArgInfo        *arg_info,
-                   GITransfer        transfer,
-                   GGIDirection      direction,
+ggi_arg_cache_new (GITypeInfo *type_info,
+                   GIArgInfo *arg_info,
+                   GITransfer transfer,
+                   GIDirection direction,
                    GGICallableCache *callable_cache,
-                   /* will be removed */
-                   gssize            c_arg_index,
-                   gssize            scm_arg_index);
+                   gssize c_arg_index,
+                   gssize scm_arg_index);
 
 void
 ggi_arg_cache_free      (GGIArgCache *cache);

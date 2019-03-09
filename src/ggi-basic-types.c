@@ -23,6 +23,51 @@ ggi_is_finite (double value)
 }
 #endif
 
+gboolean
+ggi_marshal_from_scm_basic_type_cache_adapter (GGIInvokeState   *state,
+                                               GGICallableCache *callable_cache,
+                                               GGIArgCache      *arg_cache,
+                                               SCM               scm_arg,
+                                               GIArgument       *arg,
+                                               gpointer         *cleanup_data)
+{
+    return ggi_marshal_from_scm_basic_type (scm_arg,
+                                            arg,
+                                            arg_cache->type_tag,
+                                            arg_cache->transfer,
+                                            cleanup_data);
+}
+
+static gboolean
+ggi_gpointer_from_scm (SCM scm_arg, gpointer *gpointer_)
+{
+    if (scm_is_false (scm_arg))
+        {
+            *gpointer_ = NULL;
+            return TRUE;
+        }
+    else if (scm_is_exact_integer (scm_arg))
+        {
+            *gpointer_ = (gpointer) scm_to_uintptr_t (scm_arg);
+            return TRUE;
+        }
+    else if (scm_is_bytevector (scm_arg) && SCM_BYTEVECTOR_LENGTH (scm_arg) >= 8)
+        {
+            *gpointer_ =  SCM_BYTEVECTOR_CONTENTS (scm_arg);
+            return TRUE;
+        }
+    else
+        {
+            scm_misc_error ("type marshal",
+                            "cannot convert '~a' to gpointer",
+                            scm_list_1 (scm_arg));
+            return FALSE;
+        }
+}
+
+
+
+
 static gboolean
 marshal_from_scm_void (GGIInvokeState   *state,
                        GGICallableCache *callable_cache,
@@ -42,29 +87,16 @@ marshal_from_scm_void (GGIInvokeState   *state,
     return FALSE;
 }
 
-static gpointer
-ggi_scm_to_gpointer (SCM scm_arg)
+static SCM
+marshal_to_scm_void (GGIInvokeState *state,
+                     GGICallableCache *callable_cache,
+                     GGIArgCache      *arg_cache,
+                     GIArgument       *arg,
+                     gpointer         *cleanup_data)
 {
-    if (scm_is_false (scm_arg))
-        {
-            return NULL;
-        }
-    else if (scm_is_exact_integer (scm_arg))
-        {
-            return (gpointer) scm_to_uintptr_t (scm_arg);
-        }
-    else if (scm_is_bytevector (scm_arg) && SCM_BYTEVECTOR_LENGTH (scm_arg) >= 8)
-        {
-            return SCM_BYTEVECTOR_CONTENTS (scm_arg);
-        }
-    else
-        {
-            scm_misc_error ("type marshal",
-                            "cannot convert '~a' to gpointer",
-                            scm_list_1 (scm_arg));
-        }
+    if (arg_cache->is_pointer)
+        return SCM_UNSPECIFIED;
 }
-
 
 static gboolean
 ggi_scm_to_gdouble (SCM scm_value, gdouble *gdouble_)
@@ -237,4 +269,92 @@ ggi_marshal_to_scm_basic_type (GIArgument *arg,
                            scm_list_1 (scm_from_size_t (type_tag)));
             return SCM_UNSPECIFIED;
         }
+}
+
+static gboolean
+arg_basic_type_setup_from_info (GGIArgCache *arg_cache,
+                                GITypeInfo  *type_info,
+                                GIArgInfo   *arg_info,
+                                GITransfer   transfer,
+                                GGIDirection direction)
+{
+    GITypeTag type_tag = g_type_info_get_tag (type_info);
+
+    if (!ggi_arg_base_setup (arg_cache, type_info, arg_info, transfer, direction))
+        return FALSE;
+
+    switch (type_tag)
+        {
+        case GI_TYPE_TAG_VOID:
+            if (direction & GGI_DIRECTION_FROM_SCM)
+                arg_cache->from_scm_marshaller = marshal_from_scm_void;
+
+            if (direction & GGI_DIRECTION_TO_SCM)
+                arg_cache->to_scm_marshaller = marshal_to_scm_void;
+
+            break;
+        case GI_TYPE_TAG_BOOLEAN:
+            arg_cache->allow_none = TRUE;
+            // keep on casing
+        case GI_TYPE_TAG_INT8:
+        case GI_TYPE_TAG_UINT8:
+        case GI_TYPE_TAG_INT16:
+        case GI_TYPE_TAG_UINT16:
+        case GI_TYPE_TAG_INT32:
+        case GI_TYPE_TAG_UINT32:
+        case GI_TYPE_TAG_INT64:
+        case GI_TYPE_TAG_UINT64:
+        case GI_TYPE_TAG_FLOAT:
+        case GI_TYPE_TAG_DOUBLE:
+        case GI_TYPE_TAG_UNICHAR:
+        case GI_TYPE_TAG_GTYPE:
+            if (direction & GGI_DIRECTION_FROM_SCM)
+                arg_cache->from_scm_marshaller = ggi_marshal_from_scm_basic_type_cache_adapter;
+
+            if (direction & GGI_DIRECTION_TO_SCM)
+                arg_cache->to_scm_marshaller = ggi_marshal_to_scm_basic_type_cache_adapter;
+
+            break;
+        case GI_TYPE_TAG_UTF8:
+        case GI_TYPE_TAG_FILENAME:
+            if (direction & GGI_DIRECTION_FROM_SCM)
+                {
+                    arg_cache->from_scm_marshaller = ggi_marshal_from_scm_basic_type_cache_adapter;
+                    // TODO: cleanup
+                }
+
+            if (direction & GGI_DIRECTION_TO_SCM)
+                {
+                    arg_cache->to_scm_marshaller = ggi_marshal_to_scm_basic_type_cache_adapter;
+                    // TODO: cleanup
+                }
+
+            break;
+        default:
+            g_assert_not_reached ();
+        }
+
+    return TRUE;
+}
+
+GGIArgCache *
+ggi_arg_basic_type_from_info (GITypeInfo  *type_info,
+                              GIArgInfo   *arg_info,
+                              GITransfer   transfer,
+                              GGIDirection direction)
+{
+    gboolean result = FALSE;
+    GGIArgCache *arg_cache = ggi_arg_cache_alloc ();
+
+    result = arg_basic_type_setup_from_info (arg_cache,
+                                             type_info,
+                                             arg_info,
+                                             transfer,
+                                             direction);
+
+    if (result)
+        return arg_cache;
+
+    ggi_arg_cache_free (arg_cache);
+    return NULL;
 }

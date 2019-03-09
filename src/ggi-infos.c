@@ -535,4 +535,3 @@ ggi_infos_init (void)
   scm_gitype_info_type = scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-type-info>")));
   scm_givalue_info_type = scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-value-info>")));
 }
-
