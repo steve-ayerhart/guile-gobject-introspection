@@ -28,8 +28,8 @@ _arg_info_default_value (GIArgInfo *info, GIArgument *arg)
         return TRUE;
 
     }
-    return FALSE;
 
+    return FALSE;
 }
 
 /* ggi_arg_base_setup:
@@ -77,6 +77,7 @@ ggi_arg_base_setup (GGIArgCache *arg_cache,
         else
             arg_cache->is_caller_allocates = FALSE;
     }
+
     return TRUE;
 }
 
@@ -239,7 +240,7 @@ _ggi_get_direction (GGICallableCache *callable_cache, GIDirection gi_direction)
 
 static gboolean
 _callable_cache_generate_args_cache_real (GGICallableCache *callable_cache,
-                                          GICallableInfo *callable_info)
+                                          GICallableInfo   *callable_info)
 {
     g_debug ("callable_cache_generate_args_cache_real");
 
@@ -534,7 +535,7 @@ _function_cache_init (GGIFunctionCache *function_cache,
                                                     invoker,
                                                     &error))
                 g_debug ("new for address");
-                return TRUE;
+            return TRUE;
         }
 
     // TODO: deinit real

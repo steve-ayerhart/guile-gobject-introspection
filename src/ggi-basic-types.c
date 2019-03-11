@@ -50,7 +50,7 @@ ggi_marshal_to_scm_basic_type_cache_adapter (GGIInvokeState *state,
 
 }
 
-static gboolean
+gboolean
 ggi_scm_to_utf8 (SCM scm_value, gchar **utf8)
 {
     g_debug ("ggi_scm_to_utf8");
@@ -124,7 +124,7 @@ marshal_to_scm_void (GGIInvokeState *state,
         return SCM_UNSPECIFIED;
 }
 
-static gboolean
+gboolean
 ggi_scm_to_gdouble (SCM scm_value, gdouble *gdouble_)
 {
     if (scm_is_false (scm_number_p (scm_value)))
@@ -140,7 +140,7 @@ ggi_scm_to_gdouble (SCM scm_value, gdouble *gdouble_)
     return TRUE;
 }
 
-static gboolean
+gboolean
 ggi_scm_to_gunichar (SCM scm_value, gunichar *gunichar_)
 {
     // TODO: handle bytevector ?
@@ -186,7 +186,7 @@ ggi_scm_to_gunichar (SCM scm_value, gunichar *gunichar_)
         }
 }
 
-static gboolean
+gboolean
 ggi_scm_to_gfloat (SCM scm_value, gfloat *gfloat_)
 {
     gdouble double_;
@@ -214,7 +214,7 @@ ggi_scm_to_gfloat (SCM scm_value, gfloat *gfloat_)
     return TRUE;
 }
 
-static gboolean
+gboolean
 ggi_scm_to_gtype (SCM scm_value, GType *gtype_)
 {
     if (!SCM_GTYPE_CLASSP (scm_value))
@@ -226,6 +226,213 @@ ggi_scm_to_gtype (SCM scm_value, GType *gtype_)
         }
 
     *gtype_ = scm_c_gtype_class_to_gtype (scm_value);
+
+    return TRUE;
+}
+
+gboolean
+ggi_scm_to_boolean (SCM scm_value, gboolean *gboolean_)
+{
+    if (scm_is_bool (scm_value))
+        *gboolean_ = (gboolean) scm_to_bool (scm_value);
+
+    return FALSE;
+}
+
+gboolean
+ggi_scm_to_gint8 (SCM scm_value, gint8 *gint8_)
+{
+    // TODO handle unicode?
+
+    long long_int;
+
+    // TODO: use exact integer?
+    if (!scm_is_integer (scm_value))
+        return FALSE;
+
+    long_int = scm_to_long (scm_value);
+
+    if (long_int < G_MININT8 || long_int > G_MAXINT8)
+        {
+            // TODO misc error
+            return FALSE;
+        }
+
+    *gint8_ = (gint8) long_int;
+
+    return TRUE;
+}
+
+gboolean
+ggi_scm_to_guint8 (SCM scm_value, guint8 *guint_)
+{
+    unsigned long long_int;
+
+    // TODO: use exact integer?
+    if (!scm_is_integer (scm_value))
+        return FALSE;
+
+    long_int = scm_to_ulong (scm_value);
+
+    if (long_int > G_MAXUINT8)
+        {
+            // TODO misc error
+            return FALSE;
+        }
+
+    *guint_ = (guint) long_int;
+
+    return TRUE;
+}
+
+gboolean
+ggi_scm_to_gint16 (SCM scm_value, gint16 *gint16_)
+{
+    long long_int;
+
+    // TODO: use exact integer?
+    if (!scm_is_integer (scm_value))
+        return FALSE;
+
+    long_int = scm_to_long (scm_value);
+
+    if (long_int < G_MININT16 || long_int > G_MAXINT16)
+        {
+            // TODO misc error
+            return FALSE;
+        }
+
+    *gint16_ = (gint16) long_int;
+
+    return TRUE;
+}
+
+gboolean
+ggi_scm_to_guint16 (SCM scm_value, guint16 *guint16_)
+{
+    unsigned long long_int;
+
+    // TODO: use exact integer?
+    if (!scm_is_integer (scm_value))
+        return FALSE;
+
+    long_int = scm_to_ulong (scm_value);
+
+    if (long_int > G_MAXUINT16)
+        {
+            // TODO misc error
+            return FALSE;
+        }
+
+    *guint16_ = (guint) long_int;
+
+    return TRUE;
+}
+
+gboolean
+ggi_scm_to_gint32 (SCM scm_value, gint32 *gint32_)
+{
+    long long_int;
+
+    // TODO: use exact integer?
+    if (!scm_is_integer (scm_value))
+        return FALSE;
+
+    long_int = scm_to_long (scm_value);
+
+    if (long_int < G_MININT32 || long_int > G_MAXINT32)
+        {
+            // TODO misc error
+            return FALSE;
+        }
+
+    *gint32_ = (gint32) long_int;
+
+    return TRUE;
+}
+
+gboolean
+ggi_scm_to_guint32 (SCM scm_value, guint32 *guint32_)
+{
+    unsigned long long_int;
+
+    // TODO: use exact integer?
+    if (!scm_is_integer (scm_value))
+        return FALSE;
+
+    long_int = scm_to_ulong (scm_value);
+
+    if (long_int > G_MAXUINT32)
+        {
+            // TODO misc error
+            return FALSE;
+        }
+
+    *guint32_ = (guint32) long_int;
+
+    return TRUE;
+}
+
+gboolean
+ggi_scm_to_gint (SCM scm_value, gint *gint_)
+{
+    long long_int;
+
+    // TODO: use exact integer?
+    if (!scm_is_integer (scm_value))
+        return FALSE;
+
+    long_int = scm_to_long (scm_value);
+
+    if (long_int < G_MININT || long_int > G_MAXINT)
+        {
+            // TODO misc error
+            return FALSE;
+        }
+
+    *gint_ = (gint) long_int;
+
+    return TRUE;
+}
+
+gboolean
+ggi_scm_to_guint (SCM scm_value, guint *guint_)
+{
+    unsigned long long_int;
+
+    // TODO: use exact integer?
+    if (!scm_is_integer (scm_value))
+        return FALSE;
+
+    long_int = scm_to_ulong (scm_value);
+
+    if (long_int > G_MAXUINT)
+        {
+            // TODO misc error
+            return FALSE;
+        }
+
+    *guint_ = (guint) long_int;
+
+    return TRUE;
+}
+
+gboolean
+ggi_scm_to_glong (SCM scm_value, glong *glong_)
+{
+    long long_int;
+
+    *glong_ = (glong) scm_to_long (scm_value);
+
+    return TRUE;
+}
+
+gboolean
+ggi_scm_to_gulong (SCM scm_value, gulong *gulong_)
+{
+    long long_int;
+
+    *gulong_ = (gulong) scm_to_ulong (scm_value);
 
     return TRUE;
 }
@@ -248,46 +455,44 @@ ggi_marshal_from_scm_basic_type (SCM scm_value,
                 }
             return FALSE;
 
-            /*
+        case GI_TYPE_TAG_DOUBLE:
+            return ggi_scm_to_gdouble (scm_value, &(arg->v_double));
+
         case GI_TYPE_TAG_INT8:
-            return ggi_gint8_from_scm (scm_value, &(arg->v_int8));
+            return ggi_scm_to_gint8 (scm_value, &(arg->v_int8));
 
         case GI_TYPE_TAG_UINT8:
-            return ggi_guint8_from_scm (scm_value, &(arg->v_uint8));
+            return ggi_scm_to_guint8 (scm_value, &(arg->v_uint8));
 
         case GI_TYPE_TAG_INT16:
-            return ggi_gint16_from_scm (scm_value, &(arg->v_int16));
+            return ggi_scm_to_gint16 (scm_value, &(arg->v_int16));
 
         case GI_TYPE_TAG_UINT16:
-            return ggi_guint16_from_scm (scm_value, &(arg->v_uint16));
+            return ggi_scm_to_guint16 (scm_value, &(arg->v_uint16));
 
         case GI_TYPE_TAG_INT32:
-            return ggi_gint32_from_scm (scm_value, &(arg->v_int32));
+            return ggi_scm_to_gint32 (scm_value, &(arg->v_int32));
 
         case GI_TYPE_TAG_UINT32:
-            return ggi_guint32_from_scm (scm_value, &(arg->v_uint32));
+            return ggi_scm_to_guint32 (scm_value, &(arg->v_uint32));
 
         case GI_TYPE_TAG_INT64:
-            return ggi_gint64_from_scm (scm_value, &(arg->v_int64));
+            return ggi_scm_to_gint64 (scm_value, &(arg->v_int64));
 
         case GI_TYPE_TAG_UINT64:
-            return ggi_guint64_from_scm (scm_value, &(arg->v_uint64));
+            return ggi_scm_to_guint64 (scm_value, &(arg->v_uint64));
 
         case GI_TYPE_TAG_BOOLEAN:
-            return ggi_gboolean_from_scm (scm_value, &(arg->v_boolean));
+            return ggi_scm_to_gboolean (scm_value, &(arg->v_boolean));
 
         case GI_TYPE_TAG_FLOAT:
-            return ggi_gfloat_from_scm (scm_value, &(arg->v_float));
-
-        case GI_TYPE_TAG_DOUBLE:
-            return ggi_gdouble_from_scm (scm_value, &(arg->v_double));
+            return ggi_scm_to_gfloat (scm_value, &(arg->v_float));
 
         case GI_TYPE_TAG_GTYPE:
-            return ggi_gtype_from_scm (scm_value, &(arg->v_size));
+            return ggi_scm_to_gtype (scm_value, &(arg->v_size));
 
         case GI_TYPE_TAG_UNICHAR:
-            return ggi_gunichar_from_scm (scm_value, &(arg->v_uint32));
-            */
+            return ggi_scm_to_gunichar (scm_value, &(arg->v_uint32));
 
         case GI_TYPE_TAG_UTF8:
             if (ggi_scm_to_utf8 (scm_value, &(arg->v_string))) {
