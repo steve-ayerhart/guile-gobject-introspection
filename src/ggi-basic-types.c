@@ -38,6 +38,18 @@ ggi_marshal_from_scm_basic_type_cache_adapter (GGIInvokeState   *state,
                                             cleanup_data);
 }
 
+SCM
+ggi_marshal_to_scm_basic_type_cache_adapter (GGIInvokeState *state,
+                                             GGICallableCache *callable_cache,
+                                             GGIArgCache *arg_cache,
+                                             GIArgument *arg,
+                                             gpointer *cleanup_data)
+{
+    return ggi_marshal_to_scm_basic_type (arg,
+                                          arg_cache->type_tag);
+
+}
+
 static gboolean
 ggi_gpointer_from_scm (SCM scm_arg, gpointer *gpointer_)
 {
@@ -338,10 +350,10 @@ arg_basic_type_setup_from_info (GGIArgCache *arg_cache,
 }
 
 GGIArgCache *
-ggi_arg_basic_type_from_info (GITypeInfo  *type_info,
-                              GIArgInfo   *arg_info,
-                              GITransfer   transfer,
-                              GGIDirection direction)
+ggi_arg_basic_type_new_from_info (GITypeInfo  *type_info,
+                                  GIArgInfo   *arg_info,
+                                  GITransfer   transfer,
+                                  GGIDirection direction)
 {
     gboolean result = FALSE;
     GGIArgCache *arg_cache = ggi_arg_cache_alloc ();

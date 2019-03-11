@@ -40,7 +40,7 @@ typedef SCM (*GGIMarshalToScmFunc) (GGIInvokeState   *state,
 typedef enum {
               GGI_META_ARG_TYPE_PARENT,
               GGI_META_ARG_TYPE_CHILD,
-              GGI_META_ARG_TYPE_CHLD_WITH_SCMARG,
+              GGI_META_ARG_TYPE_CHILD_WITH_SCMARG,
               GGI_META_ARG_TYPE_CLOSURE,
 } GGIMetaArgType;
 
@@ -86,12 +86,10 @@ struct _GGIArgCache
     GIArgument default_value;
 };
 
-
 typedef struct _GGIListCache {
     GGIArgCache arg_cache;
     GGIArgCache *item_cache;
 } GGIListCache;
-
 
 struct _GGIArgGArray
 {
@@ -101,7 +99,6 @@ struct _GGIArgGArray
     gboolean is_zero_terminated;
     gsize item_size;
     GIArrayType array_type;
-
 } GGIArgGArray;
 
 typedef struct _GGIInterfaceCache

@@ -10,6 +10,8 @@
 void
 ggi_register_constants (void)
 {
+  g_debug ("ggi_register_constants");
+
   scm_c_define ("g-minfloat", scm_from_double ((double) G_MINFLOAT));
   scm_c_define ("g-maxfloat", scm_from_double ((double) G_MAXFLOAT));
   scm_c_define ("g-mindouble", scm_from_double (G_MINDOUBLE));
@@ -39,6 +41,7 @@ ggi_register_constants (void)
 void
 gi_module_init (void)
 {
+  g_debug ("gi_module_init");
   ggi_register_constants ();
 
 #ifndef SCM_MAGIC_SNARFER

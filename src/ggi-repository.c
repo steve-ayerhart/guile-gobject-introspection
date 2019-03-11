@@ -174,6 +174,8 @@ SCM_DEFINE (scm_g_irepository_find_by_gtype, "%gi-repository-find-by-gtype", 2, 
 void
 ggi_repository_init (void)
 {
+  g_debug ("ggi_repository_init");
+
 #ifndef SCM_MAGIC_SNARFER
 #include "ggi-repository.x"
 #endif

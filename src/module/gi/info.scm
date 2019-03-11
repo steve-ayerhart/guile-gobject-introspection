@@ -11,6 +11,7 @@
             <gi-callable-info>
             <gi-function-info>
             <gi-callback-info>
+            %gi-callable-info-call
             <gi-signal-info>
             <gi-v-func-info>
             <gi-registered-type-info>

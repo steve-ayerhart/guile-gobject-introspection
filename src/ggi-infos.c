@@ -1,6 +1,9 @@
 #include "ggi-infos.h"
+#include "ggi-invoke.h"
 #include "gtype.h"
 #include "ggi-argument.h"
+
+#include <glib.h>
 
 /*
  * Make a list from the common GI API pattern of having a function which
@@ -278,6 +281,7 @@ SCM_DEFINE (scm_gi_enum_info_get_methods, "%gi-enum-info-get-methods", 1, 0, 0,
   return ggi_make_infos_list (scm_enum_info, g_enum_info_get_n_methods, g_enum_info_get_method);
 }
 
+
 /*
  * GIUnionInfo
  */ 
@@ -294,7 +298,7 @@ SCM_DEFINE (scm_gi_enum_info_get_methods, "%gi-enum-info-get-methods", 1, 0, 0,
  * GICallableInfo
  */
 
-SCM_DEFINE (scm_gi_callable_info_call, "%gi-callable-info-call", 2, 0, 0,
+SCM_DEFINE (scm_gi_callable_info_call, "%gi-callable-info-call", 3, 0, 0,
             (SCM scm_callable_info, SCM scm_args, SCM scm_kwargs),
             ""
             )
@@ -473,6 +477,8 @@ SCM_DEFINE (scm_gi_constant_info_get_value, "%gi-constant-info-get-value", 1, 0,
 void
 ggi_infos_init (void)
 {
+  g_debug ("ggi_infos_init");
+
 #ifndef SCM_MAGIC_SNARFER
 #include "ggi-infos.x"
 #endif

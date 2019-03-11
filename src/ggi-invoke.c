@@ -7,7 +7,7 @@
 #include "ggi-infos.h"
 #include "ggi-cache.h"
 
-extern SCM _GGIDefaultArgPlaceholder;
+SCM _GGIDefaultArgPlaceholder;
 
 /* To reduce calls to g_slice_*() we (1) allocate all the memory depended on
  * the argument count in one go and (2) keep one version per argument count
@@ -73,19 +73,155 @@ _invoke_state_init_from_cache (GGIInvokeState *state,
     return TRUE;
 }
 
+
+static gboolean
+_caller_alloc (GGIArgCache *arg_cache,
+               GIArgument *arg)
+{
+    g_debug ("_caller_alloc");
+
+    if (arg_cache->type_tag == GI_TYPE_TAG_INTERFACE)
+        {
+            GGIInterfaceCache *iface_cache = (GGIInterfaceCache *) arg_cache;
+            // TODO
+        }
+    else if (arg_cache->type_tag == GI_TYPE_TAG_ARRAY)
+        {
+        }
+    else
+        {
+            return FALSE;
+        }
+
+    if (arg->v_pointer == NULL)
+        return FALSE;
+
+    return TRUE;
+}
+
 static gboolean
 _invoke_marshal_in_args (GGIInvokeState *state, GGIFunctionCache *function_cache)
 {
+    g_debug ("_invoke_mrshal_in_args");
+
     GGICallableCache *cache = (GGICallableCache *) function_cache;
     gssize i;
 
+    // TODO: scm error
+    g_debug (" checking state/cache align");
+    g_debug ("state: %d, cache: %d", state->n_scm_in_args, cache->n_scm_args);
+
     if (state->n_scm_in_args > cache->n_scm_args)
         return FALSE;
+
+    for (i = 0; (gsize) i < _ggi_callable_cache_args_len (cache); i++)
+        {
+            GIArgument *c_arg = &state->args[i].arg_value;
+            GGIArgCache *arg_cache = g_ptr_array_index (cache->args_cache, i);
+            SCM scm_arg;
+
+            switch (arg_cache->direction)
+                {
+                case GGI_DIRECTION_FROM_SCM:
+                    g_debug ("FROM SCM");
+                    state->ffi_args[i] = c_arg;
+                    g_debug ("OOPS");
+
+                    if (arg_cache->meta_type == GGI_META_ARG_TYPE_CLOSURE)
+                        {
+                            state->ffi_args[i]->v_pointer = state->user_data;
+                            continue;
+                        }
+                    else if (arg_cache->meta_type != GGI_META_ARG_TYPE_PARENT)
+                        continue;
+
+                    // TODO: scm error
+                    g_debug ("?");
+                    if (arg_cache->scm_arg_index >= state->n_scm_in_args)
+                        {
+                            return FALSE;
+                        }
+
+
+                    scm_arg = scm_list_ref (state->scm_in_args,
+                                            scm_from_ssize_t (arg_cache->scm_arg_index));
+                    g_debug ("done from scm");
+
+                    break;
+                case GGI_DIRECTION_BIDIRECTIONAL:
+                    g_debug ("FROM BI");
+                    if (arg_cache->meta_type != GGI_META_ARG_TYPE_CHILD)
+                        {
+                            // TODO: scm error
+                            if (arg_cache->scm_arg_index >= state->n_scm_in_args)
+                                {
+                                    return FALSE;
+                                }
+
+                            scm_arg = scm_list_ref (state->scm_in_args,
+                                                    scm_from_ssize_t (arg_cache->scm_arg_index));
+                        }
+                    // fall through
+                case GGI_DIRECTION_TO_SCM:
+                    state->args[i].arg_pointer.v_pointer = c_arg;
+
+                    if (arg_cache->is_caller_allocates)
+                        {
+                            state->ffi_args[i] = c_arg;
+
+                            // TODO: scm error
+                            if (!_caller_alloc (arg_cache, c_arg))
+                                {
+                                    return FALSE;
+                                }
+                        }
+                    else
+                        {
+                            state->ffi_args[i] = &state->args[i].arg_pointer;
+                        }
+                    break;
+                default:
+                    g_assert_not_reached ();
+                }
+
+            if (scm_arg == _GGIDefaultArgPlaceholder)
+                *c_arg = arg_cache->default_value;
+            else if (arg_cache->from_scm_marshaller != NULL &&
+                     arg_cache->meta_type != GGI_META_ARG_TYPE_CHILD)
+                {
+                    g_debug ("CHILD");
+                    gboolean success;
+                    gpointer cleanup_data = NULL;
+
+                    if (!arg_cache->allow_none && scm_arg == SCM_UNSPECIFIED)
+                        {
+                            return FALSE;
+                        }
+
+                    success = arg_cache->from_scm_marshaller (state,
+                                                              cache,
+                                                              arg_cache,
+                                                              scm_arg,
+                                                              c_arg,
+                                                              &cleanup_data);
+
+                    // TODO scm error
+                    if (!success)
+                        {
+                            return FALSE;
+                        }
+                }
+        }
+
+    g_debug ("marshal in done");
+    return TRUE;
 }
 
 static SCM
 _invoke_marshal_out_args (GGIInvokeState *state, GGIFunctionCache *function_cache)
 {
+    g_debug ("_invoke_marshal_out_args");
+
     GGICallableCache *cache = (GGICallableCache *) function_cache;
     SCM scm_out = SCM_EOL;
     SCM scm_return = SCM_UNSPECIFIED;
@@ -99,8 +235,8 @@ _invoke_marshal_out_args (GGIInvokeState *state, GGIFunctionCache *function_cach
                     scm_return = cache->return_cache->to_scm_marshaller ( state,
                                                                           cache,
                                                                           cache->return_cache,
-                                                                         &state->return_arg,
-                                                                         &cleanup_data);
+                                                                          &state->return_arg,
+                                                                          &cleanup_data);
                     state->to_scm_return_arg_cleanup_data = cleanup_data;
                     if (scm_return == SCM_UNSPECIFIED)
                         {
@@ -198,6 +334,8 @@ ggi_invoke_c_callable (GGIFunctionCache *function_cache,
                        SCM scm_args,
                        SCM scm_kwargs)
 {
+    g_debug ("ggi_invoke_c_callable");
+
     GGICallableCache *cache = (GGICallableCache *) function_cache;
     GIFFIReturnValue ffi_return_value= {0};
     SCM scm_return_value = SCM_UNSPECIFIED;
@@ -240,9 +378,11 @@ ggi_callable_info_invoke (GIBaseInfo *info,
                           GGICallableCache *cache,
                           gpointer user_data)
 {
+    g_debug ("ggi_callable_info_invoke");
+
     return ggi_function_cache_invoke ((GGIFunctionCache *) cache,
-                               scm_args,
-                               scm_kwargs);
+                                      scm_args,
+                                      scm_kwargs);
 }
 
 SCM
@@ -250,10 +390,14 @@ _wrap_g_callable_info_invoke (SCM callable_info,
                               SCM scm_args,
                               SCM scm_kwargs)
 {
+    g_debug ("_wrap_g_callable_info_invoke");
+
     GIBaseInfo *base_info = ggi_object_get_gi_info (callable_info);
 
-    if (SCM_UNBNDP (scm_foreign_object_ref (callable_info, 1)))
+    if (0 == (scm_foreign_object_ref (callable_info, 1)))
         {
+            g_debug ("cache unbound");
+
             GGIFunctionCache *function_cache;
             GIInfoType type = g_base_info_get_type (base_info);
 
