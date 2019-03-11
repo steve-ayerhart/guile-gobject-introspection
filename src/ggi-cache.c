@@ -292,6 +292,7 @@ _callable_cache_generate_args_cache_real (GGICallableCache *callable_cache,
                 }
             else
                 {
+                    g_debug (" arg process");
                     GITypeInfo *type_info;
 
                     direction = _ggi_get_direction (callable_cache,
@@ -305,6 +306,8 @@ _callable_cache_generate_args_cache_real (GGICallableCache *callable_cache,
                     arg_cache = _ggi_callable_cache_get_arg (callable_cache, arg_index);
                     if (arg_cache != NULL)
                         {
+                            g_debug (" arg_cache not null");
+
                             /* ensure c_arg_index always alsign with callable_cache->args_cache
                              * and all of the various GGIInvokeState arrays. */
                             arg_cache->c_arg_index = arg_index;
@@ -322,6 +325,8 @@ _callable_cache_generate_args_cache_real (GGICallableCache *callable_cache,
                         }
                     else
                         {
+                            g_debug (" arg_cache null");
+
                             GITransfer transfer;
                             gssize scm_arg_index = -1;
 
@@ -329,8 +334,11 @@ _callable_cache_generate_args_cache_real (GGICallableCache *callable_cache,
 
                             if (direction & GGI_DIRECTION_FROM_SCM)
                                 {
+                                    g_debug (" GGI_DIRECTION_FROM_SCM");
+
                                     scm_arg_index = callable_cache->n_scm_args;
                                     callable_cache->n_scm_args++;
+                                    g_debug (" callable_cache n_scm_args: %d", callable_cache->n_scm_args);
                                 }
 
                             arg_cache = ggi_arg_cache_new (type_info,
@@ -350,6 +358,7 @@ _callable_cache_generate_args_cache_real (GGICallableCache *callable_cache,
 
                             if (direction & GGI_DIRECTION_TO_SCM)
                                 {
+                                    g_debug (" GGI_DIRECTION_TO_SCM");
                                     callable_cache->n_to_scm_args++;
 
                                     callable_cache->to_scm_args = g_slist_append (callable_cache->to_scm_args,

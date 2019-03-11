@@ -53,6 +53,8 @@ ggi_marshal_to_scm_basic_type_cache_adapter (GGIInvokeState *state,
 static gboolean
 ggi_scm_to_utf8 (SCM scm_value, gchar **utf8)
 {
+    g_debug ("ggi_scm_to_utf8");
+
     gchar *string_;
 
     string_ = scm_to_locale_string (scm_value);

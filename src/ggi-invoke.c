@@ -149,9 +149,8 @@ _invoke_marshal_in_args (GGIInvokeState *state, GGIFunctionCache *function_cache
             switch (arg_cache->direction)
                 {
                 case GGI_DIRECTION_FROM_SCM:
-                    g_debug ("FROM SCM");
+                    g_debug (" GGI_DIRECTION_FROM_SCM");
                     state->ffi_args[i] = c_arg;
-                    g_debug ("OOPS");
 
                     if (arg_cache->meta_type == GGI_META_ARG_TYPE_CLOSURE)
                         {
@@ -162,7 +161,6 @@ _invoke_marshal_in_args (GGIInvokeState *state, GGIFunctionCache *function_cache
                         continue;
 
                     // TODO: scm error
-                    g_debug ("?");
                     if (arg_cache->scm_arg_index >= state->n_scm_in_args)
                         {
                             return FALSE;
@@ -171,11 +169,9 @@ _invoke_marshal_in_args (GGIInvokeState *state, GGIFunctionCache *function_cache
 
                     scm_arg = scm_list_ref (state->scm_in_args,
                                             scm_from_ssize_t (arg_cache->scm_arg_index));
-                    g_debug ("done from scm");
-
                     break;
                 case GGI_DIRECTION_BIDIRECTIONAL:
-                    g_debug ("FROM BI");
+                    g_debug (" GGI_DIRECTION_BIDIRECTIONAL");
                     if (arg_cache->meta_type != GGI_META_ARG_TYPE_CHILD)
                         {
                             // TODO: scm error
@@ -189,6 +185,8 @@ _invoke_marshal_in_args (GGIInvokeState *state, GGIFunctionCache *function_cache
                         }
                     // fall through
                 case GGI_DIRECTION_TO_SCM:
+                    g_debug (" GGI_DIRECTION_TO_SCM");
+
                     state->args[i].arg_pointer.v_pointer = c_arg;
 
                     if (arg_cache->is_caller_allocates)
@@ -215,7 +213,8 @@ _invoke_marshal_in_args (GGIInvokeState *state, GGIFunctionCache *function_cache
             else if (arg_cache->from_scm_marshaller != NULL &&
                      arg_cache->meta_type != GGI_META_ARG_TYPE_CHILD)
                 {
-                    g_debug ("CHILD");
+                    g_debug (" try and marshal");
+
                     gboolean success;
                     gpointer cleanup_data = NULL;
 
@@ -224,6 +223,7 @@ _invoke_marshal_in_args (GGIInvokeState *state, GGIFunctionCache *function_cache
                             return FALSE;
                         }
 
+                    g_debug (" from_scm_marshaller");
                     success = arg_cache->from_scm_marshaller (state,
                                                               cache,
                                                               arg_cache,
@@ -239,7 +239,6 @@ _invoke_marshal_in_args (GGIInvokeState *state, GGIFunctionCache *function_cache
                 }
         }
 
-    g_debug ("marshal in done");
     return TRUE;
 }
 
@@ -253,11 +252,19 @@ _invoke_marshal_out_args (GGIInvokeState *state, GGIFunctionCache *function_cach
     SCM scm_return = SCM_UNSPECIFIED;
     gssize n_out_args = cache->n_to_scm_args - cache->n_to_scm_child_args;
 
+    g_debug (" n_to_scm_args: %d", cache->n_to_scm_args);
+    g_debug (" n_to_scm_child_args: %d", cache->n_to_scm_child_args);
+
+
     if (cache->return_cache)
         {
+            g_debug (" return is cached");
+
             if (!cache->return_cache->is_skipped)
                 {
-                    gpointer cleanup_data= NULL;
+                    g_debug (" return is not skipped");
+
+                    gpointer cleanup_data = NULL;
                     scm_return = cache->return_cache->to_scm_marshaller ( state,
                                                                           cache,
                                                                           cache->return_cache,
@@ -281,9 +288,9 @@ _invoke_marshal_out_args (GGIInvokeState *state, GGIFunctionCache *function_cach
 
     if (n_out_args == 0)
         {
-            if (cache->return_cache->is_skipped &&  state->error == NULL)
+            g_debug (" no out args");
+            if (cache->return_cache->is_skipped && state->error == NULL)
                 {
-                    g_assert ("no return and no out args?");
                     scm_return = SCM_UNDEFINED;
                 }
 
@@ -291,6 +298,8 @@ _invoke_marshal_out_args (GGIInvokeState *state, GGIFunctionCache *function_cach
         }
     else if (!cache->has_return && n_out_args == 1) // 1 out arg and no return
         {
+            g_debug ("1 out arg and no return");
+
             GGIArgCache *arg_cache = (GGIArgCache *) cache->to_scm_args->data;
             gpointer cleanup_data = NULL;
             scm_out = arg_cache->to_scm_marshaller (state,
@@ -308,6 +317,7 @@ _invoke_marshal_out_args (GGIInvokeState *state, GGIFunctionCache *function_cach
         }
     else // return values
         {
+            g_debug ("return values");
             gssize scm_arg_index = 0;
             GSList *cache_item = cache->to_scm_args;
             gssize num_values = cache->has_return + n_out_args;
@@ -350,8 +360,8 @@ _invoke_marshal_out_args (GGIInvokeState *state, GGIFunctionCache *function_cach
                     scm_out = scm_append (scm_list_2 (scm_out, scm_value));
                     cache_item = cache_item->next;
                 }
-            return scm_out;
         }
+    return scm_out;
 }
 
 SCM
@@ -384,10 +394,15 @@ ggi_invoke_c_callable (GGIFunctionCache *function_cache,
         }
 
     if (cache->return_cache)
-        gi_type_info_extract_ffi_return_value (cache->return_cache->type_info,
-                                               &ffi_return_value,
-                                               &state->return_arg);
+        {
+            g_debug (" has return cache");
+            gi_type_info_extract_ffi_return_value (cache->return_cache->type_info,
+                                                   &ffi_return_value,
+                                                   &state->return_arg);
+        }
 
+    g_debug (" about to calling marshal_out_args");
+    g_debug (" cache->n_to_scm_args: %d", cache->n_to_scm_args);
     scm_return_value = _invoke_marshal_out_args (state, function_cache);
     // cleanup
 
