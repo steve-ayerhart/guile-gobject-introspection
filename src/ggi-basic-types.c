@@ -231,10 +231,14 @@ ggi_scm_to_gtype (SCM scm_value, GType *gtype_)
 }
 
 gboolean
-ggi_scm_to_boolean (SCM scm_value, gboolean *gboolean_)
+ggi_scm_to_gboolean (SCM scm_value, gboolean *gboolean_)
 {
     if (scm_is_bool (scm_value))
-        *gboolean_ = (gboolean) scm_to_bool (scm_value);
+        {
+            *gboolean_ = (gboolean) scm_to_bool (scm_value);
+
+            return TRUE;
+        }
 
     return FALSE;
 }
