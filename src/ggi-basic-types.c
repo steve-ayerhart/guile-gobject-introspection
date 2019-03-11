@@ -51,6 +51,18 @@ ggi_marshal_to_scm_basic_type_cache_adapter (GGIInvokeState *state,
 }
 
 static gboolean
+ggi_scm_to_utf8 (SCM scm_value, gchar **utf8)
+{
+    gchar *string_;
+
+    string_ = scm_to_locale_string (scm_value);
+
+    *utf8 = string_;
+
+    return TRUE;
+}
+
+static gboolean
 ggi_gpointer_from_scm (SCM scm_arg, gpointer *gpointer_)
 {
     if (scm_is_false (scm_arg))
@@ -216,6 +228,86 @@ ggi_scm_to_gtype (SCM scm_value, GType *gtype_)
     return TRUE;
 }
 
+gboolean
+ggi_marshal_from_scm_basic_type (SCM scm_value,
+                                 GIArgument *arg,
+                                 GITypeTag type_tag,
+                                 GITransfer transfer,
+                                 gpointer *cleanup_data)
+{
+    switch (type_tag)
+        {
+        case GI_TYPE_TAG_VOID:
+            g_warn_if_fail (transfer == GI_TRANSFER_NOTHING);
+            if (ggi_gpointer_from_scm (scm_value, &(arg->v_pointer)))
+                {
+                    *cleanup_data = arg->v_pointer;
+                    return TRUE;
+                }
+            return FALSE;
+
+            /*
+        case GI_TYPE_TAG_INT8:
+            return ggi_gint8_from_scm (scm_value, &(arg->v_int8));
+
+        case GI_TYPE_TAG_UINT8:
+            return ggi_guint8_from_scm (scm_value, &(arg->v_uint8));
+
+        case GI_TYPE_TAG_INT16:
+            return ggi_gint16_from_scm (scm_value, &(arg->v_int16));
+
+        case GI_TYPE_TAG_UINT16:
+            return ggi_guint16_from_scm (scm_value, &(arg->v_uint16));
+
+        case GI_TYPE_TAG_INT32:
+            return ggi_gint32_from_scm (scm_value, &(arg->v_int32));
+
+        case GI_TYPE_TAG_UINT32:
+            return ggi_guint32_from_scm (scm_value, &(arg->v_uint32));
+
+        case GI_TYPE_TAG_INT64:
+            return ggi_gint64_from_scm (scm_value, &(arg->v_int64));
+
+        case GI_TYPE_TAG_UINT64:
+            return ggi_guint64_from_scm (scm_value, &(arg->v_uint64));
+
+        case GI_TYPE_TAG_BOOLEAN:
+            return ggi_gboolean_from_scm (scm_value, &(arg->v_boolean));
+
+        case GI_TYPE_TAG_FLOAT:
+            return ggi_gfloat_from_scm (scm_value, &(arg->v_float));
+
+        case GI_TYPE_TAG_DOUBLE:
+            return ggi_gdouble_from_scm (scm_value, &(arg->v_double));
+
+        case GI_TYPE_TAG_GTYPE:
+            return ggi_gtype_from_scm (scm_value, &(arg->v_size));
+
+        case GI_TYPE_TAG_UNICHAR:
+            return ggi_gunichar_from_scm (scm_value, &(arg->v_uint32));
+            */
+
+        case GI_TYPE_TAG_UTF8:
+            if (ggi_scm_to_utf8 (scm_value, &(arg->v_string))) {
+                *cleanup_data = arg->v_string;
+                return TRUE;
+            }
+            return FALSE;
+
+        case GI_TYPE_TAG_FILENAME:
+            if (ggi_scm_to_utf8 (scm_value, &(arg->v_string))) {
+                *cleanup_data = arg->v_string;
+                return TRUE;
+            }
+            return FALSE;
+
+        default:
+            // todo scm error
+            return FALSE;
+        }
+
+    return TRUE;
+}
 
 // marshalling to scheme is relatively straight forward.
 SCM

@@ -90,6 +90,7 @@ ggi_scm_to_gulong (SCM scm_value, gulong *result);
 static gboolean
 ggi_scm_to_guint32 (SCM scm_value, guint32 *result);
 
+
 G_END_DECLS
 
 #endif

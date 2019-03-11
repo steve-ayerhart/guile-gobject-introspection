@@ -21,7 +21,33 @@ gpointer free_arg_state[GGI_INVOKE_ARG_STATE_N_MAX];
 gboolean
 _ggi_invoke_arg_state_init (GGIInvokeState *state)
 {
+    g_debug ("_ggi_invoke_arg_state_init");
+
     gpointer mem;
+
+    if (state->n_args < GGI_INVOKE_ARG_STATE_N_MAX && (mem = free_arg_state[state->n_args]) != NULL)
+        {
+            free_arg_state[state->n_args] = NULL;
+            memset (mem, 0, GGI_INVOKE_ARG_STATE_SIZE (state->n_args));
+        }
+    else
+        {
+            mem = g_slice_alloc0 (GGI_INVOKE_ARG_STATE_SIZE(state->n_args));
+        }
+
+    if (mem == NULL && state->n_args != 0)
+        {
+            // out of memory
+            return FALSE;
+        }
+
+    if (mem != NULL)
+        {
+            state->args = mem;
+            state->ffi_args = (gpointer)((gchar *) mem + state->n_args * sizeof (GGIInvokeArgState));
+        }
+
+    return TRUE;
 }
 
 static SCM
