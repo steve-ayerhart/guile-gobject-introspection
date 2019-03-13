@@ -7,9 +7,29 @@
 #include <girepository.h>
 #include <glib.h>
 
+#include "gtype.h"
 #include "gi-module.h"
 #include "ggi-argument.h"
 #include "gutil.h"
+
+void
+ggi_define_module_enum (GIBaseInfo *info)
+{
+  GIEnumInfo *enum_info;
+  const char *name;
+  GType gtype;
+  SCM scm_enum;
+
+  GI_IS_ENUM_INFO (info);
+
+  gtype = g_registered_type_info_get_g_type ((GIRegisteredTypeInfo *) info);
+
+  name = ggi_gname_to_scm_name (g_base_info_get_name (info));
+  scm_enum = scm_c_gtype_to_class (gtype);
+
+  scm_c_define (name, scm_enum);
+  scm_c_export (name, NULL);
+}
 
 void
 ggi_define_module_constant (GIBaseInfo *info)
@@ -60,6 +80,12 @@ ggi_namespace_init (void *namespace)
         {
         case GI_INFO_TYPE_CONSTANT:
           ggi_define_module_constant (info);
+          g_base_info_unref (info);
+          break;
+        case GI_INFO_TYPE_ENUM:
+        case GI_INFO_TYPE_FLAGS:
+          ggi_define_module_enum (info);
+          g_base_info_unref (info);
           break;
         default:
           break;
