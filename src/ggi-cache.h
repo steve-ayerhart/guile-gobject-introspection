@@ -282,6 +282,10 @@ _ggi_callable_cache_set_arg (GGICallableCache *cache, guint index, GGIArgCache *
 
 }
 
+void
+ggi_cache_init (void);
+
+static SCM scm_ggi_function_cache_t;
 
 G_END_DECLS
 

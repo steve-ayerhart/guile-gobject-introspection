@@ -57,6 +57,9 @@ ggi_finalize_pointer (void *info)
 GIBaseInfo *
 ggi_object_get_gi_info (SCM scm_object);
 
+gchar *
+_ggi_g_base_info_get_fullname (GIBaseInfo *info);
+
 SCM
 ggi_make_info (GIBaseInfo *info);
 

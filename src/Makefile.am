@@ -13,6 +13,9 @@ C_FILES = \
 	gsignal.c \
   gi-module.c \
   ggi-basic-types.c \
+  ggi-list.c \
+  ggi-object.c \
+  ggi-callback.c \
   ggi-argument.c \
   ggi-cache.c \
   ggi-invoke.c \

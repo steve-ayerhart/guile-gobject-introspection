@@ -470,6 +470,42 @@ SCM_DEFINE (scm_gi_constant_info_get_value, "%gi-constant-info-get-value", 1, 0,
   return scm_value;
 }
 
+// stuff
+static const char *
+_safe_base_info_get_name (GIBaseInfo *info)
+{
+  if (g_base_info_get_type (info) == GI_INFO_TYPE_TYPE) {
+    return "type_type_instance";
+  } else {
+    return g_base_info_get_name (info);
+  }
+}
+
+gchar *
+_ggi_g_base_info_get_fullname (GIBaseInfo *info)
+{
+  GIBaseInfo *container_info;
+  gchar *fullname;
+
+  container_info = g_base_info_get_container (info);
+  if (container_info != NULL) {
+    fullname = g_strdup_printf ("%s %s %s",
+                                g_base_info_get_namespace (container_info),
+                                _safe_base_info_get_name (container_info),
+                                _safe_base_info_get_name (info));
+  } else {
+    fullname = g_strdup_printf ("%s %s",
+                                g_base_info_get_namespace (info),
+                                _safe_base_info_get_name (info));
+  }
+
+  if (fullname == NULL) {
+    g_critical ("OOM");
+  }
+
+  return fullname;
+}
+
 /*
  * init
  */

@@ -10,7 +10,52 @@
 #include "gtype.h"
 #include "gi-module.h"
 #include "ggi-argument.h"
+#include "ggi-invoke.h"
+#include "ggi-infos.h"
+#include "ggi-cache.h"
 #include "gutil.h"
+
+extern SCM ggi_function_t;
+typedef SCM (*ggi_gsubr_t)(void);
+
+void
+ggi_finalize_callable_cache (void *cache)
+{
+  g_debug ("ggi_fnalize_callable_cache");
+
+  ggi_callable_cache_free (cache);
+}
+
+SCM
+_wrap_ggi_function (SCM scm_args, SCM scm_optargs)
+{
+}
+
+void
+ggi_define_module_function (GIBaseInfo *info)
+{
+  GGIFunctionCache *function_cache;
+  GGICallableCache *callable_cache;
+  GIFunctionInfo *function_info;
+  const char *function_name;
+  SCM scm_function_cache;
+  const int args;
+  const int opt_args;
+
+  GI_IS_FUNCTION_INFO (info);
+
+  function_name = g_base_info_get_name (info);
+
+  function_cache = ggi_function_cache_new ((GICallableInfo *) info);
+  callable_cache = (GGICallableCache *) function_cache;
+
+  scm_function_cache = scm_from_pointer (function_cache, ggi_finalize_callable_cache);
+  scm_c_define_gsubr (function_name,
+                      callable_cache->n_scm_required_args,
+                      callable_cache->n_scm_args - callable_cache->n_scm_required_args,
+                      0,
+                      _wrap_ggi_function);
+}
 
 void
 ggi_define_module_enum (GIBaseInfo *info)
@@ -87,6 +132,8 @@ ggi_namespace_init (void *namespace)
           ggi_define_module_enum (info);
           g_base_info_unref (info);
           break;
+        case GI_INFO_TYPE_FUNCTION:
+          ggi_define_module_function (info);
         default:
           break;
         }
@@ -188,6 +235,8 @@ void
 gi_module_init (void)
 {
   g_debug ("gi_module_init");
+
+  ggi_cache_init ();
 
   ggi_gi_constants_init ();
 

@@ -475,7 +475,6 @@ _wrap_g_callable_info_invoke (SCM callable_info,
                 }
 
 
-
             scm_foreign_object_set_x (callable_info, 1,
                                       scm_from_pointer ((GGICallableCache *) function_cache, NULL));
 

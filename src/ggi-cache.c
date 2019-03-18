@@ -4,6 +4,7 @@
 
 #include <libguile.h>
 #include <girffi.h>
+#include <girepository.h>
 
 #include "ggi-cache.h"
 #include "ggi-infos.h"
@@ -103,6 +104,64 @@ ggi_arg_cache_free (GGIArgCache *cache)
 
 /* GGIInterfaceCache */
 
+static GGIArgCache *
+_arg_cache_new_for_interface (GIInterfaceInfo *iface_info,
+                              GITypeInfo       *type_info,
+                              GIArgInfo        *arg_info,
+                              GITransfer        transfer,
+                              GGIDirection      direction,
+                              GGICallableCache *callable_cache)
+{
+    GIInfoType info_type;
+
+    info_type = g_base_info_get_type ((GIBaseInfo *) iface_info);
+
+    switch (info_type)
+        {
+        case GI_INFO_TYPE_CALLBACK:
+            g_critical ("TYPE CALLBACK NOT IMPLEMENTED");
+            return ggi_arg_callback_new_from_info (type_info,
+                                                   arg_info,
+                                                   transfer,
+                                                   direction,
+                                                   iface_info,
+                                                   callable_cache);
+        case GI_INFO_TYPE_OBJECT:
+        case GI_INFO_TYPE_INTERFACE:
+            return ggi_arg_gobject_new_from_info (type_info,
+                                                  arg_info,
+                                                  transfer,
+                                                  direction,
+                                                  iface_info,
+                                                  callable_cache);
+        case GI_INFO_TYPE_BOXED:
+        case GI_INFO_TYPE_STRUCT:
+        case GI_INFO_TYPE_UNION:
+            return ggi_arg_struct_new_from_info (type_info,
+                                                 arg_info,
+                                                 transfer,
+                                                 direction,
+                                                 iface_info);
+        case GI_INFO_TYPE_ENUM:
+            return ggi_arg_enum_new_from_info (type_info,
+                                               arg_info,
+                                               transfer,
+                                               direction,
+                                               iface_info);
+        case GI_INFO_TYPE_FLAGS:
+            return ggi_arg_flags_new_from_nfo (type_info,
+                                               arg_info,
+                                               transfer,
+                                               direction,
+                                               iface_info);
+        default:
+            g_assert_not_reached ();
+        }
+
+    return NULL;
+}
+
+
 static void
 _interface_cache_free_func (GGIInterfaceCache *cache)
 {
@@ -137,7 +196,7 @@ ggi_arg_interface_setup (GGIInterfaceCache *iface_cache,
     iface_cache->interface_info = iface_info;
     iface_cache->arg_cache.type_tag = GI_TYPE_TAG_INTERFACE;
     iface_cache->type_name = (gchar*)scm_from_utf8_string ("TYPE!!!!");
-    //    iface_cache->type_name = _ggi_g_base_info_get_fullname (iface_info);
+    iface_cache->type_name = _ggi_g_base_info_get_fullname (iface_info);
     iface_cache->g_type = g_registered_type_info_get_g_type ((GIRegisteredTypeInfo *) iface_info);
     iface_cache->scm_type = scm_from_int (1);
     //    iface_cache->scm_type = ggi_type_import_by_gi_info ((GIBaseInfo *) iface_info);
@@ -159,6 +218,8 @@ ggi_arg_cache_new (GITypeInfo *type_info,
                    gssize c_arg_index,
                    gssize scm_arg_index)
 {
+    g_debug ("ggi_arg_cache_new");
+
     GGIArgCache *arg_cache = NULL;
     GITypeTag type_tag;
 
@@ -189,21 +250,27 @@ ggi_arg_cache_new (GITypeInfo *type_info,
             break;
 
         case GI_TYPE_TAG_ARRAY:
-            // TODO
-            break;
-        case GI_TYPE_TAG_GLIST:
-            // TODO
+            g_critical ("ARRAY IMPLEMENTED");
             break;
         case GI_TYPE_TAG_GSLIST:
+            g_critical ("GSLIST NOT IMPLEMENTED");
             // TODO
             break;
         case GI_TYPE_TAG_GHASH:
+            g_critical ("GHASH NOT IMPLEMENTED");
             // TODO
             break;
         case GI_TYPE_TAG_INTERFACE:
-            // TODO
+            arg_cache = _arg_cache_new_for_interface ((GIInterfaceInfo *) g_type_info_get_interface (type_info),
+                                                      type_info,
+                                                      arg_info,
+                                                      transfer,
+                                                      direction,
+                                                      callable_cache);
+            //            g_base_info_unref ((GIBaseInfo *) interface_info);
             break;
         case GI_TYPE_TAG_ERROR:
+            g_critical ("GI_TYPE_TAG_ERROR: NOT IMPLEMENTED");
             // TODO
             break;
         default:
@@ -218,7 +285,6 @@ ggi_arg_cache_new (GITypeInfo *type_info,
 
     return arg_cache;
 }
-
 static GGIDirection
 _ggi_get_direction (GGICallableCache *callable_cache, GIDirection gi_direction)
 {
@@ -236,6 +302,13 @@ _ggi_get_direction (GGICallableCache *callable_cache, GIDirection gi_direction)
                 return GGI_DIRECTION_FROM_SCM;
             return GGI_DIRECTION_TO_SCM;
         }
+}
+
+void
+ggi_callable_cache_free (GGICallableCache *cache)
+{
+    cache->deinit (cache);
+    g_free (cache);
 }
 
 static gboolean
@@ -267,7 +340,7 @@ _callable_cache_generate_args_cache_real (GGICallableCache *callable_cache,
                                       -1);
 
     if (return_cache == NULL)
-        return FALSE;
+       return FALSE;
 
     return_cache->is_skipped = g_callable_info_skip_return (callable_info);
     callable_cache->return_cache = return_cache;
@@ -293,7 +366,6 @@ _callable_cache_generate_args_cache_real (GGICallableCache *callable_cache,
                 }
             else
                 {
-                    g_debug (" arg process");
                     GITypeInfo *type_info;
 
                     direction = _ggi_get_direction (callable_cache,
@@ -307,7 +379,6 @@ _callable_cache_generate_args_cache_real (GGICallableCache *callable_cache,
                     arg_cache = _ggi_callable_cache_get_arg (callable_cache, arg_index);
                     if (arg_cache != NULL)
                         {
-                            g_debug (" arg_cache not null");
 
                             /* ensure c_arg_index always alsign with callable_cache->args_cache
                              * and all of the various GGIInvokeState arrays. */
@@ -326,7 +397,6 @@ _callable_cache_generate_args_cache_real (GGICallableCache *callable_cache,
                         }
                     else
                         {
-                            g_debug (" arg_cache null");
 
                             GITransfer transfer;
                             gssize scm_arg_index = -1;
@@ -335,11 +405,8 @@ _callable_cache_generate_args_cache_real (GGICallableCache *callable_cache,
 
                             if (direction & GGI_DIRECTION_FROM_SCM)
                                 {
-                                    g_debug (" GGI_DIRECTION_FROM_SCM");
-
                                     scm_arg_index = callable_cache->n_scm_args;
                                     callable_cache->n_scm_args++;
-                                    g_debug (" callable_cache n_scm_args: %d", callable_cache->n_scm_args);
                                 }
 
                             arg_cache = ggi_arg_cache_new (type_info,
@@ -359,7 +426,6 @@ _callable_cache_generate_args_cache_real (GGICallableCache *callable_cache,
 
                             if (direction & GGI_DIRECTION_TO_SCM)
                                 {
-                                    g_debug (" GGI_DIRECTION_TO_SCM");
                                     callable_cache->n_to_scm_args++;
 
                                     callable_cache->to_scm_args = g_slist_append (callable_cache->to_scm_args,
@@ -444,7 +510,6 @@ _callable_cache_generate_args_cache_real (GGICallableCache *callable_cache,
 
         }
 
-    g_debug ("_callable_cache_generate_args_cache_real: success");
     return TRUE;
 }
 
@@ -473,7 +538,8 @@ _callable_cache_init (GGICallableCache *cache, GICallableInfo *callable_info)
     // TODO: handle deprecated
 
     n_args = (gint) cache->args_offset + g_callable_info_get_n_args (callable_info);
-    g_debug ("n_args: %d", n_args);
+    g_debug (" name: %s", cache->name);
+    g_debug (" n_args: %d", n_args);
 
     if (n_args >= 0)
         {
@@ -481,6 +547,7 @@ _callable_cache_init (GGICallableCache *cache, GICallableInfo *callable_info)
             g_ptr_array_set_size (cache->args_cache, n_args);
         }
 
+    g_debug ( "generate_args_cache");
     if (!cache->generate_args_cache (cache, callable_info)) {
         //        _callable_cache_deinit_real (cache);
         return FALSE;
@@ -522,7 +589,6 @@ _function_cache_init (GGIFunctionCache *function_cache,
 
     if (invoker->native_address == NULL)
         {
-            g_debug ("prep invoker");
             if (g_function_info_prep_invoker ((GIFunctionInfo *) callable_info,
                                               invoker,
                                               &error))
@@ -534,13 +600,11 @@ _function_cache_init (GGIFunctionCache *function_cache,
                                                     (GIFunctionInfo *) callable_info,
                                                     invoker,
                                                     &error))
-                g_debug ("new for address");
             return TRUE;
         }
 
     // TODO: deinit real
 
-    g_debug ("ggi_function_cache_init: failed");
     return FALSE;
 }
 
@@ -597,4 +661,14 @@ ggi_function_cache_invoke (GGIFunctionCache *function_cache,
     GGIInvokeState state = { 0, };
 
     return function_cache->invoke (function_cache, &state, scm_args, scm_kwargs);
+}
+
+void
+ggi_cache_init (void)
+{
+    g_debug ("ggi_cache_init");
+
+    scm_ggi_function_cache_t = scm_make_foreign_object_type (scm_from_utf8_symbol ("<ggi-function-cache>"),
+                                                             scm_list_1 (scm_from_utf8_symbol ("ptr")),
+                                                             NULL);
 }
