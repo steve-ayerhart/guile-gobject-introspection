@@ -10,25 +10,27 @@
 
 G_BEGIN_DECLS
 
-ggi_arg_object_out_from_scm (SCM         scm_arg,
-                             GIArgument *arg,
-                             GITransfer  transfer);
+gboolean
+ggi_arg_gobject_out_from_scm (SCM         scm_arg,
+                              GIArgument *arg,
+                              GITransfer  transfer);
 
 SCM
 ggi_arg_gobject_to_scm (GIArgument *arg,
                         GITransfer transfer);
 
 SCM
-ggi_arg_object_to_scm_called_from_c (GIArgument *arg,
-                                     GITransfer transfer);
+ggi_arg_gobject_to_scm_called_from_c (GIArgument *arg,
+                                      GITransfer transfer);
 
-SCM
-ggi_arg_object_new_from_info (GITypeInfo *type_info,
-                              GIArgInfo *arg_info,
-                              GITransfer transfer,
-                              GGIDirection direction,
-                              GIInterfaceInfo *iface_info,
-                              GGICallableCache *callable_cache);
+GGIArgCache *
+ggi_arg_gobject_new_from_info (GITypeInfo *type_info,
+                               GIArgInfo *arg_info,
+                               GITransfer transfer,
+                               GGIDirection direction,
+                               GIInterfaceInfo *iface_info,
+                               GGICallableCache *callable_cache);
 
 G_END_DECLS
+
 #endif

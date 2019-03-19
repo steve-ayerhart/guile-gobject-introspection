@@ -9,6 +9,9 @@
 #include "ggi-cache.h"
 #include "ggi-infos.h"
 #include "ggi-invoke.h"
+#include "ggi-object.h"
+#include "ggi-struct-marshal.h"
+#include "ggi-enum-marshal.h"
 #include "ggi-basic-types.h"
 
 /* _arg_info_default_value
@@ -120,12 +123,14 @@ _arg_cache_new_for_interface (GIInterfaceInfo *iface_info,
         {
         case GI_INFO_TYPE_CALLBACK:
             g_critical ("TYPE CALLBACK NOT IMPLEMENTED");
+            /*
             return ggi_arg_callback_new_from_info (type_info,
                                                    arg_info,
                                                    transfer,
                                                    direction,
                                                    iface_info,
                                                    callable_cache);
+            */
         case GI_INFO_TYPE_OBJECT:
         case GI_INFO_TYPE_INTERFACE:
             return ggi_arg_gobject_new_from_info (type_info,
@@ -149,7 +154,7 @@ _arg_cache_new_for_interface (GIInterfaceInfo *iface_info,
                                                direction,
                                                iface_info);
         case GI_INFO_TYPE_FLAGS:
-            return ggi_arg_flags_new_from_nfo (type_info,
+            return ggi_arg_flags_new_from_info (type_info,
                                                arg_info,
                                                transfer,
                                                direction,

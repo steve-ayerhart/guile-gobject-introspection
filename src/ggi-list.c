@@ -5,7 +5,7 @@
 #include <libguile.h>
 #include <glib.h>
 
-#include "ggi-array.h"
+#include "ggi-list.h"
 #include "ggi-infos.h"
 #include "ggi-basic-types.h"
 
@@ -15,7 +15,7 @@
  */
 
 
-static boolean
+static gboolean
 _ggi_marshal_from_scm_list (GGIInvokeState *state,
                             GGICallableCache *callable_cache,
                             GGIArgCache *arg_cache,
@@ -26,14 +26,14 @@ _ggi_marshal_from_scm_list (GGIInvokeState *state,
     GGIMarshalFromScmFunc from_scm_marshaller;
     guint i = 0;
     gsize success_count = 0;
-    SCM scm_length;
+    SCM scm_list_length;
     guint length;
     guint item_size;
     gboolean is_ptr_array;
     GArray *array_ = NULL;
     GGIListCache *list_cache = (GGIListCache *) arg_cache;
-    GGIArgGarray *array_cache = (GGIArgGArray *) arg_cache;
-    GITransfer cleanup_tranfer = arg_cache->transfer;
+    GGIArgGArray *array_cache = (GGIArgGArray *) arg_cache;
+    GITransfer cleanup_transfer = arg_cache->transfer;
 
     if (scm_arg == SCM_EOL)
         {
@@ -49,7 +49,7 @@ _ggi_marshal_from_scm_list (GGIInvokeState *state,
             return FALSE;
         }
 
-    scm_length = scm_length (scm_arg);
+    scm_list_length = scm_length (scm_arg);
     if (scm_is_true (scm_less_p (scm_arg, 0)))
         {
             return FALSE;
@@ -85,11 +85,11 @@ _ggi_marshal_from_scm_list (GGIInvokeState *state,
     // L253 pygobject
 
     from_scm_marshaller = list_cache->item_cache->from_scm_marshaller;
-    for (i = 0; success_count = 0; i < length; i++)
+    for (i = 0, success_count = 0; i < length; i++)
         {
             GIArgument item = {0};
             gpointer item_cleanup_data = NULL;
-            SCM scm_item = list_ref (scm_arg, i);
+            SCM scm_item = scm_list_ref (scm_arg, scm_from_uint(i));
 
             // TODO check for bad item?
 
@@ -103,9 +103,9 @@ _ggi_marshal_from_scm_list (GGIInvokeState *state,
 
             if (item_cleanup_data != NULL && item_cleanup_data != item.v_pointer)
                 {
-                    scm_misc_error ("runtime error",
-                                    "cannot cleanup item data for array due to the data/cleanup data being different"
-                                    NULL);
+                    //                    scm_misc_error ("runtime error",
+                    //               "cannot cleanup item data for array due to the data/cleanup data being different"
+                    //               NULL);
                     goto err;
                 }
 
@@ -187,12 +187,12 @@ _ggi_marshal_from_scm_list (GGIInvokeState *state,
                 {
                     for (j = 0; j < success_count; j++)
                         {
-                            SCM scm_cleanup_item = list_ref (scm_arg, j);
+                            SCM scm_cleanup_item = scm_list_ref (scm_arg, scm_from_size_t(j));
                             cleanup_func (state,
                                           list_cache->item_cache,
                                           scm_cleanup_item,
                                           is_ptr_array ?
-                                          g_ptr_array_index ((GPtrArray *) array_i, i) :
+                                          g_ptr_array_index ((GPtrArray *) array_, i) :
                                           g_array_index (array_, gpointer, j),
                                           TRUE);
                         }
@@ -211,7 +211,7 @@ _ggi_marshal_from_scm_list (GGIInvokeState *state,
         {
             // we have a child arg to handle
             GGIArgCache *child_arg =
-                ggi_callable_cache_get_arg (callable_cache, (guint) array_cache->len_arg_index);
+                _ggi_callable_cache_get_arg (callable_cache, (guint) array_cache->len_arg_index);
 
             // TODO: arg from ssize
         }

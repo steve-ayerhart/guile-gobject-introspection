@@ -36,6 +36,18 @@ typedef SCM (*GGIMarshalToScmFunc) (GGIInvokeState   *state,
                                     GIArgument       *arg,
                                     gpointer         *cleanup_data);
 
+typedef void (*GGIMarshalCleanupFunc) (GGIInvokeState   *state,
+                                       GGIArgCache      *arg_cache,
+                                       SCM               scm_arg,
+                                       gpointer          data,
+                                       gboolean          was_processed);
+
+typedef void (*GGIMarshalToScmCleanupFunc) (GGIInvokeState *state,
+                                            GGIArgCache    *arg_cache,
+                                            gpointer        cleanup_data,
+                                            gpointer        data,
+                                            gboolean        was_processed);
+
 
 typedef enum {
               GGI_META_ARG_TYPE_PARENT,
@@ -76,7 +88,8 @@ struct _GGIArgCache
     GGIMarshalFromScmFunc from_scm_marshaller;
     GGIMarshalToScmFunc to_scm_marshaller;
 
-    // TODO cleanup
+    GGIMarshalCleanupFunc from_scm_cleanup;
+    GGIMarshalToScmCleanupFunc to_scm_cleanup;
 
     GDestroyNotify destroy_notify;
 
@@ -91,7 +104,7 @@ typedef struct _GGIListCache {
     GGIArgCache *item_cache;
 } GGIListCache;
 
-struct _GGIArgGArray
+typedef struct _GGIArgGArray
 {
     GGIListCache list_cache;
     gssize fixed_size;

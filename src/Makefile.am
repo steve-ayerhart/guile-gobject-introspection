@@ -18,6 +18,8 @@ C_FILES = \
   ggi-callback.c \
   ggi-argument.c \
   ggi-cache.c \
+  ggi-enum-marshal.c \
+  ggi-struct-marshal.c \
   ggi-invoke.c \
   ggi-infos.c \
   ggi-repository.c
