@@ -1,5 +1,5 @@
-#ifndef __GUILE_GOBJECT_GOBJECT_H__
-#define __GUILE_GOBJECT_GOBJECT_H__
+#ifndef __GUILE_GOBJECT_H__
+#define __GUILE_GOBJECT_H__
 
 #include "gtype.h"
 #include "gparameter.h"
