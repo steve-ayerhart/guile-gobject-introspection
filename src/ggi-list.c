@@ -192,8 +192,8 @@ _ggi_marshal_from_scm_list (GGIInvokeState *state,
                                           list_cache->item_cache,
                                           scm_cleanup_item,
                                           is_ptr_array ?
-                                          g_ptr_array_index ((GPtrArray *) array_, i) :
-                                          g_array_index (array_, gpointer, j),
+                                            g_ptr_array_index ((GPtrArray *) array_, i) :
+                                            g_array_index (array_, gpointer, j),
                                           TRUE);
                         }
                 }

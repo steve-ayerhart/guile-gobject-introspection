@@ -16,7 +16,20 @@ typedef gboolean (*GGIObjectMarshalFromScmFunc) (SCM         scm_arg,
 static gboolean
 _ggi_marshal_from_scm_gobject (SCM         scm_arg,
                                GIArgument *arg,
-                               GITransfer  transfer); // TODO
+                               GITransfer  transfer)
+{
+    // TODO
+    return TRUE;
+}
+
+gboolean
+ggi_arg_gobject_out_arg_from_scm (SCM         scm_arg,
+                                  GIArgument *arg,
+                                  GITransfer  transfer)
+{
+    // TODO
+    return TRUE;
+}
 
 static gboolean
 _ggi_marshal_from_scm_interface_object (GGIInvokeState              *state,
@@ -25,7 +38,11 @@ _ggi_marshal_from_scm_interface_object (GGIInvokeState              *state,
                                         SCM                          scm_arg,
                                         GIArgument                  *arg,
                                         gpointer                    *cleanup_data,
-                                        GGIObjectMarshalFromScmFunc  func); // TODO
+                                        GGIObjectMarshalFromScmFunc  func)
+{
+    // TODO
+    return TRUE;
+}
 SCM
 ggi_arg_gobject_to_scm_called_from_c (GIArgument *arg,
                                       GITransfer  transfer)
@@ -52,22 +69,50 @@ ggi_arg_gobject_to_scm_called_from_c (GIArgument *arg,
 
 static SCM
 _ggi_marshal_to_scm_called_from_c_interface_object_cache_adapter (GGIInvokeState   *state,
-                                                                    GGICallableCache *callable_cache,
-                                                                    GGIArgCache      *arg_cache,
-                                                                    GIArgument       *arg,
-                                                                    gpointer         *cleanup_data)
+                                                                  GGICallableCache *callable_cache,
+                                                                  GGIArgCache      *arg_cache,
+                                                                  GIArgument       *arg,
+                                                                  gpointer         *cleanup_data)
 {
   return ggi_arg_gobject_to_scm_called_from_c (arg, arg_cache->transfer);
 }
 
 static SCM
-_ggi_marshal_to_scm_called_from_scm_inteface_object_cache_adapter (GGIInvokeState   *state,
+_ggi_marshal_to_scm_called_from_scm_interface_object_cache_adapter (GGIInvokeState   *state,
                                                                    GGICallableCache *callable_cache,
                                                                    GGIArgCache      *arg_cache,
                                                                    GIArgument       *arg,
                                                                    gpointer         *cleanup_data)
 {
   return ggi_arg_gobject_to_scm (arg, arg_cache->transfer);
+}
+
+static void
+_ggi_marshal_cleanup_from_scm_interface_object (GGIInvokeState *state,
+                                                GGIArgCache    *arg_cache,
+                                                SCM             scm_arg,
+                                                gpointer        data,
+                                                gboolean        was_processed)
+{
+  if (was_processed && state->failed && data != NULL && arg_cache->transfer != GI_TRANSFER_EVERYTHING)
+    g_object_unref (G_OBJECT (data));
+}
+
+static gboolean
+_ggi_marshal_from_scm_called_from_c_interface_object (GGIInvokeState   *state,
+                                                      GGICallableCache *callable_cache,
+                                                      GGIArgCache      *arg_cache,
+                                                      SCM               scm_arg,
+                                                      GIArgument       *arg,
+                                                      gpointer         *cleanup_data)
+{
+  return _ggi_marshal_from_scm_interface_object (state,
+                                                 callable_cache,
+                                                 arg_cache,
+                                                 scm_arg,
+                                                 arg,
+                                                 cleanup_data,
+                                                 ggi_arg_gobject_out_arg_from_scm);
 }
 
 static gboolean
@@ -94,8 +139,8 @@ _ggi_marshal_cleanup_to_scm_interface_object (GGIInvokeState *state,
                                               gpointer        data,
                                               gboolean        was_processed)
 {
-  if (!was_processed && arg_cache->transfer == GI_TRANSFER_EVERYTHING)
-    g_object_unref (G_OBJECT(data));
+  if (!was_processed&& arg_cache->transfer == GI_TRANSFER_EVERYTHING)
+    g_object_unref (G_OBJECT (data));
 }
 
 static gboolean
