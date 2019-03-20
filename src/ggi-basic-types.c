@@ -525,6 +525,8 @@ SCM
 ggi_marshal_to_scm_basic_type (GIArgument *arg,
                                GITypeTag   type_tag)
 {
+    g_debug ("ggi_marshal_to_scm_basic_type");
+
     switch (type_tag)
         {
         case GI_TYPE_TAG_BOOLEAN:
@@ -593,6 +595,8 @@ arg_basic_type_setup_from_info (GGIArgCache *arg_cache,
                                 GITransfer   transfer,
                                 GGIDirection direction)
 {
+    g_debug ("ggi_arg_basic_type_new_from_info");
+
     GITypeTag type_tag = g_type_info_get_tag (type_info);
 
     if (!ggi_arg_base_setup (arg_cache, type_info, arg_info, transfer, direction))

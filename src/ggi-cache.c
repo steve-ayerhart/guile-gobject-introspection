@@ -500,21 +500,6 @@ _callable_cache_generate_args_cache_real (GGICallableCache *callable_cache,
     if (!return_cache->is_skipped && return_cache->type_tag != GI_TYPE_TAG_VOID)
         callable_cache->has_return = TRUE;
 
-    values_names = SCM_EOL;
-    if (callable_cache->has_return)
-        values_names = scm_append (scm_list_2 (values_names, SCM_UNSPECIFIED));
-
-    arg_cache_item = callable_cache->to_scm_args;
-    while (arg_cache_item)
-        {
-            // TODO free string up
-            const gchar *arg_name = ((GGIArgCache *) arg_cache_item->data)->arg_name;
-            SCM scm_arg_string = scm_from_utf8_string (arg_name);
-            scm_append (scm_list_2 (values_names, scm_arg_string));
-            arg_cache_item = arg_cache_item->next;
-
-        }
-
     return TRUE;
 }
 
