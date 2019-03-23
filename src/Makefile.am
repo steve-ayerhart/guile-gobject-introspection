@@ -14,11 +14,15 @@ C_FILES = \
   gi-module.c \
   ggi-basic-types.c \
   ggi-list.c \
+  ggi-array.c \
   ggi-object.c \
-  ggi-callback.c \
+  ggi-closure.c \
+  ggi-ccallback.c \
   ggi-argument.c \
+  ggi-error.c \
   ggi-cache.c \
   ggi-enum-marshal.c \
+  ggi-struct.c \
   ggi-struct-marshal.c \
   ggi-invoke.c \
   ggi-infos.c \

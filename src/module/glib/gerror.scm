@@ -2,15 +2,24 @@
   #:use-module (system foreign)
   #:use-module (rnrs bytevectors)
   #:use-module (ice-9 format)
+  #:use-module (srfi srfi-9)
 
   #:use-module (glib utils)
   #:use-module (glib gquark)
 
   #:export-syntax (with-gerror)
 
-  #:export (gerror-new
+  #:export (make-gerror gerror-domain gerror-code gerror-message
+            gerror-new
             gerror-free
             gerror? unwrap-gerror wrap-gerror))
+
+(define-record-type <gerror>
+  (make-gerror domain code message)
+  gerror?
+  (domain gerror-domain)
+  (code gerror-code)
+  (message gerror-message))
 
 (define-glib '* g_error_new (list uint32 int '*))
 (define-glib void g_error_free (list '*))

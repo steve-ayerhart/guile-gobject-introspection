@@ -10,6 +10,9 @@
 #include "ggi-infos.h"
 #include "ggi-invoke.h"
 #include "ggi-object.h"
+#include "ggi-error.h"
+#include "ggi-array.h"
+#include "ggi-closure.h"
 #include "ggi-struct-marshal.h"
 #include "ggi-enum-marshal.h"
 #include "ggi-basic-types.h"
@@ -122,15 +125,12 @@ _arg_cache_new_for_interface (GIInterfaceInfo *iface_info,
     switch (info_type)
         {
         case GI_INFO_TYPE_CALLBACK:
-            g_critical ("TYPE CALLBACK NOT IMPLEMENTED");
-            /*
             return ggi_arg_callback_new_from_info (type_info,
                                                    arg_info,
                                                    transfer,
                                                    direction,
                                                    iface_info,
                                                    callable_cache);
-            */
         case GI_INFO_TYPE_OBJECT:
         case GI_INFO_TYPE_INTERFACE:
             return ggi_arg_gobject_new_from_info (type_info,
@@ -155,10 +155,10 @@ _arg_cache_new_for_interface (GIInterfaceInfo *iface_info,
                                                iface_info);
         case GI_INFO_TYPE_FLAGS:
             return ggi_arg_flags_new_from_info (type_info,
-                                               arg_info,
-                                               transfer,
-                                               direction,
-                                               iface_info);
+                                                arg_info,
+                                                transfer,
+                                                direction,
+                                                iface_info);
         default:
             g_assert_not_reached ();
         }
@@ -255,7 +255,21 @@ ggi_arg_cache_new (GITypeInfo *type_info,
             break;
 
         case GI_TYPE_TAG_ARRAY:
-            g_critical ("ARRAY IMPLEMENTED");
+            arg_cache = ggi_arg_garray_new_from_info (type_info,
+                                                      arg_info,
+                                                      transfer,
+                                                      direction,
+                                                      callable_cache);
+
+            if (arg_cache == NULL)
+                return NULL;
+
+            ggi_arg_garray_len_arg_setup (arg_cache,
+                                          type_info,
+                                          callable_cache,
+                                          direction,
+                                          c_arg_index,
+                                          &scm_arg_index);
             break;
         case GI_TYPE_TAG_GSLIST:
             g_critical ("GSLIST NOT IMPLEMENTED");
@@ -275,8 +289,10 @@ ggi_arg_cache_new (GITypeInfo *type_info,
             //            g_base_info_unref ((GIBaseInfo *) interface_info);
             break;
         case GI_TYPE_TAG_ERROR:
-            g_critical ("GI_TYPE_TAG_ERROR: NOT IMPLEMENTED");
-            // TODO
+            arg_cache = ggi_arg_gerror_new_from_info (type_info,
+                                                      arg_info,
+                                                      transfer,
+                                                      direction);
             break;
         default:
             break;
@@ -345,7 +361,7 @@ _callable_cache_generate_args_cache_real (GGICallableCache *callable_cache,
                                       -1);
 
     if (return_cache == NULL)
-       return FALSE;
+        return FALSE;
 
     return_cache->is_skipped = g_callable_info_skip_return (callable_info);
     callable_cache->return_cache = return_cache;
@@ -590,7 +606,7 @@ _function_cache_init (GGIFunctionCache *function_cache,
                                                     (GIFunctionInfo *) callable_info,
                                                     invoker,
                                                     &error))
-            return TRUE;
+                return TRUE;
         }
 
     // TODO: deinit real
@@ -643,14 +659,54 @@ ggi_function_cache_new (GICallableInfo *info)
 
 SCM
 ggi_function_cache_invoke (GGIFunctionCache *function_cache,
-                           SCM scm_args,
-                           SCM scm_kwargs)
+                           SCM               scm_args,
+                           SCM               scm_kwargs)
 {
     g_debug ("ggi_function_cache_invoke");
 
     GGIInvokeState state = { 0, };
 
     return function_cache->invoke (function_cache, &state, scm_args, scm_kwargs);
+}
+
+// GGICCallbackCache
+
+GGIFunctionCache *
+ggi_ccallback_cache_new (GICallableInfo *info,
+                         GCallback       function_ptr)
+{
+    GGICCallbackCache *ccallback_cache;
+    GGIFunctionCache *function_cache;
+
+    ccallback_cache = g_new0 (GGICCallbackCache, 1);
+    function_cache = (GGIFunctionCache *) ccallback_cache;
+
+    function_cache->invoker.native_address = function_ptr;
+
+    if (!_function_cache_init (function_cache, info))
+        {
+            g_free (ccallback_cache);
+            return NULL;
+        }
+
+    return function_cache;
+}
+
+SCM
+ggi_ccallback_cache_invoke (GGICCallbackCache *ccallback_cache,
+                            SCM                scm_args,
+                            SCM                scm_optargs,
+                            gpointer           user_data)
+{
+    GGIFunctionCache *function_cache = (GGIFunctionCache *) ccallback_cache;
+    GGIInvokeState state = { 0, };
+
+    state.user_data = user_data;
+
+    return function_cache->invoke (function_cache,
+                                   &state,
+                                   scm_args,
+                                   scm_optargs);
 }
 
 void

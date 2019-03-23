@@ -1,10 +1,9 @@
-
 /* -*- Mode: C; c-basic-offset: 4 -*-
  * vim: tabstop=4 shiftwidth=4 expandtab
  */
 
-#ifndef __GGI_CALLBACK_H__
-#define __GGI_CALLBACK_H__
+#ifndef __GGI_CCLOSURE_H__
+#define __GGI_CCLOSURE_H__
 
 #include <libguile.h>
 #include "ggi-cache.h"
@@ -18,7 +17,7 @@ typedef struct {
   GIScopeType scope;
   GDestroyNotify destroy_notify_func;
   GGICallableCache *cache;
-} GGICallback;
+} GGICCallback;
 
 extern SCM GGICallback_Type;
 

@@ -10,18 +10,14 @@
 
 G_BEGIN_DECLS
 
-GGIArgCache *ggi_arg_garray_new_from_info  (GITypeInfo        *type_info,
-                                            GIArgInfo         *arg_info,   /* may be null */
-                                            GITransfer         transfer,
-                                            GGIDirection      direction,
-                                            GGICallableCache *callable_cache);
+GGIArgCache *
+ggi_arg_glist_new_from_info (GITypeInfo       *type_info,
+                             GIArgInfo        *arg_info,
+                             GITransfer        transfer,
+                             GGIDirection      direction,
+                             GGICallableCache *callable_cache);
 
-GGIArgCache *ggi_arg_garray_len_arg_setup  (GGIArgCache      *arg_cache,
-                                            GITypeInfo        *type_info,
-                                            GGICallableCache *callable_cache,
-                                            GGIDirection      direction,
-                                            gssize             arg_index,
-                                            gssize            *py_arg_index);
+#define ggi_arg_gslist_new_from_info ggi_arg_glist_new_from_info
 
 G_END_DECLS
 

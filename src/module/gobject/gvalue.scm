@@ -9,7 +9,7 @@
             <gulong> <gint64> <guint64> <gfloat> <gdouble>
             <gchar-array> <gboxed> <gboxed-scm> <gvalue-array>
             <gpointer>
-            <genum> <gflags>
+            <genum> <gflags> <gerror>
             genum-register-static gflags-register-static
             genum-class->value-table gflags-class->value-table
             scm->gvalue gvalue->scm
@@ -40,7 +40,7 @@
 
 (define-method (initialize (instance <gvalue>) initargs)
   (or (memq #:value initargs)
-      (gruntime-error "Missing #:value argument"))
+      (error "Missing #:value argument"))
   (gvalue-set! instance (get-keyword #:value initargs 'foo)))
 
 (define-method (write (obj <gvalue>) file)
@@ -111,6 +111,7 @@ values."
 generic C structures. You won't see instances of this class, only of its
 subclasses."
   #:gtype-name "GBoxed")
+
 
 (define-class/docs <gvalue-array> (<gboxed>)
   "A @code{<gvalue>} class for arrays of @code{<gvalue>}."

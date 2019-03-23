@@ -56,8 +56,8 @@ scm_gclosure_marshal (GClosure *closure, GValue *return_value,
                       gpointer invocation_hint, gpointer marshal_data)
 {
   closure_data data = {
-    closure, return_value, n_param_values, param_values,
-    invocation_hint, marshal_data
+                       closure, return_value, n_param_values, param_values,
+                       invocation_hint, marshal_data
   };
   /* GThreadFunc is void* (*func)(void*), just like we need */
   scm_with_guile ((GThreadFunc)scm_gclosure_marshal_with_guile, &data);

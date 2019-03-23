@@ -27,7 +27,11 @@ SCM scm_scm_to_gvalue (SCM type, SCM scm);
 
 SCM scm_genum_register_static (SCM name, SCM vtable);
 SCM scm_gflags_register_static (SCM name, SCM vtable);
+
 /* C only */
+
+static guint scm_c_scm_to_flags_value (GFlagsClass *flags_class, SCM value);
+static gint scm_c_scm_to_enum_value (GEnumClass *enum_class, SCM value);
 
 SCM scm_c_make_gvalue (GType gtype);
 GValue* scm_c_gvalue_peek_value (SCM value);

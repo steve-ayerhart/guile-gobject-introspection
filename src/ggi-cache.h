@@ -17,7 +17,7 @@ typedef struct _GGICallableCache GGICallableCache;
 typedef struct _GGIFunctionCache GGIFunctionCache;
 typedef struct _GGIVFuncCache GGIVFuncCache;
 
-typedef GGIFunctionCache GGICallbackCache;
+typedef GGIFunctionCache GGICCallbackCache;
 typedef GGIFunctionCache GGIConstructorCache;
 typedef GGIFunctionCache GGIFunctionWithInstanceCache;
 typedef GGIFunctionCache GGIMethodCache;

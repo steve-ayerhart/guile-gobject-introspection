@@ -229,7 +229,10 @@ ggi_gi_constants_init (void)
                 "g-maxint", "g-maxuint", "g-minlong", "g-maxlong",
                 "g-maxulong", "g-maxsize", "g-minssize", "g-maxssize",
                 "g-minoffset", "g-maxoffset", NULL);
+
+  scm_c_define ("blahblah", scm_c_gtype_to_class (g_error_get_type ()));
 }
+
 
 void
 gi_module_init (void)

@@ -54,6 +54,11 @@ ggi_finalize_pointer (void *info)
   g_base_info_unref (info);
 }
 
+gsize
+_ggi_g_type_tag_size (GITypeTag type_tag);
+gsize
+_ggi_g_type_info_size (GITypeInfo *type_info);
+
 GIBaseInfo *
 ggi_object_get_gi_info (SCM scm_object);
 

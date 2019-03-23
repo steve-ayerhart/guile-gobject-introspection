@@ -17,9 +17,6 @@ typedef struct {
   SCMGValueSetTypeInstanceFunc setter;
 } gtype_instance_wrap_funcs;
 
-static guint scm_c_scm_to_flags_value (GFlagsClass *flags_class, SCM value);
-static gint scm_c_scm_to_enum_value (GEnumClass *enum_class, SCM value);
-
 SCM scm_class_gvalue;
 static SCM scm_allocate_instance;
 

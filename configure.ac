@@ -1,6 +1,6 @@
 AC_INIT([Guile Gobject Introspection], [0.1], [steve@ayerh.art],
 [guile-gobject-introspection],
-[http://bonerbonerboner.com])
+[https://bonerbonerboner.com])
 
 AC_CONFIG_SRCDIR([src/module/pre-install-env.in])
 AC_CONFIG_MACRO_DIRS([m4])
