@@ -14,6 +14,7 @@ C_FILES = \
   gi-module.c \
   ggi-basic-types.c \
   ggi-list.c \
+  ggi-hashtable.c \
   ggi-array.c \
   ggi-object.c \
   ggi-closure.c \

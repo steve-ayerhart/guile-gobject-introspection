@@ -10,6 +10,7 @@
 #include "ggi-infos.h"
 #include "ggi-invoke.h"
 #include "ggi-object.h"
+#include "ggi-hashtable.h"
 #include "ggi-error.h"
 #include "ggi-array.h"
 #include "ggi-closure.h"
@@ -276,8 +277,11 @@ ggi_arg_cache_new (GITypeInfo *type_info,
             // TODO
             break;
         case GI_TYPE_TAG_GHASH:
-            g_critical ("GHASH NOT IMPLEMENTED");
-            // TODO
+            arg_cache = ggi_arg_hash_table_new_from_info (type_info,
+                                              arg_info,
+                                              transfer,
+                                              direction,
+                                              callable_cache);
             break;
         case GI_TYPE_TAG_INTERFACE:
             arg_cache = _arg_cache_new_for_interface ((GIInterfaceInfo *) g_type_info_get_interface (type_info),

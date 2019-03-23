@@ -64,6 +64,8 @@ _invoke_state_init_from_cache (GGIInvokeState *state,
                                SCM scm_args,
                                SCM scm_kwargs)
 {
+    g_debug ("_invoke_state_init_from_cache");
+
     GGICallableCache *cache = (GGICallableCache *) function_cache;
 
     state->n_args =_ggi_callable_cache_args_len (cache);

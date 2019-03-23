@@ -55,6 +55,10 @@ ggi_define_module_function (GIBaseInfo *info)
                       callable_cache->n_scm_args - callable_cache->n_scm_required_args,
                       0,
                       _wrap_ggi_function);
+
+  scm_set_procedure_property_x (scm_variable_ref (scm_c_lookup (function_name)),
+                                scm_from_locale_symbol ("cache"),
+                                scm_function_cache);
 }
 
 void
