@@ -16,13 +16,6 @@
 #include "ggi-cache.h"
 #include "gutil.h"
 
-void
-ggi_finalize_callable_cache (void *cache)
-{
-  g_debug ("ggi_fnalize_callable_cache");
-
-  ggi_callable_cache_free (cache);
-}
 
 
 void

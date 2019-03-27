@@ -124,6 +124,8 @@ typedef struct _GGIInterfaceCache
     gchar *type_name;
 } GGIInterfaceCache;
 
+typedef SCM (*ggi_gsubr_t)(void);
+
 struct _GGICallableCache
 {
     const gchar *name;
@@ -182,6 +184,10 @@ struct _GGIFunctionCache {
 
     /* An invoker with ffi_cif already setup */
     GIFunctionInvoker invoker;
+
+    ffi_closure *wrapper_closure;
+    ffi_cif wrapper_cif;
+    void *wrapper;
 
     SCM (*invoke) (GGIFunctionCache *function_cache,
                    GGIInvokeState *state,

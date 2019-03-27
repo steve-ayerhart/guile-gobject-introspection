@@ -4,6 +4,7 @@
 
 #include <libguile.h>
 #include <girffi.h>
+#include <ffi.h>
 #include <girepository.h>
 
 #include "ggi-cache.h"
@@ -576,6 +577,82 @@ _function_cache_invoke_real (GGIFunctionCache *function_cache,
     return ggi_invoke_c_callable (function_cache, state, scm_args, scm_kwargs);
 }
 
+static void
+_ggi_function_wrapper (ffi_cif *cif, void *ret, void **args, void *cache)
+{
+    g_debug ("ggi_function_wrapper");
+
+    g_assert (cif != NULL);
+    g_assert (ret != NULL);
+    g_assert (args != NULL);
+    g_assert (cache != NULL);
+
+    *(ffi_arg *)ret = SCM_UNPACK (SCM_EOL);
+}
+
+static gboolean
+_function_cache_wrapper_init (GGIFunctionCache *function_cache,
+                              GGICallableCache *callable_cache)
+{
+    g_debug ("_funtion_cache_wrapper_init");
+
+    ffi_type **args = NULL;
+    ffi_type *ret_type;
+    ffi_status prep_ok;
+
+    int n_total_args;
+    int n_opt_args;
+
+    function_cache->wrapper_closure = ffi_closure_alloc (sizeof (ffi_closure),
+                                                         &(function_cache->wrapper));
+
+    g_return_val_if_fail (function_cache->wrapper_closure != NULL, FALSE);
+    g_return_val_if_fail (function_cache->wrapper != NULL, FALSE);
+
+    n_opt_args = callable_cache->n_scm_args - callable_cache->n_scm_required_args;
+    n_total_args = callable_cache->n_scm_required_args + n_opt_args;
+
+    if (n_total_args > 0)
+        args = g_new0 (ffi_type *, n_total_args);
+
+    for (int i = 0; i < n_total_args; i++)
+        {
+            args[i] = &ffi_type_pointer;
+        }
+
+    ret_type = &ffi_type_pointer;
+
+    prep_ok = ffi_prep_cif (&(function_cache->wrapper_cif),
+                            FFI_DEFAULT_ABI,
+                            n_total_args,
+                            ret_type,
+                            args);
+
+    if (prep_ok != FFI_OK)
+        {
+            scm_misc_error ("ggi_function_create_gsubr",
+                            "failed to created closure",
+                            NULL);
+            return FALSE;
+        }
+
+    prep_ok = ffi_prep_closure_loc (function_cache->wrapper_closure,
+                                   &(function_cache->wrapper_cif),
+                                   _ggi_function_wrapper,
+                                   function_cache,
+                                   function_cache->wrapper);
+
+    if (prep_ok != FFI_OK)
+        {
+            scm_misc_error ("ggi_function_create_gsubr",
+                            "failed to created closure",
+                            NULL);
+            return FALSE;
+        }
+
+    return TRUE;
+}
+
 
 static gboolean
 _function_cache_init (GGIFunctionCache *function_cache,
@@ -595,6 +672,9 @@ _function_cache_init (GGIFunctionCache *function_cache,
         function_cache->invoke = _function_cache_invoke_real;
 
     if (!_callable_cache_init (callable_cache, callable_info))
+        return FALSE;
+
+    if (!_function_cache_wrapper_init (function_cache, callable_cache))
         return FALSE;
 
     if (invoker->native_address == NULL)

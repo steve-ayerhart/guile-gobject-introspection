@@ -9,9 +9,6 @@
 
 #include <girepository.h>
 
-extern SCM ggi_funtion_type;
-typedef SCM (*ggi_gsubr_t)(void);
-
 G_BEGIN_DECLS
 
 void
