@@ -601,8 +601,8 @@ _ggi_function_wrapper (ffi_cif *cif, void *ret, void **args, void *function_cach
 
             scm_arg = SCM_PACK (*(scm_t_bits *)(args[i]));
 
-            scm_args = scm_append (scm_list_2 (scm_list_1 (scm_arg),
-                                               scm_args));
+            scm_args = scm_append (scm_list_2 (scm_args,
+                                               scm_list_1 (scm_arg)));
         }
 
     scm_optargs = SCM_EOL;
@@ -613,8 +613,8 @@ _ggi_function_wrapper (ffi_cif *cif, void *ret, void **args, void *function_cach
 
             scm_arg = SCM_PACK (*(scm_t_bits *)(args[i]));
 
-            scm_optargs = scm_append (scm_list_2 (scm_list_1 (scm_arg),
-                                                  scm_args));
+            scm_optargs = scm_append (scm_list_2 (scm_args,
+                                                  scm_list_1 (scm_arg)));
         }
 
 
