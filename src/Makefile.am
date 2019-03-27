@@ -18,6 +18,7 @@ C_FILES = \
   ggi-array.c \
   ggi-object.c \
   ggi-closure.c \
+  ggi-function.c \
   ggi-ccallback.c \
   ggi-argument.c \
   ggi-error.c \
