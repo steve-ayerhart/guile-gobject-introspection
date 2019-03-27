@@ -578,18 +578,52 @@ _function_cache_invoke_real (GGIFunctionCache *function_cache,
 }
 
 static void
-_ggi_function_wrapper (ffi_cif *cif, void *ret, void **args, void *cache)
+_ggi_function_wrapper (ffi_cif *cif, void *ret, void **args, void *function_cache)
 {
     g_debug ("ggi_function_wrapper");
 
     g_assert (cif != NULL);
     g_assert (ret != NULL);
     g_assert (args != NULL);
-    g_assert (cache != NULL);
+    g_assert (function_cache != NULL);
 
-    *(ffi_arg *)ret = SCM_UNPACK (SCM_EOL);
+    SCM scm_args, scm_optargs;
+    unsigned int n_args = cif->nargs;
+    unsigned int n_optargs;
+    GGICallableCache *callable_cache;
+
+    callable_cache = (GGICallableCache *) function_cache;
+
+    scm_args = SCM_EOL;
+    for (unsigned int i = 0; i < callable_cache->n_scm_required_args; i++)
+        {
+            SCM scm_arg;
+
+            scm_arg = SCM_PACK (*(scm_t_bits *)(args[i]));
+
+            scm_args = scm_append (scm_list_2 (scm_list_1 (scm_arg),
+                                               scm_args));
+        }
+
+    scm_optargs = SCM_EOL;
+    n_optargs = callable_cache->n_scm_args - callable_cache->n_scm_required_args;
+    for (unsigned int i = 0; i < n_optargs; i++)
+        {
+            SCM scm_arg;
+
+            scm_arg = SCM_PACK (*(scm_t_bits *)(args[i]));
+
+            scm_optargs = scm_append (scm_list_2 (scm_list_1 (scm_arg),
+                                                  scm_args));
+        }
+
+
+    *(ffi_arg *)ret = SCM_UNPACK (ggi_function_cache_invoke (function_cache,
+                                                             scm_args,
+                                                             scm_optargs));
 }
 
+// TODO: don't need both args
 static gboolean
 _function_cache_wrapper_init (GGIFunctionCache *function_cache,
                               GGICallableCache *callable_cache)
