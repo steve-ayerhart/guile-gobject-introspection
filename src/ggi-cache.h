@@ -7,7 +7,6 @@
 #include <girepository.h>
 #include <girffi.h>
 
-
 #include "ggi-invoke-state-struct.h"
 
 G_BEGIN_DECLS
@@ -236,69 +235,72 @@ GGIArgCache *
 ggi_arg_cache_alloc (void);
 
 GGIArgCache *
-ggi_arg_cache_new (GITypeInfo *type_info,
-                   GIArgInfo *arg_info,
-                   GITransfer transfer,
-                   GIDirection direction,
+ggi_arg_cache_new (GITypeInfo       *type_info,
+                   GIArgInfo        *arg_info,
+                   GITransfer        transfer,
+                   GIDirection       direction,
                    GGICallableCache *callable_cache,
-                   gssize c_arg_index,
-                   gssize scm_arg_index);
+                   gssize            c_arg_index,
+                   gssize            scm_arg_index);
 
 void
-ggi_arg_cache_free      (GGIArgCache *cache);
+ggi_arg_cache_free (GGIArgCache *cache);
 
 void
-ggi_callable_cache_free    (GGICallableCache *cache);
+ggi_callable_cache_free (GGICallableCache *cache);
 
 gchar *
 ggi_callable_cache_get_full_name (GGICallableCache *cache);
 
 GGIFunctionCache *
-ggi_function_cache_new     (GICallableInfo *info);
+ggi_function_cache_new  (GICallableInfo *info);
 
 SCM
 ggi_function_cache_invoke  (GGIFunctionCache *function_cache,
-                            SCM scm_args,
-                            SCM scm_kwargs);
+                            SCM               scm_args,
+                            SCM               scm_kwargs);
 
 GGIFunctionCache *
-ggi_ccallback_cache_new    (GICallableInfo *info,
-                            GCallback function_ptr);
+ggi_ccallback_cache_new (GICallableInfo *info,
+                         GCallback       function_ptr);
 
 SCM
 ggi_ccallback_cache_invoke (GGIFunctionCache *function_cache,
-                            SCM scm_args,
-                            SCM scm_kwargs,
-                            gpointer user_data);
+                            SCM               scm_args,
+                            SCM               scm_kwargs,
+                            gpointer          user_data);
 
 GGIFunctionCache *
-ggi_constructor_cache_new  (GICallableInfo *info);
+ggi_constructor_cache_new (GICallableInfo *info);
 
 GGIFunctionCache *
-ggi_method_cache_new       (GICallableInfo *info);
+ggi_method_cache_new (GICallableInfo *info);
 
 GGIFunctionCache *
-ggi_vfunc_cache_new        (GICallableInfo *info);
+ggi_vfunc_cache_new (GICallableInfo *info);
 
 GGIClosureCache *
-ggi_closure_cache_new      (GICallableInfo *info);
+ggi_closure_cache_new (GICallableInfo *info);
 
 inline static guint
-_ggi_callable_cache_args_len (GGICallableCache *cache) {
+_ggi_callable_cache_args_len (GGICallableCache *cache)
+{
     return ((cache)->args_cache)->len;
-
 }
 
 inline static GGIArgCache *
-_ggi_callable_cache_get_arg (GGICallableCache *cache, guint index) {
+_ggi_callable_cache_get_arg (GGICallableCache *cache,
+                             guint             index)
+{
     return (GGIArgCache *) g_ptr_array_index (cache->args_cache, index);
-
 }
 
 inline static void
-_ggi_callable_cache_set_arg (GGICallableCache *cache, guint index, GGIArgCache *arg_cache) {
+_ggi_callable_cache_set_arg (GGICallableCache *cache,
+                             guint             index,
+                             GGIArgCache      *arg_cache)
+{
     cache->args_cache->pdata[index] = arg_cache;
-
 }
 
 void
