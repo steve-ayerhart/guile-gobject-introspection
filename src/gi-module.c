@@ -16,11 +16,11 @@
 #include "ggi-cache.h"
 #include "gutil.h"
 
-
-
 void
 ggi_define_module_enum (GIBaseInfo *info)
 {
+  g_debug ("ggi_define_module_enum: %s", g_base_info_get_name (info));
+
   GIEnumInfo *enum_info;
   const char *name;
   GType gtype;
@@ -40,6 +40,8 @@ ggi_define_module_enum (GIBaseInfo *info)
 void
 ggi_define_module_constant (GIBaseInfo *info)
 {
+  g_debug ("ggi_define_module_constant: %s", g_base_info_get_name (info));
+
   GIConstantInfo *constant_info;
   const char *name;
   GITypeInfo *type_info;
@@ -120,7 +122,6 @@ SCM_DEFINE (scm_ggi_create_gi_module, "create-gi-module", 1, 1, 0,
   namespace = (gchar *) scm_to_locale_string (scm_symbol_to_string (scm_namespace));
   scm_dynwind_free (namespace);
 
-  g_debug (" namespace");
   if (SCM_UNBNDP (scm_version))
     version = NULL;
   else
@@ -129,12 +130,9 @@ SCM_DEFINE (scm_ggi_create_gi_module, "create-gi-module", 1, 1, 0,
       scm_dynwind_free (version);
     }
 
-  g_debug (" version");
   error = NULL;
 
   typelib = g_irepository_require (NULL, namespace, version, 0, &error);
-
-  g_debug (" required");
 
   if (typelib == NULL)
     {
@@ -190,8 +188,6 @@ ggi_gi_constants_init (void)
                 "g-maxint", "g-maxuint", "g-minlong", "g-maxlong",
                 "g-maxulong", "g-maxsize", "g-minssize", "g-maxssize",
                 "g-minoffset", "g-maxoffset", NULL);
-
-  scm_c_define ("blahblah", scm_c_gtype_to_class (g_error_get_type ()));
 }
 
 

@@ -21,6 +21,8 @@ ggi_finalize_callable_cache (void *cache)
 void
 ggi_define_module_function (GIBaseInfo *info)
 {
+    g_debug ("ggi_define_module_function: %s", g_base_info_get_name (info));
+
     GGIFunctionCache *function_cache;
     GGICallableCache *callable_cache;
     GIFunctionInfo *function_info;

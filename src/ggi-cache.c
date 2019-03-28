@@ -549,8 +549,6 @@ _callable_cache_init (GGICallableCache *cache, GICallableInfo *callable_info)
     // TODO: handle deprecated
 
     n_args = (gint) cache->args_offset + g_callable_info_get_n_args (callable_info);
-    g_debug (" name: %s", cache->name);
-    g_debug (" n_args: %d", n_args);
 
     if (n_args >= 0)
         {
@@ -558,13 +556,11 @@ _callable_cache_init (GGICallableCache *cache, GICallableInfo *callable_info)
             g_ptr_array_set_size (cache->args_cache, n_args);
         }
 
-    g_debug ( "generate_args_cache");
     if (!cache->generate_args_cache (cache, callable_info)) {
         //        _callable_cache_deinit_real (cache);
         return FALSE;
     }
 
-    g_debug ("callable_cache_init: success");
     return TRUE;
 }
 

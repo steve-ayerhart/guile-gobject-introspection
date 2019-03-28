@@ -338,6 +338,8 @@ ggi_arg_garray_new_from_info (GITypeInfo *type_info,
                               GGIDirection direction,
                               GGICallableCache *callable_cache)
 {
+    g_debug ("ggi_arg_garray_new_from_info");
+
     GGIArgGArray *array_cache = g_slice_new0 (GGIArgGArray);
     if (array_cache == NULL)
         return NULL;
