@@ -4,6 +4,7 @@
 
 #include <libguile.h>
 #include <girffi.h>
+#include <glib.h>
 #include <ffi.h>
 #include <girepository.h>
 
@@ -330,6 +331,7 @@ _ggi_get_direction (GGICallableCache *callable_cache, GIDirection gi_direction)
         }
 }
 
+
 void
 ggi_callable_cache_free (GGICallableCache *cache)
 {
@@ -524,6 +526,16 @@ _callable_cache_generate_args_cache_real (GGICallableCache *callable_cache,
     return TRUE;
 }
 
+static void
+_callable_cache_deinit_real (GGICallableCache *cache)
+{
+    g_clear_pointer (&cache->to_scm_args, g_slist_free);
+    g_clear_pointer (&cache->arg_name_list, g_slist_free);
+    g_clear_pointer (&cache->arg_name_hash, g_hash_table_unref);
+    g_clear_pointer (&cache->args_cache, g_ptr_array_unref);
+    g_clear_pointer (&cache->return_cache, ggi_arg_cache_free);
+}
+
 static gboolean
 _callable_cache_init (GGICallableCache *cache, GICallableInfo *callable_info)
 {
@@ -571,6 +583,16 @@ _function_cache_invoke_real (GGIFunctionCache *function_cache,
                              SCM scm_kwargs)
 {
     return ggi_invoke_c_callable (function_cache, state, scm_args, scm_kwargs);
+}
+
+static void
+_function_cache_deinit_real (GGICallableCache *callable_cache)
+{
+    g_function_invoker_destroy (&((GGIFunctionCache *) callable_cache)->invoker);
+    ffi_closure_free ((&((GGIFunctionCache *) callable_cache)->wrapper_closure));
+    // todo clear cif?
+
+    _callable_cache_deinit_real (callable_cache);
 }
 
 static void
