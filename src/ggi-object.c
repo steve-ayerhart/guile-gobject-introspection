@@ -4,6 +4,7 @@
 
 #include <libguile.h>
 #include <glib.h>
+#include <glib-object.h>
 
 #include "ggi-object.h"
 #include "gobject.h"
@@ -17,17 +18,43 @@ static gboolean
 _ggi_marshal_from_scm_gobject (SCM         scm_arg,
                                GIArgument *arg,
                                GITransfer  transfer)
+#define FUNC_NAME "_ggi_marshal_from_scm_gobject"
 {
-    // TODO
+    g_debug ("_ggi_marshal_from_scm_gobject");
+
+    GObject *gobject;
+
+    if (SCM_UNBNDP (scm_arg))
+        {
+            arg->v_pointer = NULL;
+            return TRUE;
+        }
+
+    SCM_VALIDATE_GOBJECT_COPY (1, scm_arg, gobject);
+
+    if (transfer == GI_TRANSFER_EVERYTHING)
+        g_object_unref (gobject);
+
+    arg->v_pointer = gobject;
+
     return TRUE;
 }
+#undef FUNC_NAME
 
 gboolean
 ggi_arg_gobject_out_arg_from_scm (SCM         scm_arg,
                                   GIArgument *arg,
                                   GITransfer  transfer)
 {
-    // TODO
+    g_debug ("ggi_arg_gobject_out_arg_from_scm");
+
+    GObject *gobject;
+
+    if (!_ggi_marshal_from_scm_gobject (scm_arg, arg, transfer))
+        return FALSE;
+
+    // vfunc stuff
+    //gobject = arg->v_pointer;
     return TRUE;
 }
 
@@ -39,10 +66,34 @@ _ggi_marshal_from_scm_interface_object (GGIInvokeState              *state,
                                         GIArgument                  *arg,
                                         gpointer                    *cleanup_data,
                                         GGIObjectMarshalFromScmFunc  func)
+#define FUNC_NAME "_ggi_marshal_from_scm_interface_object"
 {
-    // TODO
-    return TRUE;
+    g_debug ("_ggi_marshal_from_scm_interface_object");
+
+    GObject *gobject;
+    GGIInterfaceCache *iface_cache = (GGIInterfaceCache *) arg_cache;
+
+    if (SCM_UNBNDP (scm_arg))
+        {
+            arg->v_pointer = NULL;
+            return TRUE;
+        }
+
+    SCM_VALIDATE_GOBJECT_COPY (1, scm_arg, gobject);
+    if (g_type_is_a (G_OBJECT_TYPE (gobject), iface_cache->g_type))
+        {
+            gboolean res;
+            res = func (scm_arg, arg, arg_cache->transfer);
+            *cleanup_data = arg->v_pointer;
+            return res;
+        }
+    else
+        {
+            return FALSE;
+        }
 }
+#undef FUNC_NAME
+
 SCM
 ggi_arg_gobject_to_scm_called_from_c (GIArgument *arg,
                                       GITransfer  transfer)
@@ -170,6 +221,8 @@ ggi_arg_gobject_setup_from_info (GGIArgCache      *arg_cache,
 
             arg_cache->to_scm_cleanup = _ggi_marshal_cleanup_to_scm_interface_object;
         }
+
+    return TRUE;
 }
 
 GGIArgCache *
@@ -192,7 +245,9 @@ ggi_arg_gobject_new_from_info (GITypeInfo       *type_info,
                                              iface_info);
 
     if (cache == NULL)
-        return NULL;
+        {
+            return NULL;
+        }
 
     res = ggi_arg_gobject_setup_from_info (cache,
                                            type_info,

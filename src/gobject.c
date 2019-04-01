@@ -658,14 +658,12 @@ scm_gobject_init (void)
 #include "gobject.x"
 #endif
   scm_register_gtype_instance_funcs (&gobject_funcs);
-  scm_c_register_gtype_instance_gvalue_wrappers
-    (G_TYPE_OBJECT,
-     (SCMGValueGetTypeInstanceFunc)g_value_get_object,
-     (SCMGValueSetTypeInstanceFunc)g_value_set_object);
-  scm_c_register_gtype_instance_gvalue_wrappers
-    (G_TYPE_INTERFACE,
-     (SCMGValueGetTypeInstanceFunc)g_value_get_object,
-     (SCMGValueSetTypeInstanceFunc)g_value_set_object);
+  scm_c_register_gtype_instance_gvalue_wrappers (G_TYPE_OBJECT,
+                                                 (SCMGValueGetTypeInstanceFunc) g_value_get_object,
+                                                 (SCMGValueSetTypeInstanceFunc) g_value_set_object);
+  scm_c_register_gtype_instance_gvalue_wrappers (G_TYPE_INTERFACE,
+                                                 (SCMGValueGetTypeInstanceFunc) g_value_get_object,
+                                                 (SCMGValueSetTypeInstanceFunc) g_value_set_object);
 
   _in_construction_from_scheme = scm_permanent_object (scm_make_fluid ());
   scm_fluid_set_x (_in_construction_from_scheme, SCM_EOL);

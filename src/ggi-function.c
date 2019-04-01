@@ -21,7 +21,8 @@ ggi_finalize_callable_cache (void *cache)
 void
 ggi_define_module_function (GIBaseInfo *info)
 {
-    g_debug ("ggi_define_module_function: %s", g_base_info_get_name (info));
+    g_debug ("ggi_define_module_function:");
+    g_debug (" %s", g_base_info_get_name (info));
 
     GGIFunctionCache *function_cache;
     GGICallableCache *callable_cache;
@@ -40,6 +41,10 @@ ggi_define_module_function (GIBaseInfo *info)
     callable_cache = (GGICallableCache *) function_cache;
 
     g_assert (function_cache != NULL);
+
+    g_debug (" n_args: %d, req_args: ",
+             callable_cache->n_scm_args,
+             callable_cache->n_scm_required_args);
 
     scm_c_define_gsubr (function_name,
                         callable_cache->n_scm_required_args,

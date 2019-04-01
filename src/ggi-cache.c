@@ -61,6 +61,8 @@ ggi_arg_base_setup (GGIArgCache *arg_cache,
                     GITransfer   transfer,
                     GIDirection  direction)
 {
+    g_debug ("ggi_arg_base_setup");
+
     arg_cache->direction = direction;
     arg_cache->transfer = transfer;
     arg_cache->scm_arg_index = -1;
@@ -114,13 +116,15 @@ ggi_arg_cache_free (GGIArgCache *cache)
 /* GGIInterfaceCache */
 
 static GGIArgCache *
-_arg_cache_new_for_interface (GIInterfaceInfo *iface_info,
+_arg_cache_new_for_interface (GIInterfaceInfo  *iface_info,
                               GITypeInfo       *type_info,
                               GIArgInfo        *arg_info,
                               GITransfer        transfer,
                               GGIDirection      direction,
                               GGICallableCache *callable_cache)
 {
+    g_debug ("_arg_cache_new_for_interface");
+
     GIInfoType info_type;
 
     info_type = g_base_info_get_type ((GIBaseInfo *) iface_info);
@@ -190,6 +194,8 @@ ggi_arg_interface_setup (GGIInterfaceCache *iface_cache,
                          GGIDirection       direction,
                          GIInterfaceInfo   *iface_info)
 {
+    g_debug ("ggi_arg_interface_setup");
+
     if (!ggi_arg_base_setup ((GGIArgCache *) iface_cache,
                              type_info,
                              arg_info,
@@ -203,7 +209,6 @@ ggi_arg_interface_setup (GGIInterfaceCache *iface_cache,
     g_base_info_ref ((GIBaseInfo *)iface_info);
     iface_cache->interface_info = iface_info;
     iface_cache->arg_cache.type_tag = GI_TYPE_TAG_INTERFACE;
-    iface_cache->type_name = (gchar*)scm_from_utf8_string ("TYPE!!!!");
     iface_cache->type_name = _ggi_g_base_info_get_fullname (iface_info);
     iface_cache->g_type = g_registered_type_info_get_g_type ((GIRegisteredTypeInfo *) iface_info);
     iface_cache->scm_type = scm_from_int (1);
@@ -280,10 +285,10 @@ ggi_arg_cache_new (GITypeInfo *type_info,
             break;
         case GI_TYPE_TAG_GHASH:
             arg_cache = ggi_arg_hash_table_new_from_info (type_info,
-                                              arg_info,
-                                              transfer,
-                                              direction,
-                                              callable_cache);
+                                                          arg_info,
+                                                          transfer,
+                                                          direction,
+                                                          callable_cache);
             break;
         case GI_TYPE_TAG_INTERFACE:
             arg_cache = _arg_cache_new_for_interface ((GIInterfaceInfo *) g_type_info_get_interface (type_info),
@@ -304,7 +309,7 @@ ggi_arg_cache_new (GITypeInfo *type_info,
             break;
         }
 
-    if (arg_cache!= NULL)
+    if (arg_cache != NULL)
         {
             arg_cache->scm_arg_index = scm_arg_index;
             arg_cache->c_arg_index = c_arg_index;
@@ -447,6 +452,7 @@ _callable_cache_generate_args_cache_real (GGICallableCache *callable_cache,
 
                             if (arg_cache == NULL)
                                 {
+                                    g_debug ("ggi_arg_cache_new failed");
                                     g_base_info_unref ((GIBaseInfo *) type_info);
                                     g_base_info_unref ((GIBaseInfo *) arg_info);
                                     return FALSE;
@@ -529,6 +535,8 @@ _callable_cache_generate_args_cache_real (GGICallableCache *callable_cache,
 static void
 _callable_cache_deinit_real (GGICallableCache *cache)
 {
+    g_debug ("_callable_cache_deinit_real");
+
     g_clear_pointer (&cache->to_scm_args, g_slist_free);
     g_clear_pointer (&cache->arg_name_list, g_slist_free);
     g_clear_pointer (&cache->arg_name_hash, g_hash_table_unref);
@@ -689,10 +697,10 @@ _function_cache_wrapper_init (GGIFunctionCache *function_cache,
         }
 
     prep_ok = ffi_prep_closure_loc (function_cache->wrapper_closure,
-                                   &(function_cache->wrapper_cif),
-                                   _ggi_function_wrapper,
-                                   function_cache,
-                                   function_cache->wrapper);
+                                    &(function_cache->wrapper_cif),
+                                    _ggi_function_wrapper,
+                                    function_cache,
+                                    function_cache->wrapper);
 
     if (prep_ok != FFI_OK)
         {
@@ -724,10 +732,16 @@ _function_cache_init (GGIFunctionCache *function_cache,
         function_cache->invoke = _function_cache_invoke_real;
 
     if (!_callable_cache_init (callable_cache, callable_info))
-        return FALSE;
+        {
+            g_debug ("callable_cache_init failed");
+            return FALSE;
+        }
 
     if (!_function_cache_wrapper_init (function_cache, callable_cache))
-        return FALSE;
+        {
+            g_debug ("wrapper failed");
+            return FALSE;
+        }
 
     if (invoker->native_address == NULL)
         {
@@ -758,6 +772,8 @@ ggi_arg_interface_new_from_info (GITypeInfo       *type_info,
                                  GGIDirection     direction,
                                  GIInterfaceInfo *iface_info)
 {
+    g_debug ("ggi_arg_interface_new_from_info");
+
     GGIInterfaceCache *ic;
 
     ic = g_slice_new0 (GGIInterfaceCache);
