@@ -212,6 +212,7 @@ ggi_arg_interface_setup (GGIInterfaceCache *iface_cache,
     iface_cache->type_name = _ggi_g_base_info_get_fullname (iface_info);
     iface_cache->g_type = g_registered_type_info_get_g_type ((GIRegisteredTypeInfo *) iface_info);
     iface_cache->scm_type = scm_from_int (1);
+    // todo actually set goops type
     //    iface_cache->scm_type = ggi_type_import_by_gi_info ((GIBaseInfo *) iface_info);
 
     if (iface_cache->scm_type == NULL) {
@@ -219,6 +220,32 @@ ggi_arg_interface_setup (GGIInterfaceCache *iface_cache,
     }
 
     return TRUE;
+}
+
+GGIArgCache *
+ggi_arg_interface_new_from_info (GITypeInfo      *type_info,
+                                 GIArgInfo       *arg_info,
+                                 GITransfer       transfer,
+                                 GGIDirection     direction,
+                                 GIInterfaceInfo *iface_info)
+{
+    g_debug ("ggi_arg_interface_new_from_info");
+
+    GGIInterfaceCache *iface_cache;
+
+    iface_cache = g_slice_new0 (GGIInterfaceCache);
+    if (!ggi_arg_interface_setup (iface_cache,
+                                  type_info,
+                                  arg_info,
+                                  transfer,
+                                  direction,
+                                  iface_info))
+        {
+            ggi_arg_cache_free ((GGIArgCache *) iface_cache);
+            return NULL;
+        }
+
+    return (GGIArgCache *) iface_cache;
 }
 
 
@@ -762,33 +789,6 @@ _function_cache_init (GGIFunctionCache *function_cache,
     // TODO: deinit real
 
     return FALSE;
-}
-
-
-GGIArgCache *
-ggi_arg_interface_new_from_info (GITypeInfo       *type_info,
-                                 GIArgInfo       *arg_info,    /* may be NULL for return arguments */
-                                 GITransfer       transfer,
-                                 GGIDirection     direction,
-                                 GIInterfaceInfo *iface_info)
-{
-    g_debug ("ggi_arg_interface_new_from_info");
-
-    GGIInterfaceCache *ic;
-
-    ic = g_slice_new0 (GGIInterfaceCache);
-    if (!ggi_arg_interface_setup (ic,
-                                  type_info,
-                                  arg_info,
-                                  transfer,
-                                  direction,
-                                  iface_info)) {
-        ggi_arg_cache_free ((GGIArgCache *)ic);
-        return NULL;
-    }
-
-    return (GGIArgCache *) ic;
-
 }
 
 GGIFunctionCache *
