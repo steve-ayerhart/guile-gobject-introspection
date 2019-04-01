@@ -107,6 +107,30 @@ _ggi_marshal_from_scm_interface_enum (GGIInvokeState *state,
                                       GIArgument *arg,
                                       gpointer *cleanup_data)
 {
+    gint enum_value;
+    GGIInterfaceCache *iface_cache = (GGIInterfaceCache *) arg_cache;
+    GIBaseInfo *interface = NULL;
+
+    // TODO: check to make sure it's a goops enum
+
+    enum_value = g_value_get_enum (scm_c_gvalue_peek_value (scm_arg));
+
+    interface = g_type_info_get_interface (arg_cache->type_info);
+    g_assert (g_base_info_get_type (interface) == GI_INFO_TYPE_ENUM);
+
+    if (!gi_argument_from_c_long (arg,
+                                  (long) enum_value,
+                                  g_enum_info_get_storage_type ((GIEnumInfo *) interface)))
+        {
+            g_assert_not_reached ();
+            g_base_info_unref (interface);
+            return FALSE;
+        }
+
+    // TODO: if it's not an goops enum we need to make sure the value is in
+
+
+    g_base_info_unref (interface);
     return TRUE;
 }
 
