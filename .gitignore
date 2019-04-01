@@ -37,3 +37,6 @@ Makefile.in
 .libs
 /modules/pre-install-env
 /stamp-h1
+/GPATH
+/GRTAGS
+/GTAGS
