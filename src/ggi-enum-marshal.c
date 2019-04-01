@@ -16,28 +16,28 @@ gi_argument_from_c_long (GIArgument *arg_out,
     switch (type_tag)
         {
         case GI_TYPE_TAG_INT8:
-            arg_out->v_int8 = (gint8)c_long_in;
+            arg_out->v_int8 = (gint8) c_long_in;
             return TRUE;
         case GI_TYPE_TAG_UINT8:
-            arg_out->v_uint8 = (guint8)c_long_in;
+            arg_out->v_uint8 = (guint8) c_long_in;
             return TRUE;
         case GI_TYPE_TAG_INT16:
-            arg_out->v_int16 = (gint16)c_long_in;
+            arg_out->v_int16 = (gint16) c_long_in;
             return TRUE;
         case GI_TYPE_TAG_UINT16:
-            arg_out->v_uint16 = (guint16)c_long_in;
+            arg_out->v_uint16 = (guint16) c_long_in;
             return TRUE;
         case GI_TYPE_TAG_INT32:
-            arg_out->v_int32 = (gint32)c_long_in;
+            arg_out->v_int32 = (gint32) c_long_in;
             return TRUE;
         case GI_TYPE_TAG_UINT32:
-            arg_out->v_uint32 = (guint32)c_long_in;
+            arg_out->v_uint32 = (guint32) c_long_in;
             return TRUE;
         case GI_TYPE_TAG_INT64:
-            arg_out->v_int64 = (gint64)c_long_in;
+            arg_out->v_int64 = (gint64) c_long_in;
             return TRUE;
         case GI_TYPE_TAG_UINT64:
-            arg_out->v_uint64 = (guint64)c_long_in;
+            arg_out->v_uint64 = (guint64) c_long_in;
             return TRUE;
         default:
             scm_misc_error ("type error",
