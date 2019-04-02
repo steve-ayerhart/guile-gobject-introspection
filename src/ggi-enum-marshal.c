@@ -118,6 +118,7 @@ _ggi_marshal_from_scm_interface_enum (GGIInvokeState *state,
     interface = g_type_info_get_interface (arg_cache->type_info);
     g_assert (g_base_info_get_type (interface) == GI_INFO_TYPE_ENUM);
 
+    // TODO: is this really needed?
     if (!gi_argument_from_c_long (arg,
                                   (long) enum_value,
                                   g_enum_info_get_storage_type ((GIEnumInfo *) interface)))
@@ -128,7 +129,6 @@ _ggi_marshal_from_scm_interface_enum (GGIInvokeState *state,
         }
 
     // TODO: if it's not an goops enum we need to make sure the value is in
-
 
     g_base_info_unref (interface);
     return TRUE;
@@ -152,17 +152,41 @@ _ggi_marshal_to_scm_interface_enum (GGIInvokeState *state,
                                     GIArgument *arg,
                                     gpointer *cleanup_data)
 {
-    SCM scm_obj = SCM_UNSPECIFIED;
+    SCM scm_enum = SCM_UNSPECIFIED;
+    GGIInterfaceCache *iface_cache = (GGIInterfaceCache *) arg_cache;;
+    GIBaseInfo *interface;
+    long c_long;
 
-    return scm_obj;
+    interface = g_type_info_get_interface (arg_cache->type_info);
+    g_assert (g_base_info_get_type (interface) == GI_INFO_TYPE_ENUM);
+
+    if (!gi_argument_to_c_long (arg,
+                                &c_long,
+                                g_enum_info_get_storage_type ((GIEnumInfo *) interface)))
+        {
+            return NULL;
+        }
+
+    if (iface_cache->g_type == G_TYPE_NONE)
+        {
+            // enum without a gtype...
+        }
+    else
+        {
+            scm_enum = scm_c_make_gvalue (iface_cache->g_type);
+            //            scm_c_scm_to_enum_value (scm_enum, scm_from_long (c_long));
+        }
+
+
+    return scm_enum;
 }
 
 static SCM
-_ggi_marshal_to_scm_interface_flags (GGIInvokeState *state,
-                                    GGICallableCache *callable_cache,
-                                    GGIArgCache *arg_cache,
-                                    GIArgument *arg,
-                                    gpointer *cleanup_data)
+_ggi_marshal_to_scm_interface_flags (GGIInvokeState   *state,
+                                     GGICallableCache *callable_cache,
+                                     GGIArgCache      *arg_cache,
+                                     GIArgument       *arg,
+                                     gpointer         *cleanup_data)
 {
     SCM scm_obj = SCM_UNSPECIFIED;
 
