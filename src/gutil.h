@@ -3,6 +3,7 @@
 
 #include <glib.h>
 #include <libguile.h>
+#include <girepository.h>
 
 G_BEGIN_DECLS
 
@@ -11,6 +12,10 @@ G_BEGIN_DECLS
 
 char *
 ggi_gname_to_scm_name (const char *gname);
+
+char *
+ggi_gname_to_scm_function_name (const char *gname,
+                                GICallableInfo *callable_info);
 
 SCM
 scm_c_gerror_to_scm (GError *error);

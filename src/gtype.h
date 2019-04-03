@@ -90,6 +90,9 @@ gpointer scm_c_scm_to_gtype_instance (SCM instance);
 gpointer scm_c_scm_to_gtype_instance_typed (SCM instance, GType gtype);
 SCM scm_c_gtype_instance_to_scm (gpointer ginstance);
 
+void
+scm_gobject_gtype_init (void);
+
 G_END_DECLS
 
 #endif

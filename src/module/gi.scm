@@ -3,12 +3,12 @@
   #:use-module (gi info)
 
   #:use-module (glib utils)
-  #:use-module (gobject)
   #:use-module (gobject gtype)
   #:use-module (gobject gvalue)
   #:use-module (gobject gparameter)
   #:use-module (gobject gclosure)
   #:use-module (gobject gsignal)
+  #:use-module (gobject)
 
   #:use-module (oop goops)
   #:use-module (system foreign)

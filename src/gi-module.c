@@ -16,6 +16,9 @@
 #include "ggi-cache.h"
 #include "gutil.h"
 
+static SCM scm_gtype_name_to_scheme_name;
+static SCM scm_gtype_name_to_class_name;
+
 void
 ggi_define_module_enum (GIBaseInfo *info)
 {
@@ -30,7 +33,9 @@ ggi_define_module_enum (GIBaseInfo *info)
 
   gtype = g_registered_type_info_get_g_type ((GIRegisteredTypeInfo *) info);
 
-  name = ggi_gname_to_scm_name (g_base_info_get_name (info));
+  name = scm_to_locale_string (scm_symbol_to_string (scm_call_1 (scm_gtype_name_to_class_name,
+                                                                 scm_from_locale_string (g_type_name (gtype)))));
+
   scm_enum = scm_c_gtype_to_class (gtype);
 
   scm_c_define (name, scm_enum);
@@ -67,10 +72,99 @@ ggi_define_module_constant (GIBaseInfo *info)
   scm_c_export (name, NULL);
 }
 
+
+void
+ggi_define_module_object (GIBaseInfo *info)
+{
+  GIObjectInfo *object_info;
+  char *class_name;
+  GType gtype;
+  SCM scm_class;
+  SCM scm_gtype_name;
+
+  GI_IS_REGISTERED_TYPE_INFO (info);
+  GI_IS_OBJECT_INFO (info);
+
+  object_info = (GIObjectInfo *) info;
+  gtype = g_registered_type_info_get_g_type ((GIRegisteredTypeInfo *) info);
+
+  scm_dynwind_begin (0);
+
+  class_name = scm_to_locale_string (scm_symbol_to_string (scm_call_1 (scm_gtype_name_to_class_name,
+                                                                       scm_from_locale_string (g_type_name (gtype)))));
+  scm_dynwind_free (class_name);
+
+  scm_class = scm_c_gtype_to_class (gtype);
+
+
+  scm_c_define (class_name, scm_class);
+  scm_c_export (class_name, NULL);
+
+  scm_dynwind_end ();
+}
+
+void
+ggi_finalize_callable_cache (void *cache)
+{
+    g_debug ("ggi_fnalize_callable_cache");
+
+    //ggi_callable_cache_free (cache);
+}
+
+void
+ggi_define_module_function (GIBaseInfo *info)
+{
+    g_debug ("ggi_define_module_function:");
+    g_debug (" %s", g_base_info_get_name (info));
+
+    GGIFunctionCache *function_cache;
+    GGICallableCache *callable_cache;
+    GIFunctionInfo *function_info;
+    const char *function_name;
+    SCM scm_callable_cache;
+    const int args;
+    const int opt_args;
+    ggi_gsubr_t  *ggi_func;
+
+    GI_IS_FUNCTION_INFO (info);
+
+    function_name = ggi_gname_to_scm_function_name (g_base_info_get_name (info),
+                                                    (GICallableInfo *) info);
+
+    function_cache = ggi_function_cache_new ((GICallableInfo *) info);
+    callable_cache = (GGICallableCache *) function_cache;
+
+    g_assert (function_cache != NULL);
+
+    g_debug (" n_args: %d, req_args: ",
+             callable_cache->n_scm_args,
+             callable_cache->n_scm_required_args);
+
+    scm_c_define_gsubr (function_name,
+                        callable_cache->n_scm_required_args,
+                        callable_cache->n_scm_args - callable_cache->n_scm_required_args,
+                        0,
+                        function_cache->wrapper);
+
+
+    scm_callable_cache = scm_from_pointer (callable_cache, ggi_finalize_callable_cache);
+    scm_set_procedure_property_x (scm_variable_ref (scm_c_lookup (function_name)),
+                                  scm_from_locale_symbol ("cache"),
+                                  scm_callable_cache);
+}
+
+
+
 void
 ggi_namespace_init (void *namespace)
 {
   g_debug ("ggi_namespace_init");
+
+  scm_c_use_module ("oop goops");
+  scm_c_use_module ("glib utils");
+  scm_c_use_module ("gobject");
+  scm_c_use_module ("gobject gtype");
+  scm_c_use_module ("gobject gvalue");
 
   for (int n = 0; n < g_irepository_get_n_infos (NULL, namespace); n++)
     {
@@ -94,6 +188,9 @@ ggi_namespace_init (void *namespace)
         case GI_INFO_TYPE_FLAGS:
           ggi_define_module_enum (info);
           g_base_info_unref (info);
+          break;
+        case GI_INFO_TYPE_OBJECT:
+          ggi_define_module_object (info);
           break;
         case GI_INFO_TYPE_FUNCTION:
           ggi_define_module_function (info);
@@ -158,7 +255,6 @@ SCM_DEFINE (scm_ggi_create_gi_module, "create-gi-module", 1, 1, 0,
   return scm_module;
 }
 
-
 void
 ggi_gi_constants_init (void)
 {
@@ -188,6 +284,11 @@ ggi_gi_constants_init (void)
                 "g-maxint", "g-maxuint", "g-minlong", "g-maxlong",
                 "g-maxulong", "g-maxsize", "g-minssize", "g-maxssize",
                 "g-minoffset", "g-maxoffset", NULL);
+
+  scm_gtype_name_to_scheme_name =
+    scm_permanent_object (scm_variable_ref (scm_c_lookup ("gtype-name->scheme-name")));
+  scm_gtype_name_to_class_name =
+    scm_permanent_object (scm_variable_ref (scm_c_lookup ("gtype-name->class-name")));
 }
 
 

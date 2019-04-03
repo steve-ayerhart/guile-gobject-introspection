@@ -42,6 +42,14 @@ ggi_gname_to_scm_name (const char *gname)
   return g_string_free (name, FALSE);
 }
 
+// TODO: make more efficient
+char *
+ggi_gname_to_scm_function_name (const char       *gname,
+                                GICallableInfo *callable_info)
+{
+  return ggi_gname_to_scm_name (gname);
+}
+
 SCM
 scm_c_gerror_to_scm (GError *error)
 {

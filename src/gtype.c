@@ -250,7 +250,7 @@ get_gtype_instance_instance_funcs (GType type)
 void
 scm_register_gtype_instance_funcs (const scm_t_gtype_instance_funcs *funcs)
 {
-  gtype_instance_funcs = g_slist_append (gtype_instance_funcs, (gpointer)funcs);
+  gtype_instance_funcs = g_slist_append (gtype_instance_funcs, (gpointer) funcs);
 }
 
 gpointer
@@ -281,7 +281,7 @@ scm_c_gtype_instance_get_cached (gpointer instance)
   scm_t_gtype_instance_funcs *funcs;
   funcs = get_gtype_instance_instance_funcs (G_TYPE_FROM_INSTANCE (instance));
   if (funcs && funcs->get_qdata) {
-    gpointer data = funcs->get_qdata ((GObject*)instance, guile_gobject_quark_wrapper);
+    gpointer data = funcs->get_qdata ((GObject *) instance, guile_gobject_quark_wrapper);
 
     if (data) {
       cached = GPOINTER_TO_SCM (data);
@@ -298,7 +298,7 @@ scm_c_gtype_instance_set_cached (gpointer instance, SCM scm)
   scm_t_gtype_instance_funcs *funcs;
   funcs = get_gtype_instance_instance_funcs (G_TYPE_FROM_INSTANCE (instance));
   if (funcs && funcs->construct)
-    funcs->set_qdata ((GObject*)instance,
+    funcs->set_qdata ((GObject *) instance,
                       guile_gobject_quark_wrapper,
                       scm == SCM_BOOL_F ? NULL : SCM_TO_GPOINTER (scm));
 }
@@ -391,7 +391,7 @@ scm_c_gtype_instance_bind_to_object (gpointer ginstance, SCM object)
 
   // sink the floating ref, if any
   sink_type_instance (ginstance);
-  slots[0] = (scm_t_bits)ginstance;
+  slots[0] = (scm_t_bits) ginstance;
 
   /* Cache the return value, so that if a callback or another function returns
    * this ginstance while the ginstance is visible elsewhere, the same wrapper
@@ -404,14 +404,14 @@ SCM_DEFINE (scm_sys_gtype_instance_construct, "gtype-instance-construct", 2, 0, 
             (SCM instance, SCM initargs),
             "")
 {
-  gpointer ginstance = (gpointer)SCM_STRUCT_DATA (instance)[0];
+  gpointer ginstance = (gpointer) SCM_STRUCT_DATA (instance)[0];
 
-  if (ginstance && ginstance != (gpointer)SCM_UNBOUND) {
+  if (ginstance && ginstance != (gpointer) SCM_UNBOUND) {
     scm_c_gtype_instance_initialize_scm (instance, ginstance);
   } else {
     gpointer new_ginstance;
     new_ginstance = scm_c_gtype_instance_construct (instance, initargs);
-    ginstance = (gpointer)SCM_STRUCT_DATA (instance)[0];
+    ginstance = (gpointer) SCM_STRUCT_DATA (instance)[0];
     /* it's possible the construct function bound the object already, as is
      * the case for scheme-defined gobjects */
 
@@ -425,11 +425,7 @@ SCM_DEFINE (scm_sys_gtype_instance_construct, "gtype-instance-construct", 2, 0, 
 
 SCM_DEFINE (scm_gtype_instance_destroy_x, "gtype-instance-destroy!", 1, 0, 0,
             (SCM instance),
-            "Release all references that the Scheme wrapper @var{instance} "
-            "has on the underlying C value, and release pointers associated "
-            "with the C value that point back to Scheme.\n\n"
-            "Normally, you don't need to call this function, because garbage "
-            "collection will take care of resource management. "
+            "Release all  "
             "However some @code{<gtype-class>} instances have semantics that "
             "require this function. The canonical example is that when a "
             "@code{<gtk-object>} emits the @code{destroy} signal, all "
@@ -461,7 +457,7 @@ scm_c_scm_to_gtype_instance (SCM scm_instance)
                           "Object ~A is uninitialized.",
                           SCM_LIST1 (scm_instance));
 
-  c_ginstance = (gpointer)scm_to_ulong (scm_ulong);
+  c_ginstance = (gpointer) scm_to_ulong (scm_ulong);
 
   if (!c_ginstance)
     scm_c_gruntime_error ("scm->gtype-instance",
@@ -534,6 +530,8 @@ scm_c_gruntime_error (const char *function_name, const char *message, SCM args)
 void
 scm_gobject_gtype_init (void)
 {
+  g_debug ("scm_gobject_gtype_init");
+
   #ifndef SCM_MAGIC_SNARFER
   #include "gtype.x"
   #endif
@@ -565,6 +563,8 @@ scm_gobject_gtype_init (void)
 void
 scm_gobject_gtype_class_init (void)
 {
+  g_debug ("scm_gobject_gtype_class_init");
+
   scm_class_gtype_class =
     scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gtype-class>")));
 }
@@ -572,6 +572,8 @@ scm_gobject_gtype_class_init (void)
 void
 scm_gobject_gtype_instance_init (void)
 {
+  g_debug ("scm_gobject_gtype_instance_init");
+
   scm_class_gtype_instance =
     scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gtype-instance>")));
 }
