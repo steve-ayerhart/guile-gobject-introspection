@@ -587,11 +587,12 @@ _callable_cache_init (GGICallableCache *cache, GICallableInfo *callable_info)
     cache->name = g_base_info_get_name ((GIBaseInfo *) callable_info);
     cache->namespace = g_base_info_get_namespace ((GIBaseInfo *) callable_info);
     container = g_base_info_get_container ((GIBaseInfo *) callable_info);
+    cache->container_name = NULL;
 
     if (container != NULL && g_base_info_get_type (container) != GI_INFO_TYPE_TYPE) {
         cache->container_name = g_base_info_get_name (container);
     }
-    cache->throws = g_callable_info_can_throw_gerror ((GIBaseInfo *) callable_info);
+    cache->throws = g_callable_info_can_throw_gerror (callable_info);
 
     // TODO: handle deprecated
 
@@ -897,6 +898,8 @@ _constructor_cache_invoke_real (GGIFunctionCache *function_cache,
 GGIFunctionCache *
 ggi_constructor_cache_new (GICallableInfo *callable_info)
 {
+    g_debug ("ggi_constructor_cache_new");
+
     GGIConstructorCache *constructor_cache;
     GGIFunctionCache *function_cache;
 
@@ -967,6 +970,8 @@ _function_with_instance_cache_init (GGIFunctionWithInstanceCache *fwi_cache,
 GGIFunctionCache *
 ggi_method_cache_new (GICallableInfo *callable_info)
 {
+    g_debug ("ggi_method_cache_new");
+
     GGIMethodCache *method_cache;
     GGIFunctionWithInstanceCache *fwi_cache;
 
