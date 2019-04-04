@@ -861,12 +861,127 @@ ggi_ccallback_cache_invoke (GGICCallbackCache *ccallback_cache,
                                    scm_optargs);
 }
 
-void
-ggi_cache_init (void)
-{
-    g_debug ("ggi_cache_init");
+// GGIConstructorCache
 
-    scm_ggi_function_cache_t = scm_make_foreign_object_type (scm_from_utf8_symbol ("<ggi-function-cache>"),
-                                                             scm_list_1 (scm_from_utf8_symbol ("ptr")),
-                                                             NULL);
+static SCM
+_constructor_cache_invoke_real (GGIFunctionCache *function_cache,
+                                GGIInvokeState   *state,
+                                SCM               scm_args,
+                                SCM               scm_optargs)
+{
+    GGICallableCache *cache = (GGICallableCache *) function_cache;
+    SCM scm_class;
+    SCM scm_return;
+
+    scm_class = scm_list_ref (scm_args, 0);
+
+    if (scm_class == NULL)
+        {
+            return SCM_BOOL_F;
+        }
+
+    scm_args = scm_cdr (scm_args);
+    scm_return = _function_cache_invoke_real (function_cache,
+                                              state,
+                                              scm_args,
+                                              scm_optargs);
+
+    if (scm_return == SCM_UNSPECIFIED || cache->return_cache->is_skipped)
+        return scm_return;
+
+
+    // error
+    return SCM_BOOL_F;
 }
+
+GGIFunctionCache *
+ggi_constructor_cache_new (GICallableInfo *callable_info)
+{
+    GGIConstructorCache *constructor_cache;
+    GGIFunctionCache *function_cache;
+
+    constructor_cache = g_new0 (GGIConstructorCache, 1);
+    function_cache = (GGIFunctionCache *) constructor_cache;
+
+    function_cache->invoke = _constructor_cache_invoke_real;
+
+    if (!_function_cache_init (function_cache, callable_info))
+        {
+            g_free (constructor_cache);
+            return NULL;
+        }
+
+    return function_cache;
+}
+
+// GGIFunctionWithInstanceCache
+
+static gboolean
+_function_with_instance_cache_generate_args_cache_real (GGICallableCache *callable_cache,
+                                                        GICallableInfo   *callable_info)
+{
+    GIInterfaceInfo *interface_info;
+    GGIArgCache *instance_cache;
+    GITransfer transfer;
+
+    interface_info = g_base_info_get_container ((GIBaseInfo *) callable_info);
+    transfer = g_callable_info_get_instance_ownership_transfer (callable_info);
+
+    instance_cache = _arg_cache_new_for_interface (interface_info,
+                                                   NULL,
+                                                   NULL,
+                                                   transfer,
+                                                   GGI_DIRECTION_FROM_SCM,
+                                                   callable_cache);
+
+    if (instance_cache == NULL)
+        return FALSE;
+
+    // assume some defaults
+    instance_cache->is_pointer = TRUE;
+    instance_cache->scm_arg_index = 0;
+    instance_cache->c_arg_index = 0;
+
+    _ggi_callable_cache_set_arg (callable_cache, 0, instance_cache);
+
+    callable_cache->n_scm_args++;
+
+    return _callable_cache_generate_args_cache_real (callable_cache,
+                                                     callable_info);
+}
+
+static gboolean
+_function_with_instance_cache_init (GGIFunctionWithInstanceCache *fwi_cache,
+                                    GICallableInfo               *callable_info)
+{
+    GGICallableCache *callable_cache = (GGICallableCache *) fwi_cache;
+
+    callable_cache->args_offset += 1;
+    callable_cache->generate_args_cache = _function_with_instance_cache_generate_args_cache_real;
+
+    return _function_cache_init ((GGIFunctionCache *) fwi_cache, callable_info);
+}
+
+// GGIMethodCache
+
+GGIFunctionCache *
+ggi_method_cache_new (GICallableInfo *callable_info)
+{
+    GGIMethodCache *method_cache;
+    GGIFunctionWithInstanceCache *fwi_cache;
+
+    method_cache = g_new0 (GGIMethodCache, 1);
+    fwi_cache = (GGIFunctionWithInstanceCache *) method_cache;
+
+    if (!_function_with_instance_cache_init (fwi_cache, callable_info))
+        {
+            g_free (method_cache);
+            return NULL;
+        }
+
+
+    return (GGIFunctionCache *) method_cache;
+}
+
+
+

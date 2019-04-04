@@ -72,6 +72,14 @@ ggi_define_module_constant (GIBaseInfo *info)
   scm_c_export (name, NULL);
 }
 
+void
+ggi_define_module_object_methods (GIBaseInfo *info)
+{
+  GIObjectInfo *object_info;
+
+  GI_IS_REGISTERED_TYPE_INFO (info);
+  GI_IS_OBJECT_INFO (info);
+}
 
 void
 ggi_define_module_object (GIBaseInfo *info)
