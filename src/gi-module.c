@@ -81,6 +81,19 @@ ggi_define_module_constant (GIBaseInfo *info)
   scm_c_export (name, NULL);
 }
 
+SCM
+ggi_specialziers_from_cache (GGICallableCache *callable_cache)
+{
+  SCM scm_specializers;
+
+  scm_specializers = SCM_EOL;
+
+  for (size_t n = 0; n < callable_cache->n_scm_required_args; n++)
+    {
+      GGIArgCache *arg_cache;
+    }
+}
+
 void
 ggi_define_module_object_method (GGICallableCache *callable_cache, GICallableInfo *callable_info)
 {
@@ -88,16 +101,27 @@ ggi_define_module_object_method (GGICallableCache *callable_cache, GICallableInf
 
   SCM scm_callable_cache;
   char *method_name;
+  SCM scm_method;
 
   method_name = ggi_gname_to_scm_function_name (callable_cache->name, callable_info);
 
+  scm_method = scm_c_make_gsubr (method_name,
+                                   callable_cache->n_scm_required_args,
+                                   callable_cache->n_scm_args - callable_cache->n_scm_required_args,
+                                   0,
+                                   ((GGIFunctionCache *) callable_cache)->wrapper);
 
-  scm_c_define_gsubr (method_name,
-                      callable_cache->n_scm_required_args,
-                      callable_cache->n_scm_args - callable_cache->n_scm_required_args,
-                      0,
-                      ((GGIFunctionCache *) callable_cache)->wrapper);
 
+  if (scm_is_false (scm_variable_bound_p (scm_from_locale_symbol (method_name))))
+    {
+      gchar *define_generic;
+      define_generic = g_strconcat ("(define-generic ", method_name, ")", NULL);
+      scm_c_eval_string (define_generic);
+    }
+
+  scm_call_2 (scm_variable_ref (scm_c_lookup ("ggi-add-method!")),
+              callable_cache
+              scm_method);
 
   scm_callable_cache = scm_from_pointer (callable_cache, ggi_finalize_callable_cache);
   scm_set_procedure_property_x (scm_variable_ref (scm_c_lookup (method_name)),

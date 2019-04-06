@@ -1,6 +1,7 @@
-(define-module (glib utils)
+-(define-module (glib utils)
   #:use-module (system foreign)
   #:use-module (srfi srfi-42)
+  #:use-module (oop goops)
   #:use-module (ice-9 list)
 
   #:export (camel-case->snake-case
@@ -8,11 +9,20 @@
             gtype-name->class-name
             gtype-class-name->method-name
             class-name->gtype-name
+            ggi-make-method  ggi-add-method!
             char**->list)
 
   #:export-syntax (define/docs define-generic/docs define-class/docs with-accessors
                     define-glib define-gobject define-gir
                     define-enumeration))
+
+(define (ggi-make-method specializers procdure)
+  (make <method>
+    #:specializers specializers
+    #:procedure procedure))
+
+(define (ggi-add-method! generic method)
+  (add-method! generic method))
 
 (define-syntax define-enumeration
   (λ (stx)

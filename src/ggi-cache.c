@@ -15,6 +15,7 @@
 #include "ggi-hashtable.h"
 #include "ggi-error.h"
 #include "ggi-array.h"
+#include "ggi-list.h"
 #include "ggi-closure.h"
 #include "ggi-struct-marshal.h"
 #include "ggi-enum-marshal.h"
@@ -173,6 +174,53 @@ _arg_cache_new_for_interface (GIInterfaceInfo  *iface_info,
     return NULL;
 }
 
+static void
+_sequence_cache_free_func (GGISequenceCache *cache)
+{
+    if (cache != NULL)
+        {
+            ggi_arg_cache_free (cache->item_cache);
+            g_slice_free (GGISequenceCache, cache);
+        }
+}
+
+gboolean
+ggi_arg_sequence_setup (GGISequenceCache *sc,
+                        GITypeInfo       *type_info,
+                        GIArgInfo        *arg_info,
+                        GITransfer        transfer,
+                        GGIDirection      direction,
+                        GGICallableCache *callable_cache)
+{
+    GITypeInfo *item_type_info;
+    GITransfer item_transfer;
+
+    if (!ggi_arg_base_setup ((GGIArgCache *) sc,
+                             type_info,
+                             arg_info,
+                             transfer,
+                             direction))
+        return FALSE;
+
+    sc->arg_cache.destroy_notify = (GDestroyNotify) _sequence_cache_free_func;
+    item_type_info = g_type_info_get_param_type (type_info, 0);
+    item_transfer = transfer == GI_TRANSFER_CONTAINER ? GI_TRANSFER_NOTHING : transfer;
+
+    sc->item_cache = ggi_arg_cache_new (item_type_info,
+                                        NULL,
+                                        item_transfer,
+                                        direction,
+                                        callable_cache,
+                                        0,
+                                        0);
+    g_base_info_unref ((GIBaseInfo *) item_type_info);
+
+    if (sc->item_cache == NULL)
+        return FALSE;
+
+    return TRUE;
+}
+
 
 static void
 _interface_cache_free_func (GGIInterfaceCache *cache)
@@ -307,8 +355,11 @@ ggi_arg_cache_new (GITypeInfo *type_info,
                                           &scm_arg_index);
             break;
         case GI_TYPE_TAG_GSLIST:
-            g_critical ("GSLIST NOT IMPLEMENTED");
-            // TODO
+            arg_cache = ggi_arg_gslist_new_from_info (type_info,
+                                                      arg_info,
+                                                      transfer,
+                                                      direction,
+                                                      callable_cache);
             break;
         case GI_TYPE_TAG_GHASH:
             arg_cache = ggi_arg_hash_table_new_from_info (type_info,

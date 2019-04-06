@@ -31,7 +31,7 @@ _ggi_marshal_garray_from_scm_list (GGIInvokeState *state,
     guint item_size;
     gboolean is_ptr_array;
     GArray *array_ = NULL;
-    GGIListCache *list_cache = (GGIListCache *) arg_cache;
+    GGISequenceCache *list_cache = (GGISequenceCache *) arg_cache;
     GGIArgGArray *array_cache = (GGIArgGArray *) arg_cache;
     GITransfer cleanup_transfer = arg_cache->transfer;
 
@@ -302,7 +302,7 @@ _array_cache_free_func (GGIArgGArray *cache)
 {
     if (cache != NULL)
         {
-            ggi_arg_cache_free (((GGIListCache *) cache)->item_cache);
+            ggi_arg_cache_free (((GGISequenceCache *) cache)->item_cache);
             g_slice_free (GGIArgGArray, cache);
         }
 }

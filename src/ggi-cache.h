@@ -98,14 +98,14 @@ struct _GGIArgCache
     GIArgument default_value;
 };
 
-typedef struct _GGIListCache {
+typedef struct _GGISequenceCache {
     GGIArgCache arg_cache;
     GGIArgCache *item_cache;
-} GGIListCache;
+} GGISequenceCache;
 
 typedef struct _GGIArgGArray
 {
-    GGIListCache list_cache;
+    GGISequenceCache sequence_cache;
     gssize fixed_size;
     gssize len_arg_index;
     gboolean is_zero_terminated;
@@ -217,7 +217,7 @@ ggi_arg_interface_setup (GGIInterfaceCache *iface_cache,
                          GIInterfaceInfo   *iface_info);
 
 gboolean
-ggi_arg_list_setup  (GGIListCache      *list_cache,
+ggi_arg_sequence_setup  (GGISequenceCache      *sequence_cache,
                      GITypeInfo        *type_info,
                      GIArgInfo         *arg_info,    /* may be NULL for return arguments */
                      GITransfer         transfer,

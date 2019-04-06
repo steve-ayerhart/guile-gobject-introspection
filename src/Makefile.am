@@ -23,6 +23,7 @@ C_FILES = \
   ggi-argument.c \
   ggi-error.c \
   ggi-cache.c \
+  ggi-value.c \
   ggi-enum-marshal.c \
   ggi-struct.c \
   ggi-struct-marshal.c \
