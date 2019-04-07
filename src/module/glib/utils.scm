@@ -16,7 +16,7 @@
                     define-glib define-gobject define-gir
                     define-enumeration))
 
-(define (ggi-make-method specializers procdure)
+(define (ggi-make-method specializers procedure)
   (make <method>
     #:specializers specializers
     #:procedure procedure))

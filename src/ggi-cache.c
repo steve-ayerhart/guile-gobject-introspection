@@ -44,6 +44,71 @@ _arg_info_default_value (GIArgInfo *info, GIArgument *arg)
     return FALSE;
 }
 
+void
+ggi_arg_cache_setup_scm_goops_type (GGIArgCache *arg_cache)
+{
+    g_debug ("ggi_arg_cache_setup_scm_goops_type");
+
+    switch (arg_cache->type_tag)
+        {
+        case GI_TYPE_TAG_VOID:
+            arg_cache->scm_type = scm_variable_ref (scm_c_public_lookup ("oop goops",
+                                                                          "<null>"));
+        case GI_TYPE_TAG_BOOLEAN:
+            arg_cache->scm_type = scm_variable_ref (scm_c_public_lookup ("oop goops",
+                                                                           "<boolean>"));
+        case GI_TYPE_TAG_INT8:
+        case GI_TYPE_TAG_UINT8:
+        case GI_TYPE_TAG_INT16:
+        case GI_TYPE_TAG_UINT16:
+        case GI_TYPE_TAG_INT32:
+        case GI_TYPE_TAG_UINT32:
+        case GI_TYPE_TAG_INT64:
+        case GI_TYPE_TAG_UINT64:
+            arg_cache->scm_type = scm_variable_ref (scm_c_public_lookup ("oop goops",
+                                                                         "<integer>"));
+            break;
+        case GI_TYPE_TAG_FLOAT:
+        case GI_TYPE_TAG_DOUBLE:
+            arg_cache->scm_type = scm_variable_ref (scm_c_public_lookup ("oop goops",
+                                                                         "<number>"));
+            break;
+        case GI_TYPE_TAG_UNICHAR:
+            arg_cache->scm_type = scm_variable_ref (scm_c_public_lookup ("oop goops",
+                                                                         "<char>"));
+            break;
+        case GI_TYPE_TAG_GTYPE:
+        case GI_TYPE_TAG_UTF8:
+            arg_cache->scm_type = scm_variable_ref (scm_c_public_lookup ("oop goops",
+                                                                         "<bytevector>"));
+            break;
+        case GI_TYPE_TAG_FILENAME:
+            arg_cache->scm_type = scm_variable_ref (scm_c_public_lookup ("oop goops",
+                                                                         "<string>"));
+            break;
+        case GI_TYPE_TAG_ARRAY:
+            arg_cache->scm_type = scm_variable_ref (scm_c_public_lookup ("oop goops",
+                                                                         "<array>"));
+            break;
+        case GI_TYPE_TAG_GSLIST:
+            arg_cache->scm_type = scm_variable_ref (scm_c_public_lookup ("oop goops",
+                                                                         "<list>"));
+            break;
+        case GI_TYPE_TAG_GHASH:
+            arg_cache->scm_type = scm_variable_ref (scm_c_public_lookup ("oop goops",
+                                                                         "<hashtable>"));
+            break;
+        case GI_TYPE_TAG_INTERFACE:
+            arg_cache->scm_type = scm_c_gtype_to_class (((GGIInterfaceCache *) arg_cache)->g_type);
+            break;
+        default:
+            arg_cache->scm_type = scm_variable_ref (scm_c_public_lookup ("oop goops",
+                                                                           "<unknown>"));
+            g_debug ("UNKNOW");
+        }
+}
+
+
 /* ggi_arg_base_setup:
  * arg_cache: argument cache to initialize
  * type_info: source for type related attributes to cache
@@ -260,13 +325,6 @@ ggi_arg_interface_setup (GGIInterfaceCache *iface_cache,
     iface_cache->arg_cache.type_tag = GI_TYPE_TAG_INTERFACE;
     iface_cache->type_name = _ggi_g_base_info_get_fullname (iface_info);
     iface_cache->g_type = g_registered_type_info_get_g_type ((GIRegisteredTypeInfo *) iface_info);
-    iface_cache->scm_type = scm_c_gtype_to_class (iface_cache->g_type);
-    // todo actually set goops type
-    //    iface_cache->scm_type = ggi_type_import_by_gi_info ((GIBaseInfo *) iface_info);
-
-    if (iface_cache->scm_type == NULL) {
-        return FALSE;
-    }
 
     return TRUE;
 }
@@ -296,7 +354,6 @@ ggi_arg_interface_new_from_info (GITypeInfo      *type_info,
 
     return (GGIArgCache *) iface_cache;
 }
-
 
 GGIArgCache *
 ggi_arg_cache_new (GITypeInfo *type_info,
@@ -393,6 +450,8 @@ ggi_arg_cache_new (GITypeInfo *type_info,
             arg_cache->scm_arg_index = scm_arg_index;
             arg_cache->c_arg_index = c_arg_index;
         }
+
+    ggi_arg_cache_setup_scm_goops_type (arg_cache);
 
     return arg_cache;
 }
