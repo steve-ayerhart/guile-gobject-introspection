@@ -8,6 +8,7 @@
 #include <ffi.h>
 #include <girepository.h>
 
+#include "gtype.h"
 #include "ggi-cache.h"
 #include "ggi-infos.h"
 #include "ggi-invoke.h"
@@ -259,7 +260,7 @@ ggi_arg_interface_setup (GGIInterfaceCache *iface_cache,
     iface_cache->arg_cache.type_tag = GI_TYPE_TAG_INTERFACE;
     iface_cache->type_name = _ggi_g_base_info_get_fullname (iface_info);
     iface_cache->g_type = g_registered_type_info_get_g_type ((GIRegisteredTypeInfo *) iface_info);
-    iface_cache->scm_type = scm_from_int (1);
+    iface_cache->scm_type = scm_c_gtype_to_class (iface_cache->g_type);
     // todo actually set goops type
     //    iface_cache->scm_type = ggi_type_import_by_gi_info ((GIBaseInfo *) iface_info);
 

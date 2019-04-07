@@ -84,6 +84,8 @@ struct _GGIArgCache
     GITypeTag type_tag;
     GITypeInfo *type_info;
 
+    SCM scm_type;
+
     GGIMarshalFromScmFunc from_scm_marshaller;
     GGIMarshalToScmFunc to_scm_marshaller;
 

@@ -82,16 +82,21 @@ ggi_define_module_constant (GIBaseInfo *info)
 }
 
 SCM
-ggi_specialziers_from_cache (GGICallableCache *callable_cache)
+ggi_specializers_from_cache (GGICallableCache *callable_cache)
 {
   SCM scm_specializers;
 
   scm_specializers = SCM_EOL;
 
-  for (size_t n = 0; n < callable_cache->n_scm_required_args; n++)
+  for (size_t n = 0; n < _ggi_callable_cache_args_len (callable_cache); n++)
     {
-      GGIArgCache *arg_cache;
+      GGIArgCache *arg_cache = g_ptr_array_index (callable_cache->args_cache, n);
+
+      g_debug ("%i", n);
+      scm_specializers = scm_append (scm_list_2 (SCM_EOL, scm_list_1 (arg_cache->scm_type)));
     }
+
+  return scm_specializers;
 }
 
 void
@@ -101,18 +106,25 @@ ggi_define_module_object_method (GGICallableCache *callable_cache, GICallableInf
 
   SCM scm_callable_cache;
   char *method_name;
+  SCM scm_method_proc;
   SCM scm_method;
+  gchar *gi_module_name;
+
+  gi_module_name = g_strjoin (" ", "gi", callable_cache->namespace, NULL);
 
   method_name = ggi_gname_to_scm_function_name (callable_cache->name, callable_info);
 
-  scm_method = scm_c_make_gsubr (method_name,
+  scm_method_proc = scm_c_make_gsubr (method_name,
                                    callable_cache->n_scm_required_args,
                                    callable_cache->n_scm_args - callable_cache->n_scm_required_args,
                                    0,
                                    ((GGIFunctionCache *) callable_cache)->wrapper);
+  scm_method = scm_call_2 (scm_variable_ref (scm_c_lookup ("ggi-make-method")),
+                           ggi_specializers_from_cache (callable_cache),
+                           scm_method_proc);
 
 
-  if (scm_is_false (scm_variable_bound_p (scm_from_locale_symbol (method_name))))
+  if (scm_is_false (scm_c_private_variable (gi_module_name, method_name)))
     {
       gchar *define_generic;
       define_generic = g_strconcat ("(define-generic ", method_name, ")", NULL);
@@ -120,7 +132,7 @@ ggi_define_module_object_method (GGICallableCache *callable_cache, GICallableInf
     }
 
   scm_call_2 (scm_variable_ref (scm_c_lookup ("ggi-add-method!")),
-              callable_cache
+              (scm_variable_ref (scm_c_lookup (method_name))),
               scm_method);
 
   scm_callable_cache = scm_from_pointer (callable_cache, ggi_finalize_callable_cache);
