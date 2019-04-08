@@ -79,9 +79,6 @@ ggi_arg_cache_setup_scm_goops_type (GGIArgCache *arg_cache)
             break;
         case GI_TYPE_TAG_GTYPE:
         case GI_TYPE_TAG_UTF8:
-            arg_cache->scm_type = scm_variable_ref (scm_c_public_lookup ("oop goops",
-                                                                         "<bytevector>"));
-            break;
         case GI_TYPE_TAG_FILENAME:
             arg_cache->scm_type = scm_variable_ref (scm_c_public_lookup ("oop goops",
                                                                          "<string>"));

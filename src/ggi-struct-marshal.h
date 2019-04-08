@@ -44,6 +44,13 @@ ggi_arg_struct_to_scm_marshal (GIArgument *arg,
                                gboolean is_allocated,
                                gboolean is_foreign);
 
+void
+ggi_arg_gvalue_from_scm_cleanup (GGIInvokeState *state,
+                                 GGIArgCache    *arg_cache,
+                                 SCM             scm_arg,
+                                 gpointer        data,
+                                 gboolean        was_processed);
+
 G_END_DECLS
 
 #endif

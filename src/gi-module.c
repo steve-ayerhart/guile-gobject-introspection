@@ -104,9 +104,10 @@ ggi_specializers_from_cache (GGICallableCache *callable_cache)
 }
 
 void
-ggi_define_module_object_method (SCM scm_class, GGICallableCache *callable_cache, GICallableInfo *callable_info)
+ggi_define_module_object_method (SCM scm_class,
+                                 GGICallableCache *callable_cache,
+                                 GICallableInfo *callable_info)
 {
-  g_debug ("ggi_define_module_object_method");
 
   SCM scm_callable_cache;
   char *method_name;
@@ -119,26 +120,27 @@ ggi_define_module_object_method (SCM scm_class, GGICallableCache *callable_cache
 
   method_name = ggi_gname_to_scm_function_name (callable_cache->name, callable_info);
 
-  g_debug (" method_name: %s", method_name);
+  g_debug ("ggi_define_module_object_method: %s", method_name);
 
   scm_method_proc = scm_c_make_gsubr (method_name,
-                                   callable_cache->n_scm_required_args,
-                                   callable_cache->n_scm_args - callable_cache->n_scm_required_args,
-                                   0,
-                                   ((GGIFunctionCache *) callable_cache)->wrapper);
+                                      callable_cache->n_scm_required_args,
+                                      callable_cache->n_scm_args - callable_cache->n_scm_required_args,
+                                      0,
+                                      ((GGIFunctionCache *) callable_cache)->wrapper);
 
 
   if (g_str_equal (method_name, "new"))
     {
-      method_name = "initialize";
+      method_name = "make";
     }
 
   scm_specializers = ggi_specializers_from_cache (callable_cache);
 
-  scm_specializers = scm_append (scm_list_2 (scm_list_1 (scm_class),
-                                             scm_specializers));
+  if (g_callable_info_is_method (callable_info))
+    scm_specializers = scm_append (scm_list_2 (scm_list_1 (scm_class),
+                                               scm_specializers));
 
-  scm_simple_format (SCM_BOOL_T, scm_from_locale_string ("specializers: ~s"), scm_list_1 (scm_specializers));
+  scm_simple_format (SCM_BOOL_T, scm_from_locale_string ("specializers: ~s\n"), scm_list_1 (scm_specializers));
 
   scm_method = scm_call_2 (scm_variable_ref (scm_c_lookup ("ggi-make-method")),
                            scm_specializers,
@@ -163,7 +165,10 @@ ggi_define_module_object_method (SCM scm_class, GGICallableCache *callable_cache
 }
 
 void
-ggi_define_module_object_methods (SCM scm_class, GIBaseInfo *info)
+ggi_define_module_object_methods (SCM scm_class,
+                                  GIBaseInfo *info,
+                                  gint (*get_n_methods)(GIBaseInfo *),
+                                  GIBaseInfo * (*get_method)(GIBaseInfo *, gint))
 {
   g_debug ("ggi_define_module_object_methods: %s", g_base_info_get_name (info));
 
@@ -171,13 +176,13 @@ ggi_define_module_object_methods (SCM scm_class, GIBaseInfo *info)
 
   object_info = (GIObjectInfo *) info;
 
-  for (size_t n = 0; n < g_object_info_get_n_methods (object_info); n++)
+  for (size_t n = 0; n < get_n_methods (object_info); n++)
     {
       GIFunctionInfo *function_info;
       GGICallableCache *callable_cache;
       GGIFunctionCache *function_cache;
 
-      function_info = g_object_info_get_method (object_info, n);
+      function_info = get_method (object_info, n);
 
       switch (g_function_info_get_flags (function_info))
         {
@@ -202,7 +207,9 @@ ggi_define_module_object_methods (SCM scm_class, GIBaseInfo *info)
 }
 
 void
-ggi_define_module_object (GIBaseInfo *info)
+ggi_define_module_object (GIBaseInfo *info,
+                          gint (*get_n_methods)(GIBaseInfo *),
+                          GIBaseInfo * (*get_method)(GIBaseInfo *, gint))
 {
   GIObjectInfo *object_info;
   char *class_name;
@@ -230,50 +237,52 @@ ggi_define_module_object (GIBaseInfo *info)
 
   scm_dynwind_end ();
 
-  ggi_define_module_object_methods (scm_class, info);
+  ggi_define_module_object_methods (scm_class,
+                                    info,
+                                    get_n_methods,
+                                    get_method);
 }
 
 void
 ggi_define_module_function (GIBaseInfo *info)
 {
-    g_debug ("ggi_define_module_function:");
-    g_debug (" %s", g_base_info_get_name (info));
+  g_debug ("ggi_define_module_function: %s", g_base_info_get_name (info));
 
-    GGIFunctionCache *function_cache;
-    GGICallableCache *callable_cache;
-    GIFunctionInfo *function_info;
-    const char *function_name;
-    SCM scm_callable_cache;
-    const int args;
-    const int opt_args;
-    ggi_gsubr_t  *ggi_func;
+  GGIFunctionCache *function_cache;
+  GGICallableCache *callable_cache;
+  GIFunctionInfo *function_info;
+  const char *function_name;
+  SCM scm_callable_cache;
+  const int args;
+  const int opt_args;
+  ggi_gsubr_t  *ggi_func;
 
-    GI_IS_FUNCTION_INFO (info);
+  GI_IS_FUNCTION_INFO (info);
 
-    function_cache = ggi_function_cache_new ((GICallableInfo *) info);
-    callable_cache = (GGICallableCache *) function_cache;
+  function_cache = ggi_function_cache_new ((GICallableInfo *) info);
+  callable_cache = (GGICallableCache *) function_cache;
 
-    g_assert (function_cache != NULL);
+  g_assert (function_cache != NULL);
 
-    function_name = ggi_gname_to_scm_function_name (callable_cache->name,
-                                                    (GICallableInfo *) info);
-
-
-    g_debug (" n_args: %d, req_args: ",
-             callable_cache->n_scm_args,
-             callable_cache->n_scm_required_args);
-
-    scm_c_define_gsubr (function_name,
-                        callable_cache->n_scm_required_args,
-                        callable_cache->n_scm_args - callable_cache->n_scm_required_args,
-                        0,
-                        function_cache->wrapper);
+  function_name = ggi_gname_to_scm_function_name (callable_cache->name,
+                                                  (GICallableInfo *) info);
 
 
-    scm_callable_cache = scm_from_pointer (callable_cache, ggi_finalize_callable_cache);
-    scm_set_procedure_property_x (scm_variable_ref (scm_c_lookup (function_name)),
-                                  scm_from_locale_symbol ("cache"),
-                                  scm_callable_cache);
+  g_debug (" n_args: %d, req_args: ",
+           callable_cache->n_scm_args,
+           callable_cache->n_scm_required_args);
+
+  scm_c_define_gsubr (function_name,
+                      callable_cache->n_scm_required_args,
+                      callable_cache->n_scm_args - callable_cache->n_scm_required_args,
+                      0,
+                      function_cache->wrapper);
+
+
+  scm_callable_cache = scm_from_pointer (callable_cache, ggi_finalize_callable_cache);
+  scm_set_procedure_property_x (scm_variable_ref (scm_c_lookup (function_name)),
+                                scm_from_locale_symbol ("cache"),
+                                scm_callable_cache);
 }
 
 
@@ -312,8 +321,15 @@ ggi_namespace_init (void *namespace)
           ggi_define_module_enum (info);
           g_base_info_unref (info);
           break;
+        case GI_INFO_TYPE_STRUCT:
+          ggi_define_module_object (info,
+                                    g_struct_info_get_n_methods,
+                                    g_struct_info_get_method);
+          break;
         case GI_INFO_TYPE_OBJECT:
-          ggi_define_module_object (info);
+          ggi_define_module_object (info,
+                                    g_object_info_get_n_methods,
+                                    g_object_info_get_method);
           break;
         case GI_INFO_TYPE_FUNCTION:
           ggi_define_module_function (info);

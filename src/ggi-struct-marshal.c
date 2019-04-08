@@ -5,9 +5,66 @@
 #include <libguile.h>
 #include <glib.h>
 
+#include "ggi-value.h"
 #include "ggi-cache.h"
 #include "gtype.h"
 #include "gvalue.h"
+
+static gboolean
+_is_union_member (GIInterfaceInfo *interface_info, SCM scm_arg)
+{
+    gint n;
+    gint n_fields;
+    GIUnionInfo *union_info;
+    GIInfoType info_type;
+    gboolean is_member = FALSE;
+
+    info_type = g_base_info_get_type (interface_info);
+
+    if (info_type != GI_INFO_TYPE_UNION)
+        return FALSE;
+
+    union_info = (GIUnionInfo *) interface_info;
+    n_fields = g_union_info_get_n_fields (union_info);
+
+    for (n = 0; n < n_fields; n++)
+        {
+            GIFieldInfo *field_info;
+            GITypeInfo *field_type_info;
+
+            field_info = g_union_info_get_field (union_info, n);
+            field_type_info = g_field_info_get_type (field_info);
+
+            if (g_type_info_get_tag (field_type_info) == GI_TYPE_TAG_INTERFACE)
+                {
+                    GIInterfaceInfo *field_iface_info;
+                    SCM scm_type;
+
+                    field_iface_info = g_type_info_get_interface (field_type_info);
+                }
+        }
+}
+
+
+void
+ggi_arg_gvalue_from_scm_cleanup (GGIInvokeState *state,
+                                 GGIArgCache    *arg_cache,
+                                 SCM             scm_arg,
+                                 gpointer        data,
+                                 gboolean        was_processed)
+{
+    
+}
+
+static void
+arg_gclosure_from_scm_cleanup (GGIInvokeState *state,
+                               GGIArgCache    *arg_cache,
+                               SCM             scm_arg,
+                               gpointer        cleanup_data,
+                               gboolean        was_processed)
+{
+    
+}
 
 gboolean
 ggi_arg_struct_from_scm_marshal (SCM          scm_arg,
@@ -156,7 +213,8 @@ arg_struct_to_scm_marshal_adapter (GGIInvokeState   *state,
                                                   arg_cache->is_caller_allocates,
                                                   iface_cache->is_foreign);
 
-    *cleanup_data = scm_value;
+    *
+    cleanup_data = scm_value;
 
     return scm_value;
 }
@@ -231,20 +289,30 @@ arg_struct_to_scm_setup (GGIArgCache      *arg_cache,
 {
     GGIInterfaceCache *iface_cache = (GGIInterfaceCache *) arg_cache;
 
-    if (arg_cache->to_scm_marshaller == NULL)
-        arg_cache->to_scm_marshaller = arg_struct_to_scm_marshal_adapter;
+    if (g_struct_info_is_gtype_struct ((GIStructInfo *) iface_info))
+        {
+            arg_cache->from_scm_marshaller = arg_type_class_from_scm_marshal;
 
-    iface_cache->is_foreign = g_struct_info_is_foreign ((GIStructInfo *) iface_info);
+            if (transfer == GI_TRANSFER_NOTHING)
+                arg_cache->from_scm_cleanup = arg_type_class_from_scm_cleanup;
+        }
+    else
+        {
+            arg_cache->from_scm_marshaller = arg_struct_from_scm_marshal_adapter;
 
-    /*
-      TODO
-      if (iface_cache->is_foreign)
-      arg_cache->to_scm_cleanup = arg_foreign_to_scm_cleanup;
-      else if (!g_type_is_a (iface_cache->g_type, G_TYPE_VALUE) &&
-      iface_cache->scm_type &&
-      g_type_is_a (iface_cache->g_type, G_TYPE_BOXED))
-      arg_cache->to_scm_cleanup = arg_boxed_to_scm_cleanup;
-    */
+            if (g_type_is_a (iface_cache->g_type, G_TYPE_CLOSURE))
+                {
+                    arg_cache->from_scm_cleanup = arg_gclosure_from_scm_cleanup;
+                }
+            else if (iface_cache->g_type == G_TYPE_VALUE)
+                {
+                    arg_cache->from_scm_cleanup = ggi_arg_gvalue_from_scm_cleanup;
+                }
+            else if (iface_cache->is_foreign)
+                {
+                    arg_cache->from_scm_cleanup = arg_foreign_from_scm_cleanup;
+                }
+        }
 }
 
 GGIArgCache *
