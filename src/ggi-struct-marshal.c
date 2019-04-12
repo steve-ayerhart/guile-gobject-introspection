@@ -142,6 +142,7 @@ ggi_arg_struct_to_scm_marshaller (GIArgument      *arg,
 
     if (g_type_is_a (g_type, G_TYPE_VALUE))
         {
+            g_debug ("GVALUE HEERRRR");
             scm_obj = scm_c_gvalue_to_scm (arg->v_pointer);
         }
     else if (is_foreign)
@@ -151,8 +152,7 @@ ggi_arg_struct_to_scm_marshaller (GIArgument      *arg,
         }
     else if (g_type_is_a (g_type, G_TYPE_BOXED))
         {
-            // TODO is this right? (probably not)
-            scm_obj = scm_c_gtype_to_class (g_type);
+            scm_obj = scm_c_gvalue_new_from_boxed (g_type, arg->v_pointer);
         }
     else if (g_type_is_a (g_type, G_TYPE_POINTER))
         {

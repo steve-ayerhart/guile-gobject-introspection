@@ -992,11 +992,10 @@ _constructor_cache_invoke_real (GGIFunctionCache *function_cache,
                                               scm_optargs);
 
     if (scm_return == SCM_UNSPECIFIED || cache->return_cache->is_skipped)
-        return scm_return;
+        return SCM_UNSPECIFIED;
 
 
-    // error
-    return SCM_BOOL_F;
+    return scm_return;
 }
 
 GGIFunctionCache *
