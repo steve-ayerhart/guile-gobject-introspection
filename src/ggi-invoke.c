@@ -246,7 +246,7 @@ _invoke_marshal_out_args (GGIInvokeState *state, GGIFunctionCache *function_cach
     SCM scm_return = SCM_UNSPECIFIED;
     gssize n_out_args = cache->n_to_scm_args - cache->n_to_scm_child_args;
 
-    g_debug (" n_to_scm_args: %d, child: %d" , cache->n_to_scm_args, cache->n_to_scm_child_args);
+    g_debug (" n_to_scm_out_args: %d, child: %d" , cache->n_to_scm_args, cache->n_to_scm_child_args);
 
     if (cache->return_cache)
         {
@@ -260,12 +260,13 @@ _invoke_marshal_out_args (GGIInvokeState *state, GGIFunctionCache *function_cach
                                                                          cache->return_cache,
                                                                          &state->return_arg,
                                                                          &cleanup_data);
-                    state->to_scm_return_arg_cleanup_data = cleanup_data;
+                    //                    state->to_scm_return_arg_cleanup_data = cleanup_data;
                     if (scm_return == SCM_UNSPECIFIED)
                         {
                             // cleanup
                             return SCM_UNSPECIFIED;
                         }
+                    g_debug (" return is not skipped");
                 }
             else
                 {

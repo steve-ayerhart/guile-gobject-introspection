@@ -129,10 +129,12 @@ ggi_define_module_object_method (SCM scm_class,
                                       ((GGIFunctionCache *) callable_cache)->wrapper);
 
 
+  /*
   if (g_str_equal (method_name, "new"))
     {
       method_name = "make";
     }
+  */
 
   scm_specializers = ggi_specializers_from_cache (callable_cache);
 

@@ -133,6 +133,8 @@ ggi_arg_struct_to_scm_marshaller (GIArgument      *arg,
                                   gboolean         is_allocated,
                                   gboolean         is_foreign)
 {
+    g_debug ("gg_arg_struct_to_scm_marshaller");
+
     SCM scm_obj;
 
     if (arg->v_pointer == NULL)
@@ -213,8 +215,7 @@ arg_struct_to_scm_marshal_adapter (GGIInvokeState   *state,
                                                   arg_cache->is_caller_allocates,
                                                   iface_cache->is_foreign);
 
-    *
-    cleanup_data = scm_value;
+    * cleanup_data = scm_value;
 
     return scm_value;
 }
@@ -279,14 +280,8 @@ arg_struct_from_scm_setup (GGIArgCache     *arg_cache,
                            GIInterfaceInfo *iface_info,
                            GITransfer       transfer)
 {
-    // TODO
-}
+    g_debug ("arg_struct_from_scm_setup");
 
-static void
-arg_struct_to_scm_setup (GGIArgCache      *arg_cache,
-                         GIInterfaceInfo  *iface_info,
-                         GITransfer        transfer)
-{
     GGIInterfaceCache *iface_cache = (GGIInterfaceCache *) arg_cache;
 
     if (g_struct_info_is_gtype_struct ((GIStructInfo *) iface_info))
@@ -313,6 +308,30 @@ arg_struct_to_scm_setup (GGIArgCache      *arg_cache,
                     arg_cache->from_scm_cleanup = arg_foreign_from_scm_cleanup;
                 }
         }
+}
+
+static void
+arg_struct_to_scm_setup (GGIArgCache      *arg_cache,
+                         GIInterfaceInfo  *iface_info,
+                         GITransfer        transfer)
+{
+    g_debug ("arg_struct_to_scm_setup");
+
+    GGIInterfaceCache *iface_cache = (GGIInterfaceCache *) arg_cache;
+
+    if (arg_cache->to_scm_marshaller == NULL)
+        {
+            arg_cache->to_scm_marshaller = arg_struct_to_scm_marshal_adapter;
+        }
+
+    iface_cache->is_foreign = g_struct_info_is_foreign ((GIStructInfo *) iface_info);
+
+    if (iface_cache->is_foreign)
+        arg_cache->to_scm_cleanup = arg_foreign_to_scm_cleanup;
+    else if (!g_type_is_a (iface_cache->g_type, G_TYPE_VALUE) &&
+             g_type_is_a (iface_cache->g_type, G_TYPE_BOXED))
+        arg_cache->to_scm_cleanup = arg_boxed_to_scm_cleanup;
+
 }
 
 GGIArgCache *

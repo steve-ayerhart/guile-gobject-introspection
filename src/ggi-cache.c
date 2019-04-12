@@ -53,10 +53,10 @@ ggi_arg_cache_setup_scm_goops_type (GGIArgCache *arg_cache)
         {
         case GI_TYPE_TAG_VOID:
             arg_cache->scm_type = scm_variable_ref (scm_c_public_lookup ("oop goops",
-                                                                          "<null>"));
+                                                                         "<null>"));
         case GI_TYPE_TAG_BOOLEAN:
             arg_cache->scm_type = scm_variable_ref (scm_c_public_lookup ("oop goops",
-                                                                           "<boolean>"));
+                                                                         "<boolean>"));
         case GI_TYPE_TAG_INT8:
         case GI_TYPE_TAG_UINT8:
         case GI_TYPE_TAG_INT16:
@@ -100,7 +100,7 @@ ggi_arg_cache_setup_scm_goops_type (GGIArgCache *arg_cache)
             break;
         default:
             arg_cache->scm_type = scm_variable_ref (scm_c_public_lookup ("oop goops",
-                                                                           "<unknown>"));
+                                                                         "<unknown>"));
             g_debug ("UNKNOW");
         }
 }
@@ -499,6 +499,7 @@ _callable_cache_generate_args_cache_real (GGICallableCache *callable_cache,
 
     return_info = g_callable_info_get_return_type (callable_info);
     return_transfer = g_callable_info_get_caller_owns (callable_info);
+    g_debug ("SETTING RETURN");
     return_cache = ggi_arg_cache_new (return_info,
                                       NULL,
                                       return_transfer,
@@ -517,7 +518,7 @@ _callable_cache_generate_args_cache_real (GGICallableCache *callable_cache,
 
     callable_cache->user_data_index = -1;
 
-    for (i = 0, arg_index = (guint)callable_cache->args_offset;
+    for (i = 0, arg_index = (guint) callable_cache->args_offset;
          arg_index < _ggi_callable_cache_args_len (callable_cache);
          i++, arg_index++)
         {
@@ -726,6 +727,8 @@ _function_cache_invoke_real (GGIFunctionCache *function_cache,
                              SCM scm_args,
                              SCM scm_kwargs)
 {
+    g_debug ("_function_cache_invoke_real");
+
     return ggi_invoke_c_callable (function_cache, state, scm_args, scm_kwargs);
 }
 
@@ -978,18 +981,11 @@ _constructor_cache_invoke_real (GGIFunctionCache *function_cache,
                                 SCM               scm_args,
                                 SCM               scm_optargs)
 {
+    g_debug ("_constructor_cache_invoke_real");
+
     GGICallableCache *cache = (GGICallableCache *) function_cache;
-    SCM scm_class;
     SCM scm_return;
 
-    scm_class = scm_list_ref (scm_args, 0);
-
-    if (scm_class == NULL)
-        {
-            return SCM_BOOL_F;
-        }
-
-    scm_args = scm_cdr (scm_args);
     scm_return = _function_cache_invoke_real (function_cache,
                                               state,
                                               scm_args,
@@ -1031,6 +1027,8 @@ static gboolean
 _function_with_instance_cache_generate_args_cache_real (GGICallableCache *callable_cache,
                                                         GICallableInfo   *callable_info)
 {
+    g_debug ("_function_with_instance_cache_generate_args_cache_real");
+
     GIInterfaceInfo *interface_info;
     GGIArgCache *instance_cache;
     GITransfer transfer;
@@ -1065,6 +1063,8 @@ static gboolean
 _function_with_instance_cache_init (GGIFunctionWithInstanceCache *fwi_cache,
                                     GICallableInfo               *callable_info)
 {
+    g_debug ("_function_with_instance_cache_init");
+
     GGICallableCache *callable_cache = (GGICallableCache *) fwi_cache;
 
     callable_cache->args_offset += 1;
@@ -1095,6 +1095,3 @@ ggi_method_cache_new (GICallableInfo *callable_info)
 
     return (GGIFunctionCache *) method_cache;
 }
-
-
-

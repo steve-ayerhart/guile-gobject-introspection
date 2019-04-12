@@ -98,6 +98,8 @@ SCM
 ggi_arg_gobject_to_scm_called_from_c (GIArgument *arg,
                                       GITransfer  transfer)
 {
+    g_debug ("ggi_arg_gobject_to_scM_called_from_c");
+
     SCM scm_object;
     // TODO: explin hack 254 pygobject
 
@@ -263,6 +265,7 @@ ggi_arg_gobject_new_from_info (GITypeInfo       *type_info,
     else
         {
             ggi_arg_cache_free (cache);
+
             return NULL;
         }
 }
