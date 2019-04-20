@@ -166,6 +166,8 @@ ggi_arg_cache_alloc (void)
 void
 ggi_arg_cache_free (GGIArgCache *cache)
 {
+    g_debug ("ggi_arg_cache_free");
+
     if (cache == NULL)
         return;
 
@@ -475,6 +477,8 @@ _ggi_get_direction (GGICallableCache *callable_cache, GIDirection gi_direction)
 void
 ggi_callable_cache_free (GGICallableCache *cache)
 {
+    g_debug ("ggi_callable_cache_free: %s", cache->name);
+
     cache->deinit (cache);
     g_free (cache);
 }
@@ -687,7 +691,8 @@ _callable_cache_init (GGICallableCache *cache, GICallableInfo *callable_info)
     gint n_args;
     GIBaseInfo *container;
 
-    // TODO: deinit
+    if (cache->deinit == NULL)
+        cache->deinit = _callable_cache_deinit_real;
 
     if (cache->generate_args_cache == NULL)
         cache->generate_args_cache = _callable_cache_generate_args_cache_real;
@@ -713,7 +718,7 @@ _callable_cache_init (GGICallableCache *cache, GICallableInfo *callable_info)
         }
 
     if (!cache->generate_args_cache (cache, callable_info)) {
-        //        _callable_cache_deinit_real (cache);
+        _callable_cache_deinit_real (cache);
         return FALSE;
     }
 

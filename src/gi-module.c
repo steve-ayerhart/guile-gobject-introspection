@@ -22,9 +22,9 @@ static SCM scm_gtype_name_to_class_name;
 void
 ggi_finalize_callable_cache (void *cache)
 {
-  g_debug ("ggi_fnalize_callable_cache");
+  g_debug ("ggi_finalize_callable_cache");
 
-  //ggi_callable_cache_free (cache);
+  //ggi_callable_cache_free ((GGICallableCache *) cache);
 }
 
 
@@ -135,7 +135,6 @@ ggi_define_module_object_method (SCM scm_class,
     scm_specializers = scm_append (scm_list_2 (scm_list_1 (scm_class),
                                                scm_specializers));
 
-  //scm_simple_format (SCM_BOOL_T, scm_from_locale_string ("specializers: ~s\n"), scm_list_1 (scm_specializers));
 
   scm_method = scm_call_2 (scm_variable_ref (scm_c_lookup ("ggi-make-method")),
                            scm_specializers,
