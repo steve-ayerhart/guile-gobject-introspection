@@ -134,8 +134,9 @@ SCM_DEFINE (scm_gtype_name_to_class, "gtype-name->class", 1, 0, 0,
 
   type = g_type_from_name (c_name);
   if (!type)
-    scm_c_gruntime_error (FUNC_NAME, "No Gtype registered with name ~A",
-                          SCM_LIST1 (name));
+    scm_misc_error (FUNC_NAME,
+                    "No GType registered with name ~A",
+                    scm_list_1 (name));
 
   scm_dynwind_end ();
 
@@ -154,9 +155,9 @@ SCM_DEFINE (scm_sys_gtype_class_bind, "gtype-class-bind", 2, 0, 0,
   // SCM_VALIDATE
 
   if (scm_c_gtype_class_to_gtype (class))
-    scm_c_gruntime_error (FUNC_NAME,
-                          "Class ~A already has a GType",
-                          SCM_LIST1 (type_name));
+    scm_misc_error (FUNC_NAME,
+                    "Class ~A already has a GType",
+                    scm_list_1 (type_name));
 
   scm_dynwind_begin (0);
   c_type_name = scm_to_locale_string (type_name);
@@ -164,13 +165,13 @@ SCM_DEFINE (scm_sys_gtype_class_bind, "gtype-class-bind", 2, 0, 0,
 
   gtype = g_type_from_name (c_type_name);
   if (!gtype)
-    scm_c_gruntime_error (FUNC_NAME,
-                          "No Gtype registered with ~A",
-                          SCM_LIST1 (type_name));
+    scm_misc_error (FUNC_NAME,
+                    "No GType registered with ~A",
+                    scm_list_1 (type_name));
   if (SCM_NFALSEP (scm_c_gtype_lookup_class (gtype)))
-    scm_c_gruntime_error (FUNC_NAME,
-                          "~A already has aw GOOPS class, use gtype-name->class",
-                          SCM_LIST1 (type_name));
+    scm_misc_error (FUNC_NAME,
+                    "~A already has a GOOPS class, use gtype-name->class",
+                    scm_list_1 (type_name));
 
   g_type_set_qdata (gtype, quark_class, scm_permanent_object (class));
   scm_slot_set_x (class, scm_sym_gtype, scm_from_ulong (gtype));
@@ -490,6 +491,7 @@ scm_c_scm_to_gtype_instance_typed (SCM scm_instance, GType c_gtype)
 SCM
 scm_c_gtype_instance_to_scm_typed (gpointer c_ginstance, GType c_gtype)
 {
+  g_debug ("SUP");
   SCM scm_class, scm_object;
 
   scm_object = scm_c_gtype_instance_get_cached (c_ginstance);
@@ -497,6 +499,7 @@ scm_c_gtype_instance_to_scm_typed (gpointer c_ginstance, GType c_gtype)
     return scm_object;
 
   scm_class = scm_c_gtype_lookup_class (c_gtype);
+  g_debug ("HERE 1");
   if (SCM_FALSEP (scm_class))
     scm_class = scm_c_gtype_to_class (c_gtype);
 
@@ -504,10 +507,12 @@ scm_c_gtype_instance_to_scm_typed (gpointer c_ginstance, GType c_gtype)
 
   // FIXME more comments on why we do it this way
   scm_object = scm_call_2 (scm_allocate_instance, scm_class, SCM_EOL);
+  g_debug ("HERE 2");
 
   scm_c_gtype_instance_bind_to_object (c_ginstance, scm_object);
   scm_call_2 (scm_initialize, scm_object, SCM_EOL);
 
+  g_debug ("HERE 3");
   return scm_object;
 }
 

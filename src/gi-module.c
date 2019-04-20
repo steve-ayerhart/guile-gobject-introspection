@@ -88,7 +88,7 @@ ggi_specializers_from_cache (GGICallableCache *callable_cache)
 
   scm_specializers = SCM_EOL;
 
-  for (size_t n = 0; n < _ggi_callable_cache_args_len (callable_cache); n++)
+  for (size_t n = 0; n < callable_cache->n_scm_args; n++)
     {
       GGIArgCache *arg_cache = g_ptr_array_index (callable_cache->args_cache, n);
 
@@ -129,20 +129,13 @@ ggi_define_module_object_method (SCM scm_class,
                                       ((GGIFunctionCache *) callable_cache)->wrapper);
 
 
-  /*
-  if (g_str_equal (method_name, "new"))
-    {
-      method_name = "make";
-    }
-  */
-
   scm_specializers = ggi_specializers_from_cache (callable_cache);
 
   if (g_callable_info_is_method (callable_info))
     scm_specializers = scm_append (scm_list_2 (scm_list_1 (scm_class),
                                                scm_specializers));
 
-  scm_simple_format (SCM_BOOL_T, scm_from_locale_string ("specializers: ~s\n"), scm_list_1 (scm_specializers));
+  //scm_simple_format (SCM_BOOL_T, scm_from_locale_string ("specializers: ~s\n"), scm_list_1 (scm_specializers));
 
   scm_method = scm_call_2 (scm_variable_ref (scm_c_lookup ("ggi-make-method")),
                            scm_specializers,
@@ -258,10 +251,16 @@ ggi_define_module_function (GIBaseInfo *info)
   const int args;
   const int opt_args;
   ggi_gsubr_t  *ggi_func;
+  GIFunctionInfoFlags flags;
 
   GI_IS_FUNCTION_INFO (info);
 
-  function_cache = ggi_function_cache_new ((GICallableInfo *) info);
+
+  if (flags & GI_FUNCTION_IS_CONSTRUCTOR)
+    function_cache = ggi_constructor_cache_new ((GICallableInfo *) info);
+  else
+    function_cache = ggi_function_cache_new ((GICallableInfo *) info);
+
   callable_cache = (GGICallableCache *) function_cache;
 
   g_assert (function_cache != NULL);

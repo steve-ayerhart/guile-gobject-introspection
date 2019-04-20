@@ -499,7 +499,6 @@ _callable_cache_generate_args_cache_real (GGICallableCache *callable_cache,
 
     return_info = g_callable_info_get_return_type (callable_info);
     return_transfer = g_callable_info_get_caller_owns (callable_info);
-    g_debug ("SETTING RETURN");
     return_cache = ggi_arg_cache_new (return_info,
                                       NULL,
                                       return_transfer,

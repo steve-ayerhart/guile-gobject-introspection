@@ -9,6 +9,7 @@
 #include "ggi-cache.h"
 #include "gtype.h"
 #include "gvalue.h"
+#include "gobject.h"
 
 static gboolean
 _is_union_member (GIInterfaceInfo *interface_info, SCM scm_arg)
@@ -78,15 +79,86 @@ ggi_arg_struct_from_scm_marshal (SCM          scm_arg,
                                  gboolean     is_foreign,
                                  gboolean     is_pointer)
 {
+    g_debug ("ggi_arg_struct_from_scm_marshal");
+
     gboolean is_union = FALSE;
 
-    if (scm_arg == SCM_UNSPECIFIED) // unbound?
+    if (scm_arg == SCM_UNDEFINED) // unbound?
         {
             arg->v_pointer = NULL;
             return TRUE;
         }
 
+    // FIXME: move this large if statement to cache and set correct marshaller
+
+    if (g_type_is_a (g_type, G_TYPE_CLOSURE))
+        {
+            // TODO:
+            //return ggi_arg_gclosure_from_scm_marshal (scm_arg, arg, transfer);
+        }
+    else if (g_type_is_a (g_type, G_TYPE_VALUE))
+        {
+            // TODO:
+            /*
+              return ggi_arg_gvalue_from_scm_marshal (scm_arg,
+              arg,
+              transfer,
+              copy_reference);
+            */
+        }
+    else if (is_foreign)
+        {
+            SCM success;
+            // TODO
+            g_critical ("from_scm_marshal TODO");
+        }
+    else if (SCM_GOBJECTP (scm_arg))
+        {
+            // TODO
+            g_critical ("from_scm_marshal TODO");
+        }
+
+    if (g_type_is_a (g_type, G_TYPE_BOXED))
+        {
+            g_debug ("BOXXXXXXXED");
+
+            if (is_union ||  scm_c_gvalue_holds (scm_arg, g_type))
+                {
+                    g_debug ("WE GOT A BOX");
+                    arg->v_pointer = scm_c_gvalue_peek_boxed (scm_arg);
+                    if (transfer == GI_TRANSFER_EVERYTHING)
+                        arg->v_pointer = g_boxed_copy (g_type, arg->v_pointer);
+                }
+            else
+                {
+                    g_debug ("NO ERRRORRRRRRRR");
+                    goto type_error;
+                }
+        }
+    else if (g_type_is_a (g_type, G_TYPE_POINTER) ||
+             g_type_is_a (g_type, G_TYPE_VARIANT) ||
+             g_type == G_TYPE_NONE)
+        {
+            g_warn_if_fail (g_type_is_a (g_type, G_TYPE_VARIANT) || !is_pointer || transfer == GI_TRANSFER_NOTHING);
+
+            // TODO: variants
+        }
+    else
+        {
+            scm_misc_error ("not implemented",
+                            "structure type '~s' is not supported yet",
+                            scm_from_locale_string (g_type_name (g_type)));
+
+            return FALSE;
+        }
+
     return TRUE;
+
+ type_error:
+    {
+        g_debug ("HOO");
+        return FALSE;
+    }
 }
 
 static gboolean
@@ -124,6 +196,21 @@ arg_foreign_from_scm_cleanup (GGIInvokeState *state,
     // TODO
 }
 
+SCM
+ggi_gboxed_new (GType boxed_type, gpointer boxed, gboolean copy_boxed, gboolean own_ref)
+{
+    g_return_val_if_fail (boxed_type != 0, SCM_UNDEFINED);
+    //    g_return_val_if_fail (!copy_boxed || (copy_boxed && own_ref), SCM_UNDEFINED);
+
+    SCM scm_boxed;
+
+    if (copy_boxed)
+        scm_boxed = scm_c_gvalue_new_take_boxed (boxed_type, boxed);
+    else
+        scm_boxed = scm_c_gvalue_new_from_boxed (boxed_type, boxed);
+
+    return scm_boxed;
+}
 static SCM
 ggi_arg_struct_to_scm_marshaller (GIArgument      *arg,
                                   GIInterfaceInfo *interface_info,
@@ -133,7 +220,7 @@ ggi_arg_struct_to_scm_marshaller (GIArgument      *arg,
                                   gboolean         is_allocated,
                                   gboolean         is_foreign)
 {
-    g_debug ("gg_arg_struct_to_scm_marshaller");
+    g_debug ("ggi_arg_struct_to_scm_marshaller");
 
     SCM scm_obj;
 
@@ -142,7 +229,7 @@ ggi_arg_struct_to_scm_marshaller (GIArgument      *arg,
 
     if (g_type_is_a (g_type, G_TYPE_VALUE))
         {
-            g_debug ("GVALUE HEERRRR");
+            g_debug (" struct is VALUE");
             scm_obj = scm_c_gvalue_to_scm (arg->v_pointer);
         }
     else if (is_foreign)
@@ -152,7 +239,12 @@ ggi_arg_struct_to_scm_marshaller (GIArgument      *arg,
         }
     else if (g_type_is_a (g_type, G_TYPE_BOXED))
         {
-            scm_obj = scm_c_gvalue_new_from_boxed (g_type, arg->v_pointer);
+            g_debug (" struct is BOXED");
+
+            scm_obj = ggi_gboxed_new (g_type,
+                                      arg->v_pointer,
+                                      transfer == GI_TRANSFER_EVERYTHING || is_allocated,
+                                      is_allocated ? g_struct_info_get_size (interface_info) : 0);
         }
     else if (g_type_is_a (g_type, G_TYPE_POINTER))
         {
@@ -169,7 +261,6 @@ ggi_arg_struct_to_scm_marshaller (GIArgument      *arg,
     else
         {
             g_critical ("UNIMPLI");
-      
         }
 
     return scm_obj;
@@ -184,6 +275,8 @@ ggi_arg_struct_to_scm_marshal (GIArgument      *arg,
                                gboolean         is_allocated,
                                gboolean         is_foreign)
 {
+    g_debug ("ggi_arg_struct_to_scm_marshal");
+
     SCM scm_value = ggi_arg_struct_to_scm_marshaller (arg,
                                                       interface_info,
                                                       g_type,
@@ -204,6 +297,8 @@ arg_struct_to_scm_marshal_adapter (GGIInvokeState   *state,
                                    GIArgument       *arg,
                                    gpointer         *cleanup_data)
 {
+    g_debug ("arg_struct_to_scm_marshal_adapter");
+
     GGIInterfaceCache *iface_cache = (GGIInterfaceCache *) arg_cache;
     SCM scm_value;
 
@@ -215,7 +310,7 @@ arg_struct_to_scm_marshal_adapter (GGIInvokeState   *state,
                                                   arg_cache->is_caller_allocates,
                                                   iface_cache->is_foreign);
 
-    * cleanup_data = scm_value;
+    *cleanup_data = scm_value;
 
     return scm_value;
 }

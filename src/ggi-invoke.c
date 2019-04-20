@@ -138,7 +138,15 @@ _invoke_marshal_in_args (GGIInvokeState *state, GGIFunctionCache *function_cache
     // TODO: scm error
 
     if (state->n_scm_in_args > cache->n_scm_args)
-        return FALSE;
+        {
+            char *full_name = ggi_callable_cache_get_full_name (cache);
+            scm_misc_error ("type error",
+                            "~s takes exactly ~d argument(s) (~d given)",
+                            scm_list_3 (scm_from_locale_string (full_name),
+                                        scm_from_int (cache->n_scm_args),
+                                        scm_from_int (state->n_scm_in_args)));
+            return FALSE;
+        }
 
     for (i = 0; (gsize) i < _ggi_callable_cache_args_len (cache); i++)
         {
@@ -162,6 +170,12 @@ _invoke_marshal_in_args (GGIInvokeState *state, GGIFunctionCache *function_cache
                     // TODO: scm error
                     if (arg_cache->scm_arg_index >= state->n_scm_in_args)
                         {
+                            char *full_name = ggi_callable_cache_get_full_name (cache);
+                            scm_misc_error ("type error",
+                                            "~s takes exactly ~d argument(s) (~d given)",
+                                            scm_list_3 (scm_from_locale_string (full_name),
+                                                        scm_from_int (cache->n_scm_args),
+                                                        scm_from_int (state->n_scm_in_args)));
                             return FALSE;
                         }
 
@@ -175,6 +189,13 @@ _invoke_marshal_in_args (GGIInvokeState *state, GGIFunctionCache *function_cache
                             // TODO: scm error
                             if (arg_cache->scm_arg_index >= state->n_scm_in_args)
                                 {
+                                    char *full_name = ggi_callable_cache_get_full_name (cache);
+                                    scm_misc_error ("type error",
+                                                    "~s takes exactly ~d argument(s) (~d given)",
+                                                    scm_list_3 (scm_from_locale_string (full_name),
+                                                                scm_from_int (cache->n_scm_args),
+                                                                scm_from_int (state->n_scm_in_args)));
+
                                     return FALSE;
                                 }
 
@@ -192,6 +213,11 @@ _invoke_marshal_in_args (GGIInvokeState *state, GGIFunctionCache *function_cache
                             // TODO: scm error
                             if (!_caller_alloc (arg_cache, c_arg))
                                 {
+                                    char *full_name = ggi_callable_cache_get_full_name (cache);
+                                    scm_misc_error ("type error",
+                                                    "could not caller allocate argument ~d of callable ~s",
+                                                    scm_list_2 (scm_from_int (i),
+                                                                scm_from_locale_string (full_name)));
                                     return FALSE;
                                 }
                         }
@@ -215,6 +241,9 @@ _invoke_marshal_in_args (GGIInvokeState *state, GGIFunctionCache *function_cache
 
                     if (!arg_cache->allow_none && scm_arg == SCM_UNSPECIFIED)
                         {
+                            scm_misc_error ("type error",
+                                            "argument ~d does not allow no as a value",
+                                            scm_list_1 (scm_from_int (i)));
                             return FALSE;
                         }
 
@@ -228,6 +257,7 @@ _invoke_marshal_in_args (GGIInvokeState *state, GGIFunctionCache *function_cache
                     // TODO scm error
                     if (!success)
                         {
+                            g_critical ("marshallllllll nooo");
                             return FALSE;
                         }
                 }
@@ -243,7 +273,7 @@ _invoke_marshal_out_args (GGIInvokeState *state, GGIFunctionCache *function_cach
 
     GGICallableCache *cache = (GGICallableCache *) function_cache;
     SCM scm_out = SCM_EOL;
-    SCM scm_return = SCM_UNSPECIFIED;
+    SCM scm_return = SCM_UNDEFINED;
     gssize n_out_args = cache->n_to_scm_args - cache->n_to_scm_child_args;
 
     g_debug (" n_to_scm_out_args: %d, child: %d" , cache->n_to_scm_args, cache->n_to_scm_child_args);
@@ -252,8 +282,6 @@ _invoke_marshal_out_args (GGIInvokeState *state, GGIFunctionCache *function_cach
         {
             if (!cache->return_cache->is_skipped)
                 {
-                    g_debug (" return is not skipped");
-
                     gpointer cleanup_data = NULL;
                     scm_return = cache->return_cache->to_scm_marshaller (state,
                                                                          cache,
@@ -261,12 +289,11 @@ _invoke_marshal_out_args (GGIInvokeState *state, GGIFunctionCache *function_cach
                                                                          &state->return_arg,
                                                                          &cleanup_data);
                     //                    state->to_scm_return_arg_cleanup_data = cleanup_data;
-                    if (scm_return == SCM_UNSPECIFIED)
+                    if (scm_return == SCM_UNDEFINED)
                         {
                             // cleanup
-                            return SCM_UNSPECIFIED;
+                            return scm_return;
                         }
-                    g_debug (" return is not skipped");
                 }
             else
                 {
@@ -349,9 +376,11 @@ _invoke_marshal_out_args (GGIInvokeState *state, GGIFunctionCache *function_cach
                             return SCM_UNDEFINED;
                         }
 
-                    scm_out = scm_append (scm_list_2 (scm_out, scm_value));
+                    scm_out = scm_append (scm_list_2 (scm_out,
+                                                      scm_list_1 (scm_value)));
                     cache_item = cache_item->next;
                 }
+            scm_out = scm_values (scm_out);
         }
     return scm_out;
 }
@@ -369,10 +398,16 @@ ggi_invoke_c_callable (GGIFunctionCache *function_cache,
     SCM scm_return_value = SCM_UNSPECIFIED;
 
     if (!_invoke_state_init_from_cache (state, function_cache, scm_args, scm_kwargs))
-        goto err;
+        {
+            g_debug ("init state error");
+            goto err;
+        }
 
     if (!_invoke_marshal_in_args (state, function_cache))
-        goto err;
+        {
+            g_debug ("marshal in error");
+            goto err;
+        }
 
     ffi_call (&function_cache->invoker.cif,
               state->function_ptr,
@@ -381,6 +416,7 @@ ggi_invoke_c_callable (GGIFunctionCache *function_cache,
 
     if (state->error != NULL)
         {
+            g_debug ("state error");
             // TODO: really handle
             goto err;
         }
