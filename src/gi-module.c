@@ -22,7 +22,7 @@ static SCM scm_gtype_name_to_class_name;
 void
 ggi_finalize_callable_cache (void *cache)
 {
-  g_debug ("ggi_finalize_callable_cache");
+  g_debug ("ggi_finalize_callable_cache: %s", ((GGICallableCache *) cache)->name);
 
   //ggi_callable_cache_free ((GGICallableCache *) cache);
 }

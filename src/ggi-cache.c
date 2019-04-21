@@ -38,7 +38,6 @@ _arg_info_default_value (GIArgInfo *info, GIArgument *arg)
     if (g_arg_info_may_be_null (info)) {
         arg->v_pointer = NULL;
         return TRUE;
-
     }
 
     return FALSE;
@@ -101,7 +100,7 @@ ggi_arg_cache_setup_scm_goops_type (GGIArgCache *arg_cache)
         default:
             arg_cache->scm_type = scm_variable_ref (scm_c_public_lookup ("oop goops",
                                                                          "<unknown>"));
-            g_debug ("UNKNOW");
+            g_critical ("don't know how convert to a goops type");
         }
 }
 
@@ -454,6 +453,7 @@ ggi_arg_cache_new (GITypeInfo *type_info,
 
     return arg_cache;
 }
+
 static GGIDirection
 _ggi_get_direction (GGICallableCache *callable_cache, GIDirection gi_direction)
 {
@@ -472,7 +472,6 @@ _ggi_get_direction (GGICallableCache *callable_cache, GIDirection gi_direction)
             return GGI_DIRECTION_TO_SCM;
         }
 }
-
 
 void
 ggi_callable_cache_free (GGICallableCache *cache)
@@ -876,13 +875,11 @@ _function_cache_init (GGIFunctionCache *function_cache,
 
     if (!_callable_cache_init (callable_cache, callable_info))
         {
-            g_debug ("callable_cache_init failed");
             return FALSE;
         }
 
     if (!_function_cache_wrapper_init (function_cache, callable_cache))
         {
-            g_debug ("wrapper failed");
             return FALSE;
         }
 
@@ -995,7 +992,7 @@ _constructor_cache_invoke_real (GGIFunctionCache *function_cache,
                                               scm_args,
                                               scm_optargs);
 
-    if (scm_return == SCM_UNSPECIFIED || cache->return_cache->is_skipped)
+    if (scm_return == SCM_UNDEFINED || cache->return_cache->is_skipped)
         return SCM_UNSPECIFIED;
 
 
@@ -1094,7 +1091,6 @@ ggi_method_cache_new (GICallableInfo *callable_info)
             g_free (method_cache);
             return NULL;
         }
-
 
     return (GGIFunctionCache *) method_cache;
 }
