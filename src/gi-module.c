@@ -108,7 +108,6 @@ ggi_define_module_object_method (SCM scm_class,
                                  GGICallableCache *callable_cache,
                                  GICallableInfo *callable_info)
 {
-
   SCM scm_callable_cache;
   char *method_name;
   SCM scm_method_proc;
@@ -205,6 +204,7 @@ ggi_define_module_object (GIBaseInfo *info,
                           gint (*get_n_methods)(GIBaseInfo *),
                           GIBaseInfo * (*get_method)(GIBaseInfo *, gint))
 {
+
   GIObjectInfo *object_info;
   char *class_name;
   GType gtype;
@@ -221,6 +221,8 @@ ggi_define_module_object (GIBaseInfo *info,
 
   class_name = scm_to_locale_string (scm_symbol_to_string (scm_call_1 (scm_gtype_name_to_class_name,
                                                                        scm_from_locale_string (g_type_name (gtype)))));
+  g_debug ("ggi_define_module_object: %s", class_name);
+
   scm_dynwind_free (class_name);
 
   scm_class = scm_c_gtype_to_class (gtype);
@@ -231,10 +233,12 @@ ggi_define_module_object (GIBaseInfo *info,
 
   scm_dynwind_end ();
 
+  /*
   ggi_define_module_object_methods (scm_class,
                                     info,
                                     get_n_methods,
                                     get_method);
+  */
 }
 
 void
@@ -322,14 +326,24 @@ ggi_namespace_init (void *namespace)
           g_base_info_unref (info);
           break;
         case GI_INFO_TYPE_STRUCT:
+          g_debug ("struct:");
+          if (g_struct_info_is_gtype_struct ((GIStructInfo *) info))
+            return;
           ggi_define_module_object (info,
                                     g_struct_info_get_n_methods,
                                     g_struct_info_get_method);
           break;
         case GI_INFO_TYPE_OBJECT:
+          g_debug ("object:");
           ggi_define_module_object (info,
                                     g_object_info_get_n_methods,
                                     g_object_info_get_method);
+          break;
+        case GI_INFO_TYPE_INTERFACE:
+          g_debug ("interface:");
+          ggi_define_module_object (info,
+                                    g_interface_info_get_n_methods,
+                                    g_interface_info_get_method);
           break;
         case GI_INFO_TYPE_FUNCTION:
           ggi_define_module_function (info);
