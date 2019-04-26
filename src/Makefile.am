@@ -3,6 +3,8 @@ lib_LTLIBRARIES = gobject-introspection.la
 AM_CFALGS = -I. $(WARN_CFLAGS) $(DEBUG_FLAGS)
 
 C_FILES = \
+  scmgobject-object.c \
+  scmgi-type.c \
 	gc.c \
 	gutil.c \
 	gtype.c \
@@ -34,7 +36,7 @@ C_FILES = \
 H_FILES = $(C_FILES:.c=.h)
 X_FILES = $(C_FILES:.c=.x)
 
-gobject_introspection_la_SOURCES = $(C_FILES) $(H_FILES) support.c support.h private.h ggi-invoke-state-struct.h
+gobject_introspection_la_SOURCES = $(C_FILES) $(H_FILES) support.c support.h private.h ggi-invoke-state-struct.h scmgobject.h scmgobject-internal.h
 
 gobject_introspection_la_CFLAGS = $(GUILE_CFLAGS) $(GIR_CFLAGS) $(GOBJECT_CFLAGS) $(AM_CFLAGS)
 gobject_introspection_la_LIBADD = $(GUILE_LIBS) $(GIR_LIBS) $(GOBJECT_LIBS)

@@ -26,8 +26,15 @@ extern GQuark scmgpointer_class_key;
 extern GQuark scmgboxed_class_key;
 extern GQuark scmgobject_class_key;
 
+GQuark scmginterface_type_key;
+GQuark scmgenum_class_key;
+GQuark scmgflags_class_key;
+GQuark scmgpointer_class_key;
+GQuark scmgboxed_class_key;
+GQuark scmgobject_class_key;
+
 static GQuark
-_scmg_type_key (GType type)
+_scmgi_type_key (GType type)
 {
     GQuark key;
 
@@ -73,7 +80,7 @@ SCM_DEFINE (scmgi_g_type_get_goopstype, "%g-type-get-goops-type", 1, 0, 0,
 
     gtype = ((ScmGTypeWrapper *) scm_foreign_object_ref (scm_gtype, 0))->type;
 
-    type_key = _scmg_type_key (gtype);
+    type_key = _scmgi_type_key (gtype);
 
     scm_type = g_type_get_qdata (gtype, type_key);
     if (!scm_type)
@@ -81,6 +88,7 @@ SCM_DEFINE (scmgi_g_type_get_goopstype, "%g-type-get-goops-type", 1, 0, 0,
 
     return scm_type;
 }
+/*
 
 SCM_DEFINE (scmgi_g_type_set_goopstype, "%g-type-set-goops-type", 2, 0, 0,
             (SCM scm_gtype, SCM scm_value),
@@ -100,9 +108,13 @@ SCM_DEFINE (scmgi_g_type_set_goopstype, "%g-type-set-goops-type", 2, 0, 0,
 
 
 
+*/
 void
 scmgi_type_init ()
 {
+#ifndef SCM_MAGIC_SNARFER
+#include "scmgi-type.x"
+#endif
     scm_g_type_class = scm_make_foreign_object_type (scm_sym_gtype,
                                                      scm_from_utf8_symbol ("type"),
                                                      NULL);
