@@ -526,6 +526,88 @@ scm_c_gtype_instance_to_scm (gpointer c_ginstance)
                                             G_TYPE_FROM_INSTANCE (c_ginstance));
 }
 
+static void
+_scm_gtype_class_bind (SCM scm_gtype_class, SCM scm_gtype_name)
+{
+  GType gtype;
+  char *gtype_name;
+
+  if (scm_is_symbol (scm_gtype_name))
+    scm_gtype_name = scm_symbol_to_string (scm_gtype_name);
+  //else
+  //  scm_misc_error ("initialize", "#:gtype-name must be a symbol or #t", SCM_EOL);
+
+  scm_dynwind_begin (0);
+  gtype_name = scm_to_locale_string (scm_gtype_name);
+  scm_dynwind_free (gtype_name);
+
+  gtype = g_type_from_name (gtype_name);
+  if (!gtype)
+    scm_misc_error ("initialize",
+                    "No GType registered with name ~a",
+                    scm_list_1 (scm_gtype_name));
+
+  g_type_set_qdata (gtype, quark_class, scm_permanent_object (scm_gtype_class));
+  scm_slot_set_x (scm_gtype_class, scm_sym_gtype, scm_from_ulong (gtype));
+
+  scm_dynwind_end ();
+}
+
+static void
+_scm_gtype_finalization_magic (SCM scm_gtype_class)
+{
+  GType gtype;
+  scm_t_bits *slots;
+
+  gtype = (GType) scm_to_ulong (scm_slot_ref (scm_gtype_class, scm_sym_gtype));
+
+  slots = SCM_STRUCT_DATA (scm_gtype_class);
+  // inherit class free function
+  if (g_type_parent (gtype))
+    {
+      SCM parent = scm_c_gtype_to_class (g_type_parent (gtype));
+      slots[scm_vtable_index_instance_finalize] =
+        SCM_STRUCT_DATA (parent)[scm_vtable_index_instance_finalize];
+    }
+  else if (G_TYPE_IS_INSTANTIATABLE (gtype))
+    {
+      slots[scm_vtable_index_instance_finalize] =
+        (scm_t_bits) scm_gtype_instance_struct_free;
+    }
+  else
+    {
+      SCM parent = scm_cadr (scm_class_precedence_list (scm_gtype_class));
+      // is this right? layout might not be the same
+      slots[scm_vtable_index_instance_finalize] =
+        SCM_STRUCT_DATA (parent)[scm_vtable_index_instance_finalize];
+    }
+}
+
+
+SCM_DEFINE (scm_gtype_initialize, "%gtype-initialize", 2, 0, 0,
+            (SCM scm_gtype_class, SCM scm_initargs),
+            "")
+{
+  g_debug ("scm_gtype_initialize");
+
+  SCM scm_gtype_name = SCM_UNDEFINED;
+
+  scm_c_bind_keyword_arguments ("initialize", scm_initargs, SCM_ALLOW_OTHER_KEYS,
+                                kw_gtype_name, &scm_gtype_name,
+                                SCM_UNDEFINED);
+
+  if (SCM_UNBNDP (scm_gtype_name))
+    scm_misc_error ("initialize", "Need #:gtype-name initarg", SCM_EOL);
+
+  if (!scm_is_eq (scm_gtype_name, SCM_BOOL_T))
+    _scm_gtype_class_bind (scm_gtype_class, scm_gtype_name);
+
+  _scm_gtype_finalization_magic (scm_gtype_class);
+
+  return SCM_UNSPECIFIED;
+}
+
+
 void
 scm_c_gruntime_error (const char *function_name, const char *message, SCM args)
 {
@@ -537,9 +619,9 @@ scm_gobject_gtype_init (void)
 {
   g_debug ("scm_gobject_gtype_init");
 
-  #ifndef SCM_MAGIC_SNARFER
-  #include "gtype.x"
-  #endif
+#ifndef SCM_MAGIC_SNARFER
+#include "gtype.x"
+#endif
 
   quark_type = g_quark_from_static_string ("scm-gtype->type");
   quark_class = g_quark_from_static_string ("scm-gtype->class");

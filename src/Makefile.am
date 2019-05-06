@@ -1,9 +1,8 @@
 lib_LTLIBRARIES = gobject-introspection.la
 
-AM_CFLAGS = -I. $(WARN_CFLAGS) $(DEBUG_FLAGS) -fPIC
+AM_CFLAGS = -I. $(WARN_CFLAGS) $(DEBUG_FLAGS)# -fPIC
 
 C_FILES = \
-  g-type.c \
 	gc.c \
 	gutil.c \
 	gtype.c \

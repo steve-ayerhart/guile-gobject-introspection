@@ -33,12 +33,12 @@ ggi_define_module_enum (GIBaseInfo *info)
 {
   g_debug ("ggi_define_module_enum: %s", g_base_info_get_name (info));
 
-  GIEnumInfo *enum_info;
+  //  GIEnumInfo *enum_info;
   const char *name;
   GType gtype;
   SCM scm_enum;
 
-  GI_IS_ENUM_INFO (info);
+  //GI_IS_ENUM_INFO (info);
 
   gtype = g_registered_type_info_get_g_type ((GIRegisteredTypeInfo *) info);
 
@@ -62,7 +62,7 @@ ggi_define_module_constant (GIBaseInfo *info)
   GIArgument value = {0};
   SCM scm_value;
 
-  GI_IS_CONSTANT_INFO (info);
+  //GI_IS_CONSTANT_INFO (info);
 
   constant_info = (GIConstantInfo *) info;
 
@@ -172,7 +172,6 @@ ggi_define_module_object_methods (SCM scm_class,
   for (size_t n = 0; n < get_n_methods (object_info); n++)
     {
       GIFunctionInfo *function_info;
-      GGICallableCache *callable_cache;
       GGIFunctionCache *function_cache;
 
       function_info = get_method (object_info, n);
@@ -190,6 +189,7 @@ ggi_define_module_object_methods (SCM scm_class,
           break;
         case GI_FUNCTION_IS_GETTER:
         case GI_FUNCTION_IS_SETTER:
+        default:
           return;
         }
 
@@ -205,16 +205,10 @@ ggi_define_module_object (GIBaseInfo *info,
                           GIBaseInfo * (*get_method)(GIBaseInfo *, gint))
 {
 
-  GIObjectInfo *object_info;
   char *class_name;
   GType gtype;
   SCM scm_class;
-  SCM scm_gtype_name;
 
-  GI_IS_REGISTERED_TYPE_INFO (info);
-  GI_IS_OBJECT_INFO (info);
-
-  object_info = (GIObjectInfo *) info;
   gtype = g_registered_type_info_get_g_type ((GIRegisteredTypeInfo *) info);
 
   scm_dynwind_begin (0);
@@ -233,12 +227,10 @@ ggi_define_module_object (GIBaseInfo *info,
 
   scm_dynwind_end ();
 
-  /*
   ggi_define_module_object_methods (scm_class,
                                     info,
                                     get_n_methods,
                                     get_method);
-  */
 }
 
 void
@@ -251,9 +243,6 @@ ggi_define_module_function (GIBaseInfo *info)
   GIFunctionInfo *function_info;
   const char *function_name;
   SCM scm_callable_cache;
-  const int args;
-  const int opt_args;
-  ggi_gsubr_t  *ggi_func;
   GIFunctionInfoFlags flags;
 
   GI_IS_FUNCTION_INFO (info);
@@ -271,10 +260,6 @@ ggi_define_module_function (GIBaseInfo *info)
   function_name = ggi_gname_to_scm_function_name (callable_cache->name,
                                                   (GICallableInfo *) info);
 
-
-  g_debug (" n_args: %d, req_args: ",
-           callable_cache->n_scm_args,
-           callable_cache->n_scm_required_args);
 
   scm_c_define_gsubr (function_name,
                       callable_cache->n_scm_required_args,
