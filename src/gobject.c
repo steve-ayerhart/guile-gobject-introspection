@@ -164,6 +164,7 @@ scm_c_gobject_construct (SCM instance, SCM initargs)
                             "No property named ~S in object ~A",
                             SCM_LIST2 (propname, instance));
 
+    #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
     g_value_init (current_value, G_PARAM_SPEC_VALUE_TYPE (pspec));
     scm_c_gvalue_set (current_value, val);
 
@@ -420,6 +421,8 @@ SCM_DEFINE (scm_gobject_class_get_property_names, "gobject-class-get-property-na
   SCM ret = SCM_EOL;
 
   SCM_VALIDATE_GTYPE_CLASS_COPY (1, class, gtype);
+
+  g_debug ("gtype: %s", g_type_name (gtype));
 
   if (G_TYPE_FUNDAMENTAL (gtype) == G_TYPE_OBJECT) {
     gclass = G_OBJECT_CLASS (g_type_class_ref (gtype));

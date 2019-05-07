@@ -93,6 +93,8 @@ scm_c_gtype_get_direct_supers (GType type)
 SCM
 scm_c_gtype_to_class (GType gtype)
 {
+  g_debug ("scm_c_gtype_to_class: %s", g_type_name(gtype));
+
   SCM class, supers, gtype_name, name;
 
   class = scm_c_gtype_lookup_class (gtype);
@@ -147,12 +149,13 @@ SCM_DEFINE (scm_gtype_name_to_class, "gtype-name->class", 1, 0, 0,
 SCM_DEFINE (scm_sys_gtype_class_bind, "gtype-class-bind", 2, 0, 0,
             (SCM class, SCM type_name),
             "")
-#define FUNC_NAME s_scm_sys_gtype_class_bind
+#define FUNC_NAME "initialize"
 {
   GType gtype;
   char *c_type_name;
 
-  // SCM_VALIDATE
+  SCM_VALIDATE_GTYPE_CLASS (1, class);
+  SCM_VALIDATE_STRING (2, type_name);
 
   if (scm_c_gtype_class_to_gtype (class))
     scm_misc_error (FUNC_NAME,
@@ -191,10 +194,12 @@ scm_gtype_instance_struct_free (SCM object)
 SCM_DEFINE (scm_sys_gtype_class_inheritc_magic, "gtype-class-inherit-magic", 1, 0, 0,
             (SCM class),
             "")
-#define FUNC_NAME s_scm_sys_gtype_class_inherit_magic
+#define FUNC_NAME "s_scm_sys_gtype_class_inherit_magic"
 {
   GType gtype;
   scm_t_bits *slots;
+
+  SCM_VALIDATE_GTYPE_CLASS_COPY (1, class, gtype);
 
   slots = SCM_STRUCT_DATA (class);
   // inherit class free function
@@ -528,9 +533,19 @@ scm_c_gtype_instance_to_scm (gpointer c_ginstance)
 
 static void
 _scm_gtype_class_bind (SCM scm_gtype_class, SCM scm_gtype_name)
+#define FUNC_NAME "initialize"
 {
+  g_debug ("  _scm_gtype_class_bind");
+
   GType gtype;
   char *gtype_name;
+
+  SCM_VALIDATE_GTYPE_CLASS (1, scm_gtype_class);
+
+  if (scm_c_gtype_class_to_gtype (scm_gtype_class))
+    scm_misc_error ("initialize",
+                    "class '~a' already has a GType",
+                    scm_list_1 (scm_gtype_name));
 
   if (scm_is_symbol (scm_gtype_name))
     scm_gtype_name = scm_symbol_to_string (scm_gtype_name);
@@ -544,7 +559,12 @@ _scm_gtype_class_bind (SCM scm_gtype_class, SCM scm_gtype_name)
   gtype = g_type_from_name (gtype_name);
   if (!gtype)
     scm_misc_error ("initialize",
-                    "No GType registered with name ~a",
+                    "No GType registered with name '~a'",
+                    scm_list_1 (scm_gtype_name));
+
+  if (scm_is_true (scm_c_gtype_lookup_class (gtype)))
+    scm_misc_error ("initialize",
+                    "'~a' already has a GOOPS class, use gtype-name->class",
                     scm_list_1 (scm_gtype_name));
 
   g_type_set_qdata (gtype, quark_class, scm_permanent_object (scm_gtype_class));
@@ -555,33 +575,36 @@ _scm_gtype_class_bind (SCM scm_gtype_class, SCM scm_gtype_name)
 
 static void
 _scm_gtype_finalization_magic (SCM scm_gtype_class)
+#define FUNC_NAME "initialize"
 {
-  GType gtype;
-  scm_t_bits *slots;
+g_debug ("  _scm_gtype_finalization_magic");
+GType gtype;
+scm_t_bits *slots;
 
-  gtype = (GType) scm_to_ulong (scm_slot_ref (scm_gtype_class, scm_sym_gtype));
+SCM_VALIDATE_GTYPE_CLASS_COPY (1, scm_gtype_class, gtype);
 
-  slots = SCM_STRUCT_DATA (scm_gtype_class);
-  // inherit class free function
-  if (g_type_parent (gtype))
-    {
-      SCM parent = scm_c_gtype_to_class (g_type_parent (gtype));
-      slots[scm_vtable_index_instance_finalize] =
-        SCM_STRUCT_DATA (parent)[scm_vtable_index_instance_finalize];
-    }
-  else if (G_TYPE_IS_INSTANTIATABLE (gtype))
-    {
-      slots[scm_vtable_index_instance_finalize] =
-        (scm_t_bits) scm_gtype_instance_struct_free;
-    }
-  else
-    {
-      SCM parent = scm_cadr (scm_class_precedence_list (scm_gtype_class));
-      // is this right? layout might not be the same
-      slots[scm_vtable_index_instance_finalize] =
-        SCM_STRUCT_DATA (parent)[scm_vtable_index_instance_finalize];
-    }
+slots = SCM_STRUCT_DATA (scm_gtype_class);
+// inherit class free function
+if (g_type_parent (gtype))
+  {
+    SCM parent = scm_c_gtype_to_class (g_type_parent (gtype));
+    slots[scm_vtable_index_instance_finalize] =
+      SCM_STRUCT_DATA (parent)[scm_vtable_index_instance_finalize];
+  }
+ else if (G_TYPE_IS_INSTANTIATABLE (gtype))
+   {
+     slots[scm_vtable_index_instance_finalize] =
+       (scm_t_bits) scm_gtype_instance_struct_free;
+   }
+ else
+   {
+     SCM parent = scm_cadr (scm_class_precedence_list (scm_gtype_class));
+     // is this right? layout might not be the same
+     slots[scm_vtable_index_instance_finalize] =
+       SCM_STRUCT_DATA (parent)[scm_vtable_index_instance_finalize];
+   }
 }
+#undef FUNC_NAME
 
 
 SCM_DEFINE (scm_gtype_initialize, "%gtype-initialize", 2, 0, 0,
@@ -631,11 +654,18 @@ scm_gobject_gtype_init (void)
   scm_sys_gtype_to_class =
     scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("gtype->class")));
 
+
+  scm_class_gtype_class =
+    scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gtype-class>")));
+  scm_class_gtype_instance =
+    scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gtype-instance>")));
+
   // (g-object utils)
   scm_gtype_name_to_scheme_name =
     scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("gtype-name->scheme-name")));
   scm_gtype_name_to_class_name =
     scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("gtype-name->class-name")));
+
 
   // (oop goops)
   scm_make_class = scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("make-class")));
@@ -645,22 +675,4 @@ scm_gobject_gtype_init (void)
     scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("allocate-instance")));
   scm_initialize =
     scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("initialize")));
-}
-
-void
-scm_gobject_gtype_class_init (void)
-{
-  g_debug ("scm_gobject_gtype_class_init");
-
-  scm_class_gtype_class =
-    scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gtype-class>")));
-}
-
-void
-scm_gobject_gtype_instance_init (void)
-{
-  g_debug ("scm_gobject_gtype_instance_init");
-
-  scm_class_gtype_instance =
-    scm_permanent_object (SCM_VARIABLE_REF (scm_c_lookup ("<gtype-instance>")));
 }

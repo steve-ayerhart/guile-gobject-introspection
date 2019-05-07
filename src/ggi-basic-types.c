@@ -118,6 +118,8 @@ marshal_to_scm_void (GGIInvokeState *state,
 {
     if (arg_cache->is_pointer)
         return SCM_UNSPECIFIED;
+
+    return SCM_UNSPECIFIED;
 }
 
 gboolean
@@ -420,8 +422,6 @@ ggi_scm_to_guint (SCM scm_value, guint *guint_)
 gboolean
 ggi_scm_to_glong (SCM scm_value, glong *glong_)
 {
-    long long_int;
-
     *glong_ = (glong) scm_to_long (scm_value);
 
     return TRUE;
@@ -430,8 +430,6 @@ ggi_scm_to_glong (SCM scm_value, glong *glong_)
 gboolean
 ggi_scm_to_gulong (SCM scm_value, gulong *gulong_)
 {
-    long long_int;
-
     *gulong_ = (gulong) scm_to_ulong (scm_value);
 
     return TRUE;

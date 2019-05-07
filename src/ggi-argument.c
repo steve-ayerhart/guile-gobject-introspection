@@ -113,7 +113,7 @@ _ggi_hash_pointer_to_arg (GIArgument *arg,
     case GI_TYPE_TAG_UINT8:
       arg->v_int16 = (guint8) GPOINTER_TO_INT (arg->v_pointer);
       break;
-    case_GI_TYPE_TAG_UINT16:
+    case GI_TYPE_TAG_UINT16:
       arg->v_int16 = (guint16) GPOINTER_TO_INT (arg->v_pointer);
       break;
     case GI_TYPE_TAG_UINT32:
@@ -289,6 +289,7 @@ _ggi_argument_from_object (SCM         scm_obj,
 {
   g_debug ("_ggi_argument_from_object");
 
+  /*
   GIArgument arg;
   GITypeTag type_tag;
   gpointer cleanup_data = NULL;
@@ -318,6 +319,7 @@ _ggi_argument_from_object (SCM         scm_obj,
         // FINISH
       }
     }
+  */
 }
 
 typedef struct
@@ -663,11 +665,11 @@ scm_to_gi_interface (SCM scm_arg,
     break;
   case GI_INFO_TYPE_BOXED:
     {
-      GIRegisteredTypeInfo *reg_type;
-      GType gtype;
+      //GIRegisteredTypeInfo *reg_type;
+      //GType gtype;
 
-      reg_type = (GIRegisteredTypeInfo *) arg_type;
-      gtype = g_registered_type_info_get_g_type (reg_type);
+      //reg_type = (GIRegisteredTypeInfo *) arg_type;
+      //gtype = g_registered_type_info_get_g_type (reg_type);
 
       if (transfer_type == GI_TRANSFER_EVERYTHING)
         *c_instance = scm_c_gvalue_dup_boxed (scm_arg);

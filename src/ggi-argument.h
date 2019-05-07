@@ -94,17 +94,6 @@ scm_to_gi_interface (SCM scm_arg,
                      GArgument *arg,
                      GArgument *destroy_arg);
 
-static void
-callback_closure (ffi_cif *cif,
-                  void *result,
-                  void **args,
-                  void *data);
-
-static void
-destroy_notify_callback (ffi_cif *cif,
-                         void *result,
-                         void **args,
-                         void *data);
 
 G_GNUC_INTERNAL void
 gi_argument_init (void);

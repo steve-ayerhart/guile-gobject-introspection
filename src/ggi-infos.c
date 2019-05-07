@@ -5,10 +5,52 @@
 
 #include <glib.h>
 
+static SCM scm_gibase_info_type;
+
+static SCM scm_gicallable_info_type;
+static SCM scm_gicallback_info_type;
+static SCM scm_gifunction_info_type;
+static SCM scm_gisignal_info_type;
+static SCM scm_giv_func_info_type;
+
+static SCM scm_giregistered_type_info_type;
+static SCM scm_gienum_info_type;
+static SCM scm_giinterface_info_type;
+static SCM scm_giobject_info_type;
+static SCM scm_gistruct_info_type;
+static SCM scm_giunion_info_type;
+
+static SCM scm_giarg_info_type;
+static SCM scm_giconstant_info_type;
+static SCM scm_gifield_info_type;
+static SCM scm_giproperty_info_type;
+static SCM scm_givalue_info_type;
+static SCM scm_gitype_info_type;
+
 /*
  * Make a list from the common GI API pattern of having a function which
  * returns a count and an indexed GIBaseInfo in the range of 0 to count
  */
+
+static void
+ggi_finalize_object (SCM scm_info)
+{
+  g_print ("FINALIZING OBJ\n");
+  GIBaseInfo *info;
+
+  info = (GIBaseInfo *) scm_to_pointer (scm_foreign_object_ref (scm_info, 0));
+
+  g_base_info_unref (info);
+}
+
+static void
+ggi_finalize_pointer (void *info)
+{
+  g_print ("FINALIZING PROP\n");
+
+  g_base_info_unref (info);
+}
+
 
 SCM
 ggi_make_infos_list (SCM scm_info_class,
@@ -113,36 +155,6 @@ GIBaseInfo *
 ggi_object_get_gi_info (SCM scm_object)
 {
   return (GIBaseInfo *) scm_to_pointer (scm_foreign_object_ref (scm_object, 0));
-}
-
-static SCM
-make_infos_list (SCM scm_info,
-                 gint (*get_n_infos)(GIBaseInfo *),
-                 GIBaseInfo * (*get_info)(GIBaseInfo *, gint))
-{
-  GIBaseInfo *base_info;
-  gint n_infos;
-  SCM scm_infos;
-  gint i;
-
-  base_info = ggi_object_get_gi_info (scm_info);
-
-  n_infos = get_n_infos (base_info);
-
-  scm_infos = SCM_EOL;
-  for (i = 0; i < n_infos; i++) {
-    GIBaseInfo *info;
-    SCM scm_info;
-
-    info = (GIBaseInfo *) get_info (base_info, i);
-    g_assert (info != NULL);
-
-    scm_info =ggi_make_info (info);
-
-    scm_infos = scm_append (scm_list_2 (scm_infos, scm_list_1 (scm_info)));
-  }
-
-  return scm_infos;
 }
 
 
@@ -453,8 +465,6 @@ SCM_DEFINE (scm_gi_constant_info_get_value, "%gi-constant-info-get-value", 1, 0,
   SCM scm_value;
 
   constant_info = (GIConstantInfo *) ggi_object_get_gi_info (scm_constant_info);
-
-  GI_IS_CONSTANT_INFO (constant_info);
 
   if (g_constant_info_get_value (constant_info, &value) < 0) {
     return SCM_UNDEFINED;

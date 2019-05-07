@@ -227,10 +227,12 @@ ggi_define_module_object (GIBaseInfo *info,
 
   scm_dynwind_end ();
 
+  /*
   ggi_define_module_object_methods (scm_class,
                                     info,
                                     get_n_methods,
                                     get_method);
+  */
 }
 
 void
@@ -240,13 +242,11 @@ ggi_define_module_function (GIBaseInfo *info)
 
   GGIFunctionCache *function_cache;
   GGICallableCache *callable_cache;
-  GIFunctionInfo *function_info;
   const char *function_name;
   SCM scm_callable_cache;
   GIFunctionInfoFlags flags;
 
-  GI_IS_FUNCTION_INFO (info);
-
+  flags = g_function_info_get_flags ((GIFunctionInfo *) info);
 
   if (flags & GI_FUNCTION_IS_CONSTRUCTOR)
     function_cache = ggi_constructor_cache_new ((GICallableInfo *) info);
@@ -286,6 +286,9 @@ ggi_namespace_init (void *namespace)
   scm_c_use_module ("gobject");
   scm_c_use_module ("gobject gtype");
   scm_c_use_module ("gobject gvalue");
+  scm_c_use_module ("gobject gparameter");
+  scm_c_use_module ("gobject gclosure");
+
 
   for (int n = 0; n < g_irepository_get_n_infos (NULL, namespace); n++)
     {

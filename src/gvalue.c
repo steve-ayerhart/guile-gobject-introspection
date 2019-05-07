@@ -351,7 +351,7 @@ scm_c_gvalue_set (GValue *gvalue, SCM value)
   }
 }
 #undef FUNC_NAME
-static gint
+gint
 scm_c_scm_to_enum_value (GEnumClass *enum_class, SCM value)
 #define FUNC_NAME "scm->enum-value"
 {
@@ -407,7 +407,7 @@ SCM_DEFINE (scm_genum_to_value, "genum->value", 1, 0, 0,
 }
 #undef FUNC_NAME
 
-static guint
+guint
 scm_c_scm_to_flags_value (GFlagsClass *flags_class, SCM value)
 #define FUNC_NAME "scm->flags-value"
 {

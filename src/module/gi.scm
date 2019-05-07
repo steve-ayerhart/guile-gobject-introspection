@@ -1,6 +1,6 @@
 (define-module (gi)
-  #:use-module (gi repository)
-  #:use-module (gi info)
+;  #:use-module (gi repository)
+;  #:use-module (gi info)
 
   #:use-module (glib utils)
   #:use-module (gobject gtype)

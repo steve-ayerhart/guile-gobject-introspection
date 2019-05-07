@@ -18,8 +18,6 @@ moddir=$(prefix)/share/guile/site/$(GUILE_EFFECTIVE_VERSION)
 godir=$(libdir)/guile/$(GUILE_EFFECTIVE_VERSION)/ccache
 
 SOURCES = \
-  g-object.scm \
-  g-object/g-type.scm \
 	glib/utils.scm \
 	gobject/gtype.scm \
 	gobject/gvalue.scm \
@@ -27,6 +25,4 @@ SOURCES = \
 	gobject/gclosure.scm \
 	gobject/gsignal.scm \
 	gobject.scm \
-  gi/info.scm \
-  gi/repository.scm \
   gi.scm
