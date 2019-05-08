@@ -5,6 +5,7 @@
 
 #include <glib.h>
 
+/*
 static SCM scm_gibase_info_type;
 
 static SCM scm_gicallable_info_type;
@@ -26,12 +27,14 @@ static SCM scm_gifield_info_type;
 static SCM scm_giproperty_info_type;
 static SCM scm_givalue_info_type;
 static SCM scm_gitype_info_type;
+*/
 
 /*
  * Make a list from the common GI API pattern of having a function which
  * returns a count and an indexed GIBaseInfo in the range of 0 to count
  */
 
+/*
 static void
 ggi_finalize_object (SCM scm_info)
 {
@@ -157,10 +160,10 @@ ggi_object_get_gi_info (SCM scm_object)
   return (GIBaseInfo *) scm_to_pointer (scm_foreign_object_ref (scm_object, 0));
 }
 
+*/
 
 /*
  * GIBaseInfo
- */
 
 SCM_DEFINE (scm_gi_base_info_get_type, "%gi-base-info-get-type", 1, 0, 0,
             (SCM scm_base_info),
@@ -247,10 +250,10 @@ SCM_DEFINE (scm_gi_base_info_get_attribute, "%gi-base-info-get-attribute", 2, 0,
 
   return scm_from_locale_symbol (value);
 }
+*/
 
 /*
  * GIRegisteredInfo
- */
 
 SCM_DEFINE (scm_gi_registered_type_info_get_g_type, "%gi-registered-type-info-get-gtype", 1, 0, 0,
             (SCM scm_registered_type_info),
@@ -269,10 +272,10 @@ SCM_DEFINE (scm_gi_registered_type_info_get_g_type, "%gi-registered-type-info-ge
 
   return scm_c_gtype_to_class (gtype);
 }
+*/
 
 /*
  * GIObjectInfo
- */
 
 SCM_DEFINE (scm_gi_object_info_get_methods, "%gi-object-info-get-methods", 1, 0, 0,
             (SCM scm_object_info),
@@ -281,10 +284,10 @@ SCM_DEFINE (scm_gi_object_info_get_methods, "%gi-object-info-get-methods", 1, 0,
 {
   return ggi_make_infos_list (scm_object_info, g_object_info_get_n_methods, g_object_info_get_method);
 }
+*/
 
 /*
  * GIEnumInfo
- */
 SCM_DEFINE (scm_gi_enum_info_get_methods, "%gi-enum-info-get-methods", 1, 0, 0,
             (SCM scm_enum_info),
             ""
@@ -292,11 +295,11 @@ SCM_DEFINE (scm_gi_enum_info_get_methods, "%gi-enum-info-get-methods", 1, 0, 0,
 {
   return ggi_make_infos_list (scm_enum_info, g_enum_info_get_n_methods, g_enum_info_get_method);
 }
+*/
 
 
 /*
  * GIUnionInfo
- */ 
 
  SCM_DEFINE (scm_gi_union_info_get_methods, "%gi-union-info-get-methods", 1, 0, 0,
              (SCM scm_union_info),
@@ -305,10 +308,10 @@ SCM_DEFINE (scm_gi_enum_info_get_methods, "%gi-enum-info-get-methods", 1, 0, 0,
  {
    return ggi_make_infos_list (scm_union_info, g_union_info_get_n_methods, g_union_info_get_method);
  }
+*/ 
 
 /*
  * GICallableInfo
- */
 
 SCM_DEFINE (scm_gi_callable_info_call, "%gi-callable-info-call", 3, 0, 0,
             (SCM scm_callable_info, SCM scm_args, SCM scm_kwargs),
@@ -317,10 +320,10 @@ SCM_DEFINE (scm_gi_callable_info_call, "%gi-callable-info-call", 3, 0, 0,
 {
   return _wrap_g_callable_info_invoke (scm_callable_info, scm_args, scm_kwargs);
 }
+*/
 
 /*
  * GIArgInfo
- */
 
 #define DIRECTION_IN_SYMBOL "gi-direction-in"
 #define DIRECTION_OUT_SYMBOL "gi-direction-out"
@@ -450,10 +453,10 @@ SCM_DEFINE (scm_g_arg_info_get_type, "%gi-arg-info-get-type", 1, 0, 0,
 
   return scm_type;
 }
+*/
 
 /*
  * GIConstantInfo
- */
 
 SCM_DEFINE (scm_gi_constant_info_get_value, "%gi-constant-info-get-value", 1, 0, 0,
             (SCM scm_constant_info),
@@ -637,6 +640,7 @@ _ggi_g_type_info_size (GITypeInfo *type_info)
 
   return size;
 }
+*/
 
 // stuff
 static const char *
@@ -686,6 +690,7 @@ ggi_infos_init (void)
 #ifndef SCM_MAGIC_SNARFER
 #include "ggi-infos.x"
 #endif
+  /*
   scm_t_struct_finalize finalizer = ggi_finalize_object;
   scm_gibase_info_type = scm_make_foreign_object_type (scm_from_utf8_symbol ("<gi-base-info>"),
                                                        scm_list_2 (scm_from_utf8_symbol ("info"),
@@ -744,4 +749,5 @@ ggi_infos_init (void)
   scm_giproperty_info_type = scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-property-info>")));
   scm_gitype_info_type = scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-type-info>")));
   scm_givalue_info_type = scm_permanent_object (scm_variable_ref (scm_c_lookup("<gi-value-info>")));
+  */
 }

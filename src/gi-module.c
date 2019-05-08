@@ -314,12 +314,14 @@ ggi_namespace_init (void *namespace)
           g_base_info_unref (info);
           break;
         case GI_INFO_TYPE_STRUCT:
+          /*
           g_debug ("struct:");
           if (g_struct_info_is_gtype_struct ((GIStructInfo *) info))
             return;
           ggi_define_module_object (info,
                                     g_struct_info_get_n_methods,
                                     g_struct_info_get_method);
+          */
           break;
         case GI_INFO_TYPE_OBJECT:
           g_debug ("object:");

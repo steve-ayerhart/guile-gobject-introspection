@@ -27,6 +27,7 @@ C_FILES = \
   ggi-enum-marshal.c \
   ggi-struct.c \
   ggi-struct-marshal.c \
+  ggi-infos.c \
   ggi-invoke.c
 
 H_FILES = $(C_FILES:.c=.h)
